@@ -1,0 +1,20 @@
+<gui version="1.0" name="Minimal" viewport="390x844">
+  <tokens>
+    <color name="primary" value="#007AFF" />
+    <color name="surface" value="#FFFFFF" />
+    <color name="label" value="#1C1C1E" />
+    <color name="secondary-label" value="#6E6E73" />
+    <number name="radius-card" value="12" />
+    <number name="space-md" value="16" />
+  </tokens>
+  <fonts>
+    <font family="Inter" source="google" category="sans-serif" weights="400 600 700" styles="normal" />
+  </fonts>
+  <stack direction="vertical" fill="#F2F2F7" gap="16" padding="24">
+    <stack direction="vertical" fill="$surface" radius="$radius-card" padding="$space-md" gap="8">
+      <text value="Hello, dotgui" font-family="Inter" font-size="22" font-weight="700" color="$label" />
+      <text value="UI as text. Open, portable, readable." font-family="Inter" font-size="15" font-weight="400" color="$secondary-label" />
+    </stack>
+    <shape type="rect" width="342" height="50" fill="$primary" radius="12" />
+  </stack>
+</gui>

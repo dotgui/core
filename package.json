@@ -1,0 +1,16 @@
+{
+  "name": "dotgui-core",
+  "version": "1.0.0",
+  "description": "Canonical spec and type definitions for the .gui format",
+  "main": "./schema/types.ts",
+  "types": "./schema/types.ts",
+  "exports": {
+    ".": "./schema/types.ts",
+    "./validate": "./schema/validate.ts"
+  },
+  "files": [
+    "schema/",
+    "spec/",
+    "examples/"
+  ]
+}
