@@ -93,3 +93,10 @@ Each RFC has frontmatter followed by these sections:
 | RFC | Title | Status |
 |---|---|---|
 | [0021](0021-root-canvas-model.md) | Root canvas model — drop `viewport`, `<col>` over `<frame>` | Draft |
+
+### 0.3 — Vocabulary & Primitives
+
+| RFC | Title | Status |
+|---|---|---|
+| [0022](0022-fill-and-border.md) | fill and border — unified color and outline properties | Draft |
+| [0023](0023-remove-shape.md) | Remove `<shape>` — geometry as frames, paths as assets | Draft |

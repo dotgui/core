@@ -67,8 +67,14 @@ export type EffectType = 'drop-shadow' | 'inner-shadow' | 'layer-blur' | 'backgr
 /** Shape types */
 export type ShapeType = 'rect' | 'ellipse' | 'line' | 'path'
 
-/** Stroke position */
-export type StrokePosition = 'inside' | 'outside' | 'center'
+/** Border align — used in border= shorthand and border-align= longhand */
+export type BorderAlign = 'inside' | 'outside' | 'center'
+
+/** Border style */
+export type BorderStyle = 'solid' | 'dashed' | 'dotted'
+
+/** @deprecated Use BorderAlign */
+export type StrokePosition = BorderAlign
 
 /** Stroke cap style (for line shapes) */
 export type StrokeCap = 'round' | 'square' | 'arrow-lines' | 'arrow-equilateral'
@@ -277,7 +283,7 @@ export interface TextSegment {
   'font-size'?: number
   'font-weight'?: number
   'font-style'?: 'normal' | 'italic'
-  color?: HexColor | TokenRef
+  fill?: HexColor | TokenRef
   'line-height'?: number | string
   'letter-spacing'?: number | string
   decoration?: 'underline' | 'strikethrough'
@@ -302,7 +308,7 @@ export interface SingleStyleText extends VisualAttrs {
   'font-size'?: number
   'font-weight'?: number
   'font-style'?: 'normal' | 'italic'
-  color?: HexColor | TokenRef
+  fill?: HexColor | TokenRef
   'line-height'?: number | string
   'letter-spacing'?: number | string
   'paragraph-spacing'?: number
@@ -347,8 +353,11 @@ export interface ImgNode extends VisualAttrs {
   fit?: ImgFitMode
   radius?: number | string
   'corner-smoothing'?: number
-  stroke?: HexColor | TokenRef
-  'stroke-width'?: number
+  border?: string
+  'border-color'?: HexColor | TokenRef
+  'border-width'?: number
+  'border-style'?: BorderStyle
+  'border-align'?: BorderAlign
 }
 
 export interface SvgNode extends VisualAttrs {
@@ -383,9 +392,11 @@ export interface RectShape extends VisualAttrs {
   'effect-style'?: string
   radius?: number | string
   'corner-smoothing'?: number
-  stroke?: HexColor | TokenRef
-  'stroke-width'?: number
-  'stroke-position'?: StrokePosition
+  border?: string
+  'border-color'?: HexColor | TokenRef
+  'border-width'?: number
+  'border-style'?: BorderStyle
+  'border-align'?: BorderAlign
   shadow?: string
 }
 
@@ -402,9 +413,11 @@ export interface EllipseShape extends VisualAttrs {
   fill?: FillValue
   'fill-style'?: string
   'effect-style'?: string
-  stroke?: HexColor | TokenRef
-  'stroke-width'?: number
-  'stroke-position'?: StrokePosition
+  border?: string
+  'border-color'?: HexColor | TokenRef
+  'border-width'?: number
+  'border-style'?: BorderStyle
+  'border-align'?: BorderAlign
   shadow?: string
   // Arc / donut segment
   'arc-start'?: number
@@ -445,7 +458,67 @@ export interface PathShape extends VisualAttrs {
   d?: string
 }
 
+/** @deprecated Use RectNode, EllipseNode, LineNode, or <img> for paths. Kept for backward compat. */
 export type ShapeNode = RectShape | EllipseShape | LineShape | PathShape
+
+// ---------------------------------------------------------------------------
+// Helper geometry tags — sugar over <frame>, same pattern as row/col/grid
+// ---------------------------------------------------------------------------
+
+/** Decorative box — same visual attrs as frame, no layout children */
+export interface RectNode extends VisualAttrs {
+  tag: 'rect'
+  name?: string
+  x?: number
+  y?: number
+  w: number | 'fill'
+  h: number | 'fill'
+  fill?: FillValue
+  'fill-style'?: string
+  'effect-style'?: string
+  radius?: number | string
+  'corner-smoothing'?: number
+  border?: string
+  'border-color'?: HexColor | TokenRef
+  'border-width'?: number
+  'border-style'?: BorderStyle
+  'border-align'?: BorderAlign
+  shadow?: string
+}
+
+/** Oval or circle — radius is always 50%, not exposed as an attribute */
+export interface EllipseNode extends VisualAttrs {
+  tag: 'ellipse'
+  name?: string
+  x?: number
+  y?: number
+  w: number | 'fill'
+  h: number | 'fill'
+  fill?: FillValue
+  'fill-style'?: string
+  'effect-style'?: string
+  border?: string
+  'border-color'?: HexColor | TokenRef
+  'border-width'?: number
+  'border-style'?: BorderStyle
+  'border-align'?: BorderAlign
+  shadow?: string
+}
+
+/** Thin visual separator — horizontal by default */
+export interface LineNode extends VisualAttrs {
+  tag: 'line'
+  name?: string
+  x?: number
+  y?: number
+  w?: number | 'fill'
+  direction?: 'horizontal' | 'vertical'
+  /** Line thickness in px. Default: 1 */
+  thickness?: number
+  fill?: HexColor | TokenRef
+  'fill-style'?: string
+  opacity?: number
+}
 
 // ---------------------------------------------------------------------------
 // Layout nodes
@@ -470,7 +543,7 @@ export interface GridNode extends Omit<StackNode, 'tag' | 'direction' | 'gap' | 
   'row-gap'?: number | string
 }
 
-export type GUIChild = FrameNode | StackNode | RowNode | ColNode | GridNode | GroupNode | TextNode | ImgNode | SvgNode | ShapeNode
+export type GUIChild = FrameNode | StackNode | RowNode | ColNode | GridNode | GroupNode | TextNode | ImgNode | RectNode | EllipseNode | LineNode | SvgNode | ShapeNode
 
 export interface FrameNode extends VisualAttrs {
   tag: 'frame'
@@ -486,9 +559,11 @@ export interface FrameNode extends VisualAttrs {
   'effect-style'?: string
   radius?: number | string
   'corner-smoothing'?: number
-  stroke?: HexColor | TokenRef
-  'stroke-width'?: number
-  'stroke-position'?: StrokePosition
+  border?: string
+  'border-color'?: HexColor | TokenRef
+  'border-width'?: number
+  'border-style'?: BorderStyle
+  'border-align'?: BorderAlign
   shadow?: string
   clip?: boolean
   appearance?: Appearance
@@ -547,9 +622,11 @@ export interface StackNode extends VisualAttrs {
   'effect-style'?: string
   radius?: number | string
   'corner-smoothing'?: number
-  stroke?: HexColor | TokenRef
-  'stroke-width'?: number
-  'stroke-position'?: StrokePosition
+  border?: string
+  'border-color'?: HexColor | TokenRef
+  'border-width'?: number
+  'border-style'?: BorderStyle
+  'border-align'?: BorderAlign
   shadow?: string
   clip?: boolean
   appearance?: Appearance
