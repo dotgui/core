@@ -24,12 +24,12 @@ This repository is the source of truth for the format. All dotgui tools referenc
 Every `.gui` file declares which version of this spec it targets:
 
 ```xml
-<gui version="1.0" name="Checkout">
+<gui version="0.2" name="Checkout">
   ...
 </gui>
 ```
 
-`version="1.0"` means the file conforms to **dotgui-core v1.0**.
+`version="0.2"` means the file conforms to **dotgui-core v0.2** — the current working version. v1.0 is the planned first public stable release.
 
 Tools that consume `.gui` files should check this version and reject (or warn on) files they don't support.
 
@@ -50,20 +50,20 @@ Tools that consume `.gui` files should check this version and reject (or warn on
 ## Quick look
 
 ```xml
-<gui version="1.0" name="Profile">
+<gui version="0.2" name="Profile">
   <tokens>
     <color name="primary" value="#007AFF" />
     <number name="radius-card" value="12" />
   </tokens>
-  <stack direction="vertical" fill="#F2F2F7" gap="16" padding="24">
-    <stack direction="horizontal" gap="12" fill="#FFFFFF" radius="$radius-card" padding="16">
-      <img src="$avatar" width="48" height="48" radius="24" fit="cover" />
-      <stack direction="vertical" gap="4">
+  <col fill="#F2F2F7" gap="16" p="24">
+    <row gap="12" fill="#FFFFFF" radius="$radius-card" p="16">
+      <img src="$avatar" w="48" h="48" radius="24" fit="cover" />
+      <col gap="4">
         <text value="Jane Smith" font-family="Inter" font-size="17" font-weight="600" color="#1C1C1E" />
         <text value="@janesmith" font-family="Inter" font-size="14" font-weight="400" color="#6E6E73" />
-      </stack>
-    </stack>
-  </stack>
+      </col>
+    </row>
+  </col>
 </gui>
 ```
 
@@ -87,5 +87,7 @@ if (!result.valid) {
 
 | Version | Status | Notes |
 |---|---|---|
-| `1.0` | Current | Initial release. Full Figma layer coverage. `<component>`, `<component-set>`, `<instance>` — component definitions and reuse. |
-| `2.0` | Planned | `<scroll>`, `<overlay>`, semantic roles |
+| `0.1` | Stable | Initial format design. XML over JSON, package format, token system, layout sugar tags (`row`/`col`/`grid`), appearance block, component/instance system, optimizer separation. |
+| `0.2` | Current (in progress) | Layout API overhaul: unified `w`/`h` sizing, 9-point `align`, `gap` auto convention, `p` padding + per-side attrs, `abs` for absolute children, boolean presence convention. Inline SVG on `<svg>`. Root canvas model. |
+| `1.0` | Planned | First public stable release. Full Figma layer coverage. Semver applies from this point. |
+| `2.0` | Future | `<scroll>`, `<overlay>`, semantic roles, interactions. |

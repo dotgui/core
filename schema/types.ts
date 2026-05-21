@@ -638,8 +638,10 @@ export interface GroupNode extends VisualAttrs {
   name?: string
   x?: number
   y?: number
-  width?: number
-  height?: number
+  /** Required on group — no content to derive size from */
+  w: number
+  /** Required on group — no content to derive size from */
+  h: number
   // Mask passthrough — set when the first child is a mask node
   'mask-src'?: AssetRef
   'mask-x'?: number

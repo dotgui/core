@@ -150,6 +150,132 @@ Do not use absolute `x`/`y` to lay out ordinary content inside a section. If ite
 
 `columns` = column count. `gap="col-gap row-gap"` (two values).
 
+### When grid beats row and col
+
+Use `<grid>` when `<row>` or `<col>` alone cannot produce the layout:
+
+| Situation | Why row/col fails | Use grid |
+|---|---|---|
+| Multiple rows of cards that must align in columns | `<row wrap>` wraps but columns don't stay aligned | ✅ `<grid columns="N">` guarantees column alignment |
+| KPI / stat blocks, 4 across | Four inline `<row>` children won't distribute evenly or wrap cleanly | ✅ `<grid columns="4">` |
+| Image gallery — 3-per-row | Items would need manual width math to stay even | ✅ `<grid columns="3">` divides equally |
+| Feature cards — 2×3 layout | `<col>` stacks vertically; nesting two `<col>` in a `<row>` works but is fragile | ✅ `<grid columns="2">` is cleaner |
+| Icon + label tiles, unknown count | Can't know how many columns to put in a `<row>` | ✅ `<grid columns="4" wrap>` |
+
+**Grid children share equal column widths.** They can have different heights — each row in the grid will be as tall as its tallest child.
+
+### Syntax in full
+
+```xml
+<grid columns="3" gap="24 16" p="24" w="fill">
+  <!-- children get equal 1/3 column widths automatically -->
+  <instance component="comp-feature-card" />
+  <instance component="comp-feature-card" />
+  <instance component="comp-feature-card" />
+  <instance component="comp-feature-card" />
+  <instance component="comp-feature-card" />
+  <instance component="comp-feature-card" />
+</grid>
+```
+
+`gap="24 16"` — 24px between columns, 16px between rows. Single value `gap="16"` sets both axes equally.
+
+### Common grid patterns
+
+**KPI / stats dashboard — 4 across**
+```xml
+<grid columns="4" gap="18" p="24" w="fill">
+  <instance component="stat-card" label="Revenue" value="$48.2K" />
+  <instance component="stat-card" label="Orders" value="1,204" />
+  <instance component="stat-card" label="Users" value="9,341" />
+  <instance component="stat-card" label="Churn" value="2.1%" />
+</grid>
+```
+
+**Feature cards — 3 across, 2 rows**
+```xml
+<grid columns="3" gap="24 20" p="48 72" w="fill">
+  <instance component="feature-card" icon="$svg-speed"    title="Fast" />
+  <instance component="feature-card" icon="$svg-lock"     title="Secure" />
+  <instance component="feature-card" icon="$svg-globe"    title="Global" />
+  <instance component="feature-card" icon="$svg-chart"    title="Analytics" />
+  <instance component="feature-card" icon="$svg-support"  title="Support" />
+  <instance component="feature-card" icon="$svg-api"      title="API" />
+</grid>
+```
+
+**Image gallery — 3-per-row**
+```xml
+<grid columns="3" gap="4" w="fill">
+  <img src="$img-1" w="fill" h="260" fit="cover" />
+  <img src="$img-2" w="fill" h="260" fit="cover" />
+  <img src="$img-3" w="fill" h="260" fit="cover" />
+  <img src="$img-4" w="fill" h="260" fit="cover" />
+  <img src="$img-5" w="fill" h="260" fit="cover" />
+  <img src="$img-6" w="fill" h="260" fit="cover" />
+</grid>
+```
+
+**App icon / category grid**
+```xml
+<grid columns="4" gap="12 20" p="16" w="fill">
+  <instance component="app-icon" name="Photos" />
+  <instance component="app-icon" name="Camera" />
+  <instance component="app-icon" name="Messages" />
+  <instance component="app-icon" name="Settings" />
+</grid>
+```
+
+**Pricing plans — 3 columns, different heights OK**
+```xml
+<grid columns="3" gap="24" p="48" w="fill" align="top-left">
+  <instance component="pricing-card" plan="Starter" price="$9" />
+  <instance component="pricing-card" plan="Pro"     price="$29" />
+  <instance component="pricing-card" plan="Scale"   price="$99" />
+</grid>
+```
+
+### Nested grids — sections with different column counts
+
+Different sections of a page can use different column counts. Nest grids inside a `<col>` to build complex dashboards:
+
+```xml
+<col w="fill" gap="32" p="32" fill="#F8F8F8">
+
+  <!-- top row: 4 stat cards -->
+  <grid columns="4" gap="18" w="fill">
+    <instance component="stat-card" label="Revenue"   value="$48.2K" />
+    <instance component="stat-card" label="Orders"    value="1,204" />
+    <instance component="stat-card" label="Avg order" value="$40" />
+    <instance component="stat-card" label="Returns"   value="3.2%" />
+  </grid>
+
+  <!-- middle: 2-column split (chart + activity feed) -->
+  <row gap="18" w="fill">
+    <instance component="chart-card" w="fill" title="Revenue over time" />
+    <instance component="activity-feed" w="320" title="Recent activity" />
+  </row>
+
+  <!-- bottom: 3 category cards -->
+  <grid columns="3" gap="18" w="fill">
+    <instance component="category-card" label="Electronics" />
+    <instance component="category-card" label="Clothing" />
+    <instance component="category-card" label="Home" />
+  </grid>
+
+</col>
+```
+
+### When NOT to use grid
+
+| Situation | Use instead |
+|---|---|
+| Items have wildly different widths | `<row wrap gap="12">` — wraps naturally without forcing equal columns |
+| One row of items that won't exceed a line | `<row>` — simpler, no column math |
+| A sidebar + main area layout | `<row>` with explicit `w` on the sidebar child |
+| Purely vertical content stacking | `<col>` |
+| Masonry / Pinterest layout (varying heights per column) | Not natively supported — use `<frame>` with `abs` or export as asset |
+
 ## Sizing — `w` and `h`
 
 `w` and `h` replace `width`/`height` and `sizing-h`/`sizing-v`. One attribute, three modes:
