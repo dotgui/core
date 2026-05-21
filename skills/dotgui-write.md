@@ -81,6 +81,18 @@ Document order: `tokens` → `styles` → `fonts` → `assets` → `components` 
 
 `<row>`, `<col>`, and `<grid>` are the primary layout tags. **Prefer them over `<stack direction="...">` always** — the direction is in the tag name, not an attribute that could be forgotten. The parser normalizes them to `<stack>` internally.
 
+## Layout priority
+
+Author layout in this order:
+
+1. Use `<col>` for vertical document flow, sections, card content, forms, and stacked text.
+2. Use `<row>` for horizontal groups, nav bars, button rows, media+copy pairs, and inline icon/text groups.
+3. Use `<grid>` for repeated spatial sets: KPI cards, feature cards, galleries, pricing tables, dashboard tiles, and any evenly distributed multi-column block.
+4. Use `<frame>` only when you need a bounded canvas, clipping, explicit layering, or a non-flow scene such as a hero image with overlays.
+5. Use `abs` only for true overlays or pinned layers: backgrounds, scrims, badges, captions over media, decorative elements, masks, or exported geometry that cannot be represented as flow.
+
+Do not use absolute `x`/`y` to lay out ordinary content inside a section. If items appear one after another, they belong in a `<row>`, `<col>`, or `<grid>`. This avoids fragile overlaps when text wraps, fonts load differently, or content changes.
+
 ---
 
 # Layout Tags
@@ -492,9 +504,9 @@ Without components: N identical blocks. With components: N one-liners.
 <instance component="comp-tag" label="Open Source" />
 ```
 
-## Use `<row>`/`<col>` over `<frame>` when children flow
+## Use flow layout before frames and absolute positions
 
-`<frame>` forces explicit `x`/`y` on every child. `<col>`/`<row>` eliminates them.
+`<frame>` creates a fixed canvas where children are absolute by default. That is useful for backgrounds and layered compositions, but fragile for normal UI. `<col>`, `<row>`, and `<grid>` let content define height naturally and prevent accidental collisions.
 
 ```xml
 <!-- Avoid -->
@@ -508,6 +520,39 @@ Without components: N identical blocks. With components: N one-liners.
   <text value="Title" font-size="20" font-weight="700" color="#1C1C1E" />
   <text value="Subtitle" font-size="15" color="#6E6E73" />
 </col>
+```
+
+For repeated cards, use `<grid>` instead of manually positioning each item:
+
+```xml
+<!-- Avoid -->
+<frame w="1296" h="140">
+  <instance component="stat-card" x="0" y="0" />
+  <instance component="stat-card" x="328" y="0" />
+  <instance component="stat-card" x="656" y="0" />
+</frame>
+
+<!-- Prefer -->
+<grid w="fill" columns="3" gap="18">
+  <instance component="stat-card" />
+  <instance component="stat-card" />
+  <instance component="stat-card" />
+</grid>
+```
+
+A common hero pattern is one layered `<frame>` for the visual canvas, then one flow `<col>` inside it:
+
+```xml
+<frame w="1440" h="980" clip>
+  <img abs x="0" y="0" w="1440" h="980" src="$hero" fit="cover" />
+  <shape abs x="0" y="0" w="1440" h="980" type="rect" fill="#00000066" />
+
+  <col w="fill" h="fill" p="34 72 72 72" gap="64">
+    <row w="fill" gap align="middle-center">...</row>
+    <col w="760" gap="32">...</col>
+    <grid w="fill" columns="4" gap="18">...</grid>
+  </col>
+</frame>
 ```
 
 ## Omit defaults — they're assumed

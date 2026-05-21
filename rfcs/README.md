@@ -87,3 +87,9 @@ Each RFC has frontmatter followed by these sections:
 | RFC | Title | Status |
 |---|---|---|
 | [0020](0020-svg-inline-content.md) | Inline SVG content on the `<svg>` tag | Implemented |
+
+### 0.2 — Canvas Model
+
+| RFC | Title | Status |
+|---|---|---|
+| [0021](0021-root-canvas-model.md) | Root canvas model — drop `viewport`, `<col>` over `<frame>` | Draft |
