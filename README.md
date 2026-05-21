@@ -24,7 +24,7 @@ This repository is the source of truth for the format. All dotgui tools referenc
 Every `.gui` file declares which version of this spec it targets:
 
 ```xml
-<gui version="1.0" name="Checkout" viewport="390x844">
+<gui version="1.0" name="Checkout">
   ...
 </gui>
 ```
@@ -50,7 +50,7 @@ Tools that consume `.gui` files should check this version and reject (or warn on
 ## Quick look
 
 ```xml
-<gui version="1.0" name="Profile" viewport="390x844">
+<gui version="1.0" name="Profile">
   <tokens>
     <color name="primary" value="#007AFF" />
     <number name="radius-card" value="12" />

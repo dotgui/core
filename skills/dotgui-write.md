@@ -32,7 +32,7 @@ A program distinguishes a package from raw markup by magic bytes: ZIP starts wit
 ### design.guix structure
 
 ```xml
-<gui version="0.2" name="Checkout" viewport="390x844">
+<gui version="0.2" name="Checkout">
 
   <tokens>
     <color name="primary" value="#007AFF" />
@@ -64,6 +64,33 @@ A program distinguishes a package from raw markup by magic bytes: ZIP starts wit
 ```
 
 Document order: `tokens` → `styles` → `fonts` → `assets` → `components` → root layout node.
+
+### Root canvas — `<col>` vs `<frame>`
+
+The first layout tag under `<gui>` is the canvas. Choose based on whether the height is known:
+
+| Root tag | When to use | `h` required? |
+|---|---|---|
+| `<col w="390">` | Content-driven screen — height grows with content | ❌ omit, hugs children |
+| `<frame w="390" h="844">` | Fixed artboard — pixel-perfect, clips to bounds | ✅ required |
+
+**Default to `<col w="390">` when authoring from scratch.** This avoids the hard-cut clipping problem where a fixed `h` silently hides content that overflows. `<frame>` is for locked Figma artboards where the designer controls every pixel.
+
+```xml
+<!-- content-driven screen — height expands to fit everything -->
+<gui version="0.2" name="Profile">
+  <col w="390" fill="#F2F2F7" p="24" gap="16">
+    ...
+  </col>
+</gui>
+
+<!-- fixed artboard — pixel-perfect, clips at 844px -->
+<gui version="0.2" name="Splash">
+  <frame w="390" h="844" fill="#0A0A0A">
+    ...
+  </frame>
+</gui>
+```
 
 ---
 

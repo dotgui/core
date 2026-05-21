@@ -98,7 +98,7 @@ The `preview.webp` is not decoration — it is the face of the file. Before any 
 The root element is `<gui>`. Everything else is a child.
 
 ```xml
-<gui version="0.2" name="Checkout" viewport="390x844">
+<gui version="0.2" name="Checkout">
   <tokens>
     <color name="primary" value="#007AFF" />
     <number name="space-md" value="16" />
@@ -110,20 +110,32 @@ The root element is `<gui>`. Everything else is a child.
     <image id="img-1" format="webp" src="assets/img-1.webp" />
     <image id="svg-1" format="svg" src="assets/svg-1.svg" />
   </assets>
-  <stack direction="vertical" fill="#F2F2F7" gap="16" p="24">
+  <col w="390" fill="#F2F2F7" gap="16" p="24">
     <text value="Checkout" font-family="Inter" font-size="28" font-weight="700" color="#1C1C1E" />
     ...
-  </stack>
+  </col>
 </gui>
 ```
 
 ### Root Element
 
+`<gui>` is a document envelope — never rendered. Direct children are metadata blocks or exactly one root layout node. Metadata always precedes the layout root.
+
 | Attr | Description |
 |---|---|
 | `version` | Spec version (`0.2`) |
 | `name` | Screen or layer name |
-| `viewport` | Canvas size as `WxH` |
+
+### Root Canvas
+
+The first layout tag under `<gui>` defines the canvas. Two patterns:
+
+| Root | When | `h` |
+|---|---|---|
+| `<col w="390">` | Content-driven screen, AI-authored | absent — hugs children |
+| `<frame w="390" h="844">` | Fixed artboard, Figma export | required |
+
+`<frame>` children are absolutely positioned. `<col>` children flow vertically. Default to `<col>` — it cannot clip content.
 
 ### Tokens
 

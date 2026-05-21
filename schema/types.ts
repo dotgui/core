@@ -26,9 +26,6 @@ export type FillValue = HexColor | GradientValue | TokenRef
 /** An asset reference: $asset-id */
 export type AssetRef = string
 
-/** Viewport string: WxH e.g. "390x844" */
-export type Viewport = string
-
 /** Image fit modes for <img> nodes */
 export type ImgFitMode = 'cover' | 'contain' | 'fill' | 'none'
 
@@ -584,8 +581,6 @@ export interface GUIDocument {
   version: string
   /** Screen or layer name */
   name?: string
-  /** Canvas size as "WxH" */
-  viewport?: Viewport
   /** Preview thumbnail */
   preview?: {
     format: 'webp' | 'png'
