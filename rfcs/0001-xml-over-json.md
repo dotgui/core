@@ -1,12 +1,13 @@
 ---
 rfc: 0001
-title: XML over JSON
+title: XML-inspired markup over JSON
 status: Implemented
 introduced-in: 0.1
 date: 2026-05-20
+updated: 2026-05-23
 ---
 
-# XML over JSON
+# XML-inspired markup over JSON
 
 ## Context
 
@@ -14,7 +15,9 @@ dotgui needed a serialization format for describing UI structure. The two obviou
 
 ## Decision
 
-Use XML-inspired markup as the format for `.guix` files.
+The markup language inside the `.gui` package is XML-inspired — not strict XML.
+
+Like JSX to JavaScript, the markup follows XML's shape: tags, attributes, nesting, self-closing elements. But it is not bound by XML's rules. The format can introduce shorthands, CSS-style functions, or expressions that a strict XML parser would reject. The `.guix` filename inside the package signals this — it is not a `.xml` file.
 
 ## Reasoning
 
@@ -24,11 +27,15 @@ XML also maps naturally to UI trees. Nesting communicates containment. Attribute
 
 For AI specifically: models are trained on enormous amounts of tag-based markup. Asking an LLM to write a `.gui` layout is like asking it to write JSX — it already knows the pattern cold. JSON requires the model to maintain a `"type"` convention that has no parallel in its training data for UI.
 
+The JSX comparison is intentional and not just aesthetic. JSX proved that taking XML's syntax and relaxing its rules — rather than following them strictly — produces a more expressive, practical language. The `.gui` markup takes the same position.
+
 ## Alternatives Considered
 
 **JSON** — Rejected. The `"type"` key workaround is awkward. Attribute vs child distinction is lost. Deeper nesting becomes hard to read quickly.
 
 **YAML** — Rejected. Indentation-sensitive, brittle to copy-paste, no good tag-name concept, poor tooling support relative to XML.
+
+**Strict XML** — Rejected as the compliance target. XML's rules exist for document interchange standards, not for a UI layout language. Requiring strict XML validity would block useful shorthands and force verbose syntax where a relaxed parser handles it cleanly.
 
 **Custom binary format** — Rejected immediately. Defeats the entire purpose of human and AI readability.
 
@@ -40,10 +47,10 @@ For AI specifically: models are trained on enormous amounts of tag-based markup.
 
 ## Implementation Notes
 
-The markup lives inside the ZIP package as `design.guix`. A program distinguishing a package from raw markup uses magic bytes: ZIP starts with `PK`, markup starts with `<`.
+The markup lives inside the `.gui` ZIP package as `design.guix`. The parser is a custom XML-inspired parser — not a strict XML parser. It handles the format's own conventions without being constrained by XML spec compliance.
 
 ## Test Cases
 
-- A `.guix` file must be valid XML
 - Tag names carry semantic meaning and map 1:1 to node types
 - Attributes are the primary vehicle for node properties
+- The markup parses correctly without requiring strict XML validity

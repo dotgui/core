@@ -1,10 +1,12 @@
 ---
 rfc: 0023
 title: Remove <shape> — rect, ellipse, line as helper tags; paths as assets
-status: Draft
+status: Implemented
 introduced-in: 0.3
 date: 2026-05-21
+updated: 2026-05-23
 supersedes: 0020
+related: 0031
 ---
 
 # Remove `<shape>` — rect, ellipse, line as helper tags; paths as assets
@@ -37,11 +39,11 @@ Additionally, this RFC supersedes RFC 0020 (Inline SVG content on the `<svg>` ta
 
 **`<rect>`, `<ellipse>`, and `<line>` are introduced as first-class helper tags** — sugar over `<frame>`, following the same pattern as `<row>`, `<col>`, and `<grid>` over `<stack>`. They carry designer-readable intent, render identically to their frame equivalents, and require no new rendering logic.
 
-**`<shape type="path">` becomes `<img src="$asset">`** — vector paths are SVG assets, accessed the same way as any other image.
+**`<shape type="path">` becomes `<img src="assets/...">`** — vector paths are SVG assets, referenced inline the same way as any other image.
 
 **`<svg>` is removed.** It collapses into `<img>`. SVG is an image format. Whether an asset is raster or vector is a renderer implementation detail, not an authoring concern. `<img>` handles both.
 
-**Inline SVG (RFC 0020) is superseded.** All SVG content goes through the asset pipeline and is referenced via `<img src="$asset">`.
+**Inline SVG (RFC 0020) is superseded.** All SVG content is stored in `assets/` and referenced via `<img src="assets/...">`.
 
 ---
 
@@ -85,15 +87,15 @@ Default: horizontal, `thickness="1"`, `w="fill"`. For vertical: `h="fill"`.
 
 ### `<img>` handles raster and vector
 
-`<img>` now accepts any asset reference regardless of format:
+`<img>` now accepts any asset reference regardless of format. No separate declaration — source is inline, always.
 
 ```xml
-<img src="$img-hero" w="800" h="400" />     <!-- raster (webp) -->
-<img src="$svg-logo" w="120" h="32" />      <!-- vector (svg) — was <svg src="..."> -->
-<img src="$icon-rocket" w="21" h="21" />    <!-- icon (svg) — was <shape type="path"> -->
+<img src="assets/hero.webp" w="800" h="400" />     <!-- raster -->
+<img src="assets/logo.svg" w="120" h="32" />       <!-- vector — was <svg src="..."> -->
+<img src="assets/icon-rocket.svg" w="21" h="21" /> <!-- icon — was <shape type="path"> -->
 ```
 
-The renderer detects asset format at render time. The author does not need to know or declare it.
+The renderer detects asset format from the file extension at render time. The author does not declare format — only `src`, `w`, and `h`.
 
 ---
 
@@ -128,7 +130,7 @@ This matters to AI agents reasoning about a `.gui` file and to human authors sca
 
 A vector path, boolean operation, star, or polygon is SVG content — path data, drawing instructions, no layout semantics. The Figma plugin already exports complex vectors as SVG assets. `<shape type="path">` was an inconsistency where icon paths were inlined rather than exported.
 
-In the NASA sample file, 13 Lucide icons were authored as `<shape type="path">` — each 3–5 lines of raw path data. As `<img src="$icon-x">` references, each becomes a single line. The SVG file exists once in assets and is reused.
+In the NASA sample file, 13 Lucide icons were authored as `<shape type="path">` — each 3–5 lines of raw path data. As `<img src="assets/icon-x.svg">` references, each becomes a single line. The SVG file lives once in `assets/` and is referenced wherever needed.
 
 ### Inline SVG violates the single-convention guarantee
 
@@ -144,7 +146,7 @@ RFC 0022 removed `stroke` from the dotgui vocabulary. RFC 0020's inline SVG rein
 
 **Keep `<shape type="path">` for simple single-path icons** — Rejected. "Simple" is not a formal criterion. One rule (paths are assets) is better than a heuristic (some paths are inlined, others are not).
 
-**Keep inline SVG for AI generation convenience** — Rejected. The convenience was real but the cost — convention contamination — is structural. AI agents generating `.gui` produce `<img src="$asset">` references just as easily as inline SVG markup. The asset pipeline is a one-line addition to the output.
+**Keep inline SVG for AI generation convenience** — Rejected. The convenience was real but the cost — convention contamination — is structural. AI agents generating `.gui` produce `<img src="assets/icon.svg">` references just as easily as inline SVG markup. Writing a file to `assets/` is a one-line addition to the output.
 
 **`<divider>` instead of `<line>`** — Considered. `<divider>` is more semantic (closer to HTML's `<hr>`). Rejected in favour of `<line>` because dotgui is a UI layout format, not a document format. Designer vocabulary takes precedence over document semantics. `<line>` is what the format's primary authors reach for.
 
@@ -210,11 +212,11 @@ RFC 0022 removed `stroke` from the dotgui vocabulary. RFC 0020's inline SVG rein
 <line fill="$gold" thickness="2" />
 
 <!-- img — SVG asset (was <svg src="...">) -->
-<img src="$svg-logo" w="120" h="32" />
+<img src="assets/logo.svg" w="120" h="32" />
 
 <!-- img — icon (was <shape type="path">) -->
-<img src="$icon-rocket" w="21" h="21" />
+<img src="assets/icon-rocket.svg" w="21" h="21" />
 
-<!-- img — raster (unchanged) -->
-<img src="$img-hero" w="800" h="400" />
+<!-- img — raster -->
+<img src="assets/hero.webp" w="800" h="400" />
 ```
