@@ -106,12 +106,8 @@ The root element is `<gui>`. Everything else is a child.
   <fonts>
     <font family="Inter" source="google" weights="400 600 700" styles="normal" />
   </fonts>
-  <assets>
-    <image id="img-1" format="webp" src="assets/img-1.webp" />
-    <image id="svg-1" format="svg" src="assets/svg-1.svg" />
-  </assets>
   <col w="390" fill="#F2F2F7" gap="16" p="24">
-    <text value="Checkout" font-family="Inter" font-size="28" font-weight="700" color="#1C1C1E" />
+    <text value="Checkout" font-family="Inter" font-size="28" font-weight="700" fill="#1C1C1E" />
     ...
   </col>
 </gui>
@@ -150,7 +146,7 @@ Design system primitives. Referenced anywhere in the tree with `$name`.
 ```
 
 ```xml
-<shape type="rect" fill="$primary" radius="$radius-card" />
+<rect fill="$primary" radius="$radius-card" />
 ```
 
 ### Styles
@@ -165,7 +161,7 @@ Named text styles from the design system. Each `<text-style>` captures a full ty
 ```
 
 ```xml
-<text text-style="Heading/H1" value="Welcome" x="24" y="80" color="#1C1C1E" />
+<text text-style="Heading/H1" value="Welcome" x="24" y="80" fill="#1C1C1E" />
 ```
 
 Color and layout attrs are always inlined — they are not part of the text style definition. Only styles used in the exported tree are emitted.
@@ -186,20 +182,20 @@ Font declarations for the renderer. The renderer uses these to load Google Fonts
 
 ### Assets
 
-Embedded images and vector artwork. All raster images are converted to WebP by the plugin.
+Images and vector artwork are embedded in the package under `assets/` and referenced inline — no declaration block, no `$id` indirection.
 
 ```xml
-<assets>
-  <image id="img-1" format="webp" src="base64:..." />
-  <image id="svg-1" format="svg" src="base64:..." />
-</assets>
-```
+<!-- embedded raster — stored in assets/ inside the package -->
+<img src="assets/hero.webp" w="320" h="200" fit="cover" />
 
-Reference with `$id`, or use an external URL directly:
-```xml
-<img src="$img-1" w="320" h="200" fit="cover" />
+<!-- embedded vector -->
+<img src="assets/logo.svg" w="120" h="32" />
+
+<!-- external URL — fallback only when embedding is not possible -->
 <img src="https://example.com/photo.jpg" w="320" h="200" fit="cover" />
 ```
+
+All raster images are converted to WebP by the plugin (0.85 quality). The renderer loads `assets/...` paths from the package and `https://` URLs from the network. If a URL reference fails to load, the renderer shows an `asset not loaded` error state — no silent failure.
 
 ### Components & Instances
 
@@ -215,8 +211,8 @@ Reusable UI building blocks. A `<components>` block at the top of the document h
       <prop name="show-badge" type="visible" target="show-badge" />
     </props>
     <col w="320" radius="12" fill="#fff">
-      <text id="title" value="Product Name" font-size="18" font-weight="700" color="#1C1C1E" />
-      <shape id="show-badge" type="rect" w="8" h="8" radius="4" fill="$red" />
+      <text id="title" value="Product Name" font-size="18" font-weight="700" fill="#1C1C1E" />
+      <rect id="show-badge" w="8" h="8" radius="4" fill="$red" />
     </col>
   </component>
 </components>
@@ -234,15 +230,15 @@ Maps to a Figma component set. Each `<variant>` is a member of the set and carri
         <prop name="label" type="text" target="label" />
       </props>
       <row gap="8" p="12 24" fill="$primary" radius="8">
-        <text id="label" value="Label" font-size="16" font-weight="600" color="#fff" />
+        <text id="label" value="Label" font-size="16" font-weight="600" fill="#fff" />
       </row>
     </variant>
     <variant id="comp-button-style-secondary" style="secondary">
       <props>
         <prop name="label" type="text" target="label" />
       </props>
-      <row gap="8" p="12 24" fill="none" stroke="$primary" stroke-width="1.5" radius="8">
-        <text id="label" value="Label" font-size="16" font-weight="600" color="$primary" />
+      <row gap="8" p="12 24" fill="none" border="1.5 $primary" radius="8">
+        <text id="label" value="Label" font-size="16" font-weight="600" fill="$primary" />
       </row>
     </variant>
   </component-set>
@@ -288,7 +284,7 @@ References a component or variant by `component` id. Prop overrides are inline a
 <components>
   <component name="Button/Primary" id="comp-button-primary">
     <row gap="8" p="12 24" fill="$primary" radius="8">
-      <text id="label" value="Label" font-size="16" font-weight="600" color="#fff" />
+      <text id="label" value="Label" font-size="16" font-weight="600" fill="#fff" />
     </row>
   </component>
 </components>
@@ -328,11 +324,13 @@ Children are flow-positioned. Maps to a Figma auto-layout frame.
 </stack>
 ```
 
-`direction` is `horizontal`, `vertical`, or `grid`. Grid adds `columns`, `gap` (two-value for column + row gap), and `align`.
+`direction` is `horizontal`, `vertical`, or `grid`. The `grid` direction is legacy — use the `<grid>` tag (RFC 032) for new work. Legacy grid adds `columns` (uniform column count), `gap`, and `align`.
 
 **Sizing (`w` / `h`)**
 
-On stack nodes, `w` and `h` are optional. Absent = hug content. Use `"fill"` to fill the parent, or a number for a fixed pixel size. All other node types (`frame`, `shape`, `img`, `svg`) require explicit `w` and `h`.
+On stack nodes, `w` and `h` are optional. Absent = hug content. Use `"fill"` to fill the parent, or a number for a fixed pixel size.
+
+On `frame`, `shape`, `img`, and `svg` nodes, explicit `w` and `h` are normally required. **Exception:** a `frame` (or any node) that is a direct child of a `<grid>` with a `gc`/`gr` range does not need `w`/`h` — the range drives fill sizing instead.
 
 **Padding (`p` / `pt` `pr` `pb` `pl`)**
 
@@ -354,7 +352,171 @@ On stack nodes, `w` and `h` are optional. Absent = hug content. Use `"fill"` to 
 | `p` | CSS shorthand | — |
 | `pt` `pr` `pb` `pl` | px | — |
 | `wrap` | boolean presence | — |
-| `columns` | number (grid only) | — |
+| `columns` | number (legacy grid only — use `<grid cols="N">` instead) | — |
+
+#### `<grid>` — Grid container (RFC 032)
+
+The `<grid>` tag supports three modes determined by which attributes are present.
+
+| Attrs present | Mode |
+|---|---|
+| `cols` and/or `rows` | Track grid — explicit track sizes, children placed by `gc`/`gr` |
+| `unit` | Unit grid — fixed coordinate canvas, children placed by `gc`/`gr` |
+| `cols`/`rows` + `unit` | ❌ Validation error — pick one |
+| neither (legacy) | Auto-flow — `columns="N"` produces `repeat(N, 1fr)` |
+
+**Sizing contract — universal across all modes**
+
+`w` and `h` are always pixels. The fill-vs-hug decision on a grid child comes from whether `gc`/`gr` carries a range:
+
+| `gc` / `gr` | `w` / `h` | Sizing |
+|---|---|---|
+| `"2/5"` (range) | absent | fills the spanned columns/rows (`100%`) |
+| `"2/5"` (range) | `"80"` | 80 px fixed, anchored at the range start |
+| `"2"` (start only) | absent | hugs content |
+| `"2"` (start only) | `"80"` | 80 px fixed |
+
+##### Mode 1 — Track Grid
+
+Parent declares track sizes. Children declare which track they occupy via `gc`/`gr`.
+
+**`<grid>` attrs — track mode**
+
+| Attr | Example | Meaning |
+|---|---|---|
+| `cols` | `"3"` | 3 equal columns → `repeat(3, 1fr)` |
+| | `"240 1fr"` | Mixed tracks — bare integer = px, explicit unit for `fr`/`auto`/`%` |
+| | `"fill 200"` | Responsive — `repeat(auto-fill, minmax(200px, 1fr))` |
+| `rows` | same rules | Row track sizes |
+| `gap` | `"16"` / `"16 8"` | Column gap / row gap in px |
+| `w`, `h` | existing | `fill` or fixed px |
+
+Track template rules:
+```
+cols="3"        →  repeat(3, 1fr)
+cols="240 1fr"  →  240px 1fr
+cols="1fr 2fr"  →  1fr 2fr
+cols="auto 1fr" →  auto 1fr
+cols="fill 200" →  repeat(auto-fill, minmax(200px, 1fr))
+```
+
+**Child placement attrs — track mode**
+
+| Attr | Example | Meaning |
+|---|---|---|
+| `gc` | `"1"` | Sit in column 1, hug content width |
+| | `"2/5"` | Columns 2 through 5 inclusive — fills if no `w` |
+| | `"1/-1"` | First to last column — spans all columns |
+| `gr` | same rules | Row position |
+| `col-span` | `"2"` / `"all"` | Span N columns from current position |
+| `row-span` | `"2"` | Span N rows |
+
+Range end is **inclusive** — `gc="2/5"` occupies columns 2, 3, 4, and 5 (CSS `grid-column: 2 / 6`). The `-1` sentinel is passed through as-is for full-span shorthand.
+
+Children without `gc`/`gr` auto-flow into the next available cell.
+
+```xml
+<grid cols="200 1fr" rows="56 1fr" gap="0" w="fill" h="fill">
+
+  <!-- gc range 1/-1 fills all columns; h="fill" added explicitly since gr has no range -->
+  <row gc="1/-1" gr="1" h="fill" fill="#fff" p="0 20" align="middle-left" gap>
+    <text value="Dashboard" font-size="17" font-weight="600" />
+    <img w="28" h="28" radius="14" src="$avatar" />
+  </row>
+
+  <!-- gc="1" gr="2" — no range on either, no w/h → hugs; use fill on children instead -->
+  <col gc="1" gr="2" fill="#f7f7f7" p="12" gap="2">
+    <row w="fill" p="10 12" radius="8" fill="#007aff" align="middle-left">
+      <text value="Home" fill="#fff" font-size="14" font-weight="500" />
+    </row>
+  </col>
+
+  <col gc="2" gr="2" p="32" gap="16">
+    <text value="Overview" font-size="22" font-weight="700" />
+  </col>
+
+</grid>
+```
+
+##### Mode 2 — Unit Grid
+
+For floating, non-structured interfaces — overlapping cards, canvas-style components, dashboard widgets. Elements sit at intentional positions in a snapped coordinate space. Replaces `<frame>` + `abs` at component level.
+
+**`<grid>` attrs — unit mode**
+
+| Attr | Example | Meaning |
+|---|---|---|
+| `unit` | `"8"` | Each grid square = 8 px. Presence activates unit mode |
+| `w` | `"320"` | Total canvas width in px |
+| `h` | `"400"` | Total canvas height in px |
+
+`w ÷ unit` and `h ÷ unit` give the column and row count of the coordinate space.
+
+**Child placement attrs — unit mode**
+
+| Attr | Example | Meaning |
+|---|---|---|
+| `gc` | `"5"` | Start at unit column 5, hug content width |
+| | `"5/20"` | Unit columns 5 through 20 inclusive — fills if no `w` |
+| `gr` | same rules | Unit row position |
+| `w` | `"128"` | 128 px fixed width, positioned at `gc` start |
+| `h` | `"48"` | 48 px fixed height, positioned at `gr` start |
+
+`w` and `h` are always pixels. Use a `gc`/`gr` range for fill sizing, explicit `w`/`h` for fixed pixel sizing.
+
+Children at overlapping coordinates stack in document order — first child is behind, last child is in front.
+
+```xml
+<grid unit="8" w="320" h="400" fill="#fff" radius="16">
+
+  <!-- Cover: fills full width (cols 1–40) and 112px tall (rows 1–14) -->
+  <img gc="1/40" gr="1/14" fit="cover" src="$cover" />
+
+  <!-- Avatar: 128×128px fixed, positioned at col 13 row 9 -->
+  <img gc="13" gr="9" w="128" h="128" fit="cover" radius="64" border="4 #fff" src="$avatar" />
+
+  <!-- Online dot: 32×32px fixed -->
+  <col gc="26" gr="21" w="32" h="32" fill="#34c759" radius="4" border="2 #fff" />
+
+  <!-- Name + handle: fills cols 2–39, rows 27–32 -->
+  <col gc="2/39" gr="27/32" align="middle-center" gap="2">
+    <text value="Sarah Johnson" font-size="18" font-weight="700" fill="#111" />
+    <text value="@sarahj" font-size="13" fill="#888" />
+  </col>
+
+  <!-- Stats: fills cols 2–39, rows 34–41 -->
+  <row gc="2/39" gr="34/41" gap align="middle-center">
+    <col w="fill" align="middle-center" gap="2">
+      <text value="248" font-size="17" font-weight="700" />
+      <text value="Posts" font-size="12" fill="#888" />
+    </col>
+    <col w="fill" align="middle-center" gap="2">
+      <text value="12.4k" font-size="17" font-weight="700" />
+      <text value="Followers" font-size="12" fill="#888" />
+    </col>
+  </row>
+
+  <!-- Follow: 128×48px fixed -->
+  <row gc="3" gr="44" w="128" h="48" fill="#007aff" radius="8" align="middle-center">
+    <text value="Follow" fill="#fff" font-size="14" font-weight="600" />
+  </row>
+
+  <!-- Message: 128×48px fixed -->
+  <row gc="22" gr="44" w="128" h="48" fill="#f0f0f0" radius="8" align="middle-center">
+    <text value="Message" font-size="14" font-weight="600" fill="#111" />
+  </row>
+
+</grid>
+```
+
+##### `gc` / `gr` naming
+
+`gc` = grid-column, `gr` = grid-row. Named to avoid collision with the `<col>` and `<row>` tag names:
+
+```xml
+<col gc="1" gr="2">      ← unambiguous
+<row gc="1/-1" gr="1">   ← unambiguous
+```
 
 #### `<group>` — Logical grouping
 
@@ -370,14 +532,14 @@ When the first child of a Figma group is a mask node, the plugin extracts the ma
 
 ```xml
 <group x="0" y="0" w="390" h="200"
-       mask-src="$svg-2" mask-x="0" mask-y="0" mask-width="390" mask-height="200">
+       mask-src="assets/mask-2.svg" mask-x="0" mask-y="0" mask-width="390" mask-height="200">
   ...
 </group>
 ```
 
 | Attr | Notes |
 |---|---|
-| `mask-src` | Asset ref (`$id`) for the SVG mask shape |
+| `mask-src` | Asset path (`assets/...`) for the SVG mask shape |
 | `mask-x` / `mask-y` | Position of the mask relative to the group origin |
 | `mask-width` / `mask-height` | Dimensions of the mask |
 
@@ -390,105 +552,178 @@ Single-style text is self-closing with a `value` attribute. Mixed-style text has
 ```xml
 <!-- Single style -->
 <text value="Welcome back" x="24" y="80" w="200" h="32"
-      font-family="Inter" font-size="22" font-weight="700"
-      color="#1C1C1E" line-height="28" />
+      font-family="Inter" font-postscript="Inter-Bold" font-size="22" font-weight="700"
+      fill="#1C1C1E" line-height="28" />
 
 <!-- Mixed styles -->
-<text x="24" y="80" w="200" h="32">
-  <segment value="Hello " font-size="16" font-weight="400" color="#6E6E73" />
-  <segment value="World"  font-size="16" font-weight="700" color="#1C1C1E" />
+<text x="24" y="80" w="200">
+  <segment value="Pay " fill="#6E6E73" font-size="16" />
+  <segment value="$42.00" fill="#1C1C1E" font-size="16" font-weight="700" />
 </text>
+
+<!-- Variable font with OpenType features -->
+<text value="Dashboard" font-family="Inter" font-size="28" font-weight="700"
+      font-variation='"wght" 700, "opsz" 28'
+      font-feature='"tnum", "ss01"'
+      fill="#1C1C1E" />
+
+<!-- Decorated text with color and style -->
+<text value="On sale" font-family="Inter" font-size="16"
+      decoration="underline" decoration-color="#FF3B30"
+      decoration-style="wavy" decoration-thickness="2"
+      fill="#1C1C1E" />
+
+<!-- List item -->
+<text value="First item" font-family="Inter" font-size="16"
+      list="disc" list-level="0" fill="#1C1C1E" />
 ```
 
-#### `<img>` — Raster image
+**Text attributes**
+
+| Attr | Values | Notes |
+|---|---|---|
+| `value` | string | Text content. Present on single-style; absent on mixed-style |
+| `font-family` | string | Font family name, e.g. `"Inter"` |
+| `font-postscript` | string | PostScript name, e.g. `"Inter-Bold"` (best-effort) |
+| `font-style-name` | string | Original style name from the font, e.g. `"Bold Italic"` |
+| `font-size` | number | Font size in px |
+| `font-weight` | `100`–`900` | Numeric weight |
+| `font-style` | `"italic"` | Omitted when normal |
+| `font-variation` | string | CSS `font-variation-settings` value, e.g. `'"wght" 600, "wdth" 75'` |
+| `font-feature` | string | CSS `font-feature-settings` value, e.g. `'"tnum", "ss01"'` |
+| `line-height` | number or `"n%"` | px or percent. Omitted when auto |
+| `letter-spacing` | number or `"n%"` | px or percent. Omitted when 0 |
+| `baseline-shift` | number | Baseline offset in px. Positive = up |
+| `paragraph-spacing` | number | Space after each paragraph in px |
+| `paragraph-indent` | number | First-line indent in px |
+| `align` | `"left"`, `"center"`, `"right"`, `"justified"` | Horizontal alignment. Default `left` |
+| `vertical-align` | `"top"`, `"center"`, `"bottom"` | Vertical alignment within fixed-height box |
+| `text-style` | string | Named text style reference (omits individual font attrs) |
+| `fill` | hex, gradient, token | Text color |
+| `fill-style` | string | Named fill style reference |
+| `decoration` | `"underline"`, `"strikethrough"` | Text decoration line |
+| `decoration-color` | hex | Color of the decoration line |
+| `decoration-style` | `"solid"`, `"dashed"`, `"dotted"`, `"wavy"`, `"double"` | Decoration line style |
+| `decoration-thickness` | number | Decoration line thickness in px |
+| `text-case` | `"uppercase"`, `"lowercase"`, `"capitalize"`, `"small-caps"` | Text transform |
+| `leading-trim` | `"cap-height"` | Trims leading to cap height |
+| `text-resize` | `"hug"`, `"hug-height"`, `"fixed"`, `"truncate"` | Sizing mode from the source tool |
+| `truncate` | boolean presence | Clip text with ellipsis when it overflows |
+| `max-lines` | number | Maximum lines before clipping |
+| `overflow` | `"clip"`, `"ellipsis"` | Explicit overflow behavior |
+| `list` | `"disc"`, `"decimal"` | List marker type |
+| `list-level` | number | List nesting depth (0-based) |
+| `list-marker` | string | Custom marker string |
+| `href` | URL | Wraps text in a hyperlink |
+
+All segment-level attrs override text-level attrs for that segment. Segment attrs are a subset: `value`, `font-family`, `font-postscript`, `font-style-name`, `font-size`, `font-weight`, `font-style`, `font-variation`, `font-feature`, `line-height`, `letter-spacing`, `baseline-shift`, `fill`, `decoration`, `decoration-color`, `decoration-style`, `decoration-thickness`, `text-case`, `list`, `list-level`, `href`.
+
+#### `<img>` — Image and vector asset
+
+`<img>` handles both raster and vector assets. The renderer detects format from the file extension at render time — the author only writes `src`, `w`, and `h`.
 
 ```xml
-<img name="Hero Image" src="$img-1" x="0" y="0" w="390" h="240"
+<!-- raster — embedded in package -->
+<img name="Hero Image" src="assets/hero.webp" x="0" y="0" w="390" h="240"
      fit="cover" radius="12" />
-```
 
-`src` accepts an asset reference (`$id`) or an external URL:
+<!-- vector icon — embedded in package -->
+<img src="assets/icon-close.svg" w="24" h="24" />
 
-```xml
+<!-- external URL — fallback only -->
 <img src="https://example.com/photo.jpg" w="390" h="240" fit="cover" />
 ```
 
 `fit` is `cover`, `contain`, `fill`, or `none`. The `name` attr carries the Figma layer name.
 
-#### `<svg>` — Vector artwork
+### Geometry Tags
 
-Two modes: **asset reference** or **inline content**.
+#### `<rect>` — Rectangular box
 
-**Asset reference** — `src` points to an `<assets>` entry or an external URL. Used for complex graphic clusters exported from Figma — boolean operations, compound vectors, multi-layer icon groups.
-
-```xml
-<svg name="Icon / Close" src="$svg-1" x="24" y="24" w="48" h="48" />
-```
-
-**Inline content** — no `src`. Children are raw SVG elements rendered directly into a `<svg viewBox="0 0 w h">` container. No `<assets>` entry required.
+Sugar for a childless `<frame>`. Signals decorative intent — no layout children. `w` and `h` are required.
 
 ```xml
-<svg w="48" h="48">
-  <circle cx="24" cy="24" r="20" fill="#007AFF" />
-  <path d="M12 24l8 8 16-16" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" />
-</svg>
+<rect fill="$primary" w="340" h="52" />
+<rect fill="$surface" w="320" h="64" radius="12" border="$line" />
+<rect fill="none" border="2 dashed $focus inside" w="320" h="64" radius="8" />
 ```
 
-The distinction is `src` presence. When `src` is absent, all XML children are serialized and set as the content of the SVG element. Inline content is not validated by the `.gui` parser — invalid SVG children will fail at render time, not parse time.
+Supports all visual attributes: `fill`, `border`, `radius`, `opacity`, `blend`, `rotation`, `appearance`. Does not accept layout attributes (`direction`, `gap`, `p`, `align`).
 
-Inline SVG is primarily useful for AI-generated `.gui` and hand-authored files where the SVG markup is available directly and going through the asset pipeline would add unnecessary overhead. See [RFC 0020](../rfcs/0020-svg-inline-content.md) for the full rationale.
+#### `<ellipse>` — Oval or circle
 
-The `name` attr carries the Figma layer name (asset reference mode only).
-
-### Shape Tag
+Sugar for `<frame radius="9999">`. Full-radius rendering is the contract — `radius` is not an attribute on `<ellipse>`. Equal dimensions produce a circle.
 
 ```xml
-<!-- Rectangle -->
-<shape type="rect" x="0" y="0" w="340" h="52"
-       fill="$primary" radius="12" />
-
-<!-- Ellipse -->
-<shape type="ellipse" x="12" y="12" w="8" h="8" fill="#FF3B30" />
-
-<!-- Arc / donut segment -->
-<shape type="ellipse" x="0" y="0" w="100" h="100"
-       fill="#007AFF" arc-start="0" arc-end="270" arc-inner="0.6" />
-
-<!-- Line -->
-<shape type="line" x="0" y="100" w="390"
-       stroke="#E5E5EA" stroke-width="1" />
-
-<!-- Path (vector / boolean operation / star / polygon) — filled -->
-<shape type="path" x="12" y="12" w="24" h="24" fill="#1C1C1E">
-  <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-</shape>
-
-<!-- Path — stroked outline (Lucide / icon pattern) -->
-<shape type="path" x="12" y="12" w="24" h="24" fill="none" stroke="#6366F1" stroke-width="1.5">
-  <path d="M5 12h14M12 5l7 7-7 7" />
-</shape>
+<ellipse fill="#FF3B30" w="8" h="8" />      <!-- circle -->
+<ellipse fill="$blue" w="80" h="40" />      <!-- oval -->
+<ellipse fill="none" border="2 $ink" w="48" h="48" />
 ```
 
-`type="path"` is used for VECTOR, STAR, POLYGON, and BOOLEAN_OPERATION nodes. The SVG path data is emitted as a `<path d="..." />` child element. `fill-style` and `effect-style` attrs apply the same way as on `rect` and `ellipse`.
+Arc and donut shapes (progress rings, pie segments) are SVG assets referenced via `<img>`.
 
-`fill="none" stroke="..." stroke-width="..."` produces a stroked outline path with no fill — the standard pattern for stroke-only icons (Lucide, Heroicons, etc.). `stroke-position` (`center` | `inside` | `outside`) is also supported and mirrors Figma's stroke alignment.
+#### `<line>` — Separator
+
+Sugar for a thin frame used as a visual divider. Default: horizontal, `thickness="1"`, `w="fill"`.
+
+```xml
+<line fill="$border" />                        <!-- horizontal, 1px, fill width -->
+<line fill="$border" direction="vertical" />   <!-- vertical, 1px, fill height -->
+<line fill="$gold" thickness="2" />            <!-- custom thickness -->
+```
 
 ### Appearance Block
 
-Used when a node has multiple fills, image fills, or complex effects. A non-layout child that describes the parent's paint and effect stack.
+Used when a node has multiple fills, complex borders, or multiple effects. A non-layout child that describes the parent's complete paint and effect stack.
 
 ```xml
 <frame w="320" h="180">
   <appearance>
-    <fill type="image" src="$img-1" fit="cover" />
-    <fill type="color" value="#00000066" />
+    <fill type="image" src="assets/hero.webp" fit="crop" x="12" y="8" w="640" h="360" />
+    <fill type="linear-gradient" value="linear-gradient(180deg, #00000000 0%, #00000099 100%)" blend="multiply" opacity="0.8" />
+    <border color="$line" w="1" align="inside" />
     <effect type="drop-shadow" x="0" y="8" radius="24" spread="0" color="#00000033" />
   </appearance>
   ...
 </frame>
 ```
 
+All three stacks — fills, borders, effects — are ordered in document order. Simple single-paint cases use `fill="..."` directly on the element; simple single-border cases use the `border="..."` shorthand. Use `<appearance>` only when multiple layers, border stacks, or paint-level metadata (opacity, blend, transform) are needed.
+
 `fill` types: `color`, `linear-gradient`, `radial-gradient`, `angular-gradient`, `image`.
+
+`fill` attributes:
+
+| Attr | Description | Notes |
+|---|---|---|
+| `type` | `color`, `linear-gradient`, `radial-gradient`, `angular-gradient`, `image` | Required |
+| `value` | Hex color or gradient CSS string | For color and gradient fills |
+| `src` | Asset path (`assets/img.webp`) | For image fills |
+| `fit` | `cover`, `contain`, `crop`, `tile`, `fill`, `none` | Image scaling mode |
+| `opacity` | `0`–`1` | Paint-level opacity; omitted when `1` |
+| `blend` | `multiply`, `screen`, `overlay`, `darken`, `lighten`, ... | Paint-level blend mode; omitted when `normal` |
+| `visible` | `false` | Emitted only for hidden paints that must be preserved |
+| `x` / `y` | number | Crop offset in pixels (when `fit="crop"`) |
+| `w` / `h` | number | Crop image dimensions in pixels (when `fit="crop"`) |
+| `transform` | string | Compact transform matrix for exact gradient/image mapping |
+
+`border` attributes (inside `<appearance>`):
+
+| Attr | Description | Notes |
+|---|---|---|
+| `color` | Solid color or token ref | |
+| `paint` | Gradient value for gradient borders | DOM renderer uses first solid stop as fallback |
+| `w` | Stroke width in px | |
+| `align` | `inside`, `center` (default), `outside` | |
+| `style` | `solid` (default), `dashed`, `dotted` | |
+| `dash` | Explicit dash pattern, e.g. `4 2` | SVG renderers only |
+| `cap` | `butt`, `round`, `square`, `arrow-lines`, `arrow-equilateral` | SVG renderers only |
+| `join` | `miter`, `round`, `bevel` | SVG renderers only |
+| `opacity` | Border-level opacity | |
+| `blend` | Border-level blend mode | |
+| `visible` | `false` | Preserve hidden borders without rendering |
+
+When `<appearance>` contains at least one `<border>`, the `border` shorthand on the parent element is ignored — the appearance stack owns all border rendering.
 
 `effect` types:
 
@@ -515,7 +750,7 @@ The `fill` attribute accepts:
 
 ### Shared Visual Attributes
 
-These apply to all layout, content, and shape nodes:
+These apply to all layout, content, and geometry nodes:
 
 | Attr | Values | Notes |
 |---|---|---|
@@ -526,11 +761,20 @@ These apply to all layout, content, and shape nodes:
 | `rotation` | degrees | Omitted when `0` |
 | `constraint-h` | `right`, `center`, `scale`, `stretch` | `left` is default, omitted |
 | `constraint-v` | `bottom`, `center`, `scale`, `stretch` | `top` is default, omitted |
-| `w` | number, `"fill"` | Width. On stack/row/col: absent = hug. On frame/shape/img/svg: required |
-| `h` | number, `"fill"` | Height. On stack/row/col: absent = hug. On frame/shape/img/svg: required |
+| `w` | number, `"fill"` | Width. On stack/row/col: absent = hug. On frame/rect/ellipse/img/group: required |
+| `h` | number, `"fill"` | Height. On stack/row/col: absent = hug. On frame/rect/ellipse/img/group: required |
 | `abs` | boolean presence | Absolute child inside an auto-layout parent |
 | `min-width` / `max-width` | px | Omitted when unset |
 | `min-height` / `max-height` | px | Omitted when unset |
+| `border` | shorthand string | Outline — `"[width] [color] [style] [align]"`. Defaults: `1 solid center`. Example: `"2 #333 dashed inside"` |
+| `border-color` | color | Longhand — border color only |
+| `border-width` | px | Longhand — border width only |
+| `border-style` | `solid`, `dashed`, `dotted` | Longhand — border style only |
+| `border-align` | `inside`, `center`, `outside` | Longhand — border alignment only |
+| `border-top` | shorthand | Top edge only — `"[width] [color] [style]"`. Always inside-aligned |
+| `border-right` | shorthand | Right edge only |
+| `border-bottom` | shorthand | Bottom edge only |
+| `border-left` | shorthand | Left edge only |
 
 **`w` / `h` sizing rules**
 
@@ -538,7 +782,8 @@ These apply to all layout, content, and shape nodes:
 |---|---|---|---|
 | `stack`, `row`, `col` | hug content | fill parent | fixed px |
 | `text` | hug content | fill parent | fixed px |
-| `frame`, `shape`, `img`, `svg`, `group` | **required — must provide a value** | fill parent | fixed px |
+| `frame`, `rect`, `ellipse`, `img`, `group` | **required — must provide a value** | fill parent | fixed px |
+| `line` | `w` defaults to `fill`, `h` defaults to `thickness` | — | fixed px |
 
 **Boolean presence convention**
 
@@ -554,9 +799,10 @@ Bare attributes without a value are treated as `true`. `<frame clip>` = `<frame 
 The Figma plugin. Select any visible layer — frame, component, group, shape, text, or vector — and export it as `.gui`. The plugin:
 
 - Traverses the Figma layer tree and maps each node to its `.gui` equivalent
-- Extracts and encodes all image fills as WebP via the Canvas API
-- Emits VECTOR, STAR, POLYGON, and BOOLEAN_OPERATION nodes as `<shape type="path">` with inline SVG path data
-- Exports complex multi-layer graphic clusters (groups of graphic-only leaves) as `<svg>` assets
+- Extracts and encodes all image fills as WebP (0.85 quality) via the Canvas API
+- Emits RECTANGLE nodes as `<rect>`, ELLIPSE (no arc) as `<ellipse>`, LINE as `<line>`
+- Exports VECTOR, STAR, POLYGON, BOOLEAN_OPERATION, and arc/donut ELLIPSE nodes as SVG assets stored in `assets/` and referenced via `<img src="assets/...">`
+- Exports complex multi-layer graphic clusters (groups of graphic-only leaves) as SVG assets in `assets/`
 - Resolves Figma Variables to `<tokens>` entries and emits `$token-name` references inline
 - Resolves Figma Styles (text, fill, effect) to `<styles>` entries and emits `text-style`/`fill-style`/`effect-style` refs
 - Handles mask groups: extracts the mask shape as an SVG asset, hoists it to `mask-src` on `<group>`
@@ -581,7 +827,7 @@ Rules run in eight passes, each operating on the output of the previous:
 | Pass | Responsibility | Rules |
 |---|---|---|
 | 1 | Remove invisible and empty nodes | Remove nodes with `visible=false`, `opacity=0`, zero dimensions, or empty text content |
-| 2 | Remove no-op effects | Drop effects below perceptibility thresholds (shadow opacity `< 0.05`, blur `< 0.5px`, stroke `< 0.5px`) |
+| 2 | Remove no-op effects | Drop effects below perceptibility thresholds (shadow opacity `< 0.05`, blur `< 0.5px`, border width `< 0.5px`) |
 | 3 | Normalize values | Uniform color format, collapsed corner radius, rounded floating-point coordinates |
 | 4 | Flatten structure | Remove single-child wrapper frames with no visual role; collapse parents and children with identical bounds |
 | 5 | Infer layout | Detect vertical/horizontal stacks from child positions (±2px tolerance); detect grid patterns; extract padding |
@@ -623,17 +869,17 @@ setZoom?.(1)   // fit to container
 setZoom?.(2)   // 2× zoom
 ```
 
-With a pre-built asset map (avoids re-parsing large base64 blobs):
+With a pre-built asset map (package caller resolves `assets/` paths to data URLs before passing in):
 
 ```typescript
 const assetMap = {
-  '$img-1': 'data:image/webp;base64,...',
-  '$svg-1': 'data:image/svg+xml;base64,...',
+  'assets/hero.webp': 'data:image/webp;base64,...',
+  'assets/logo.svg': 'data:image/svg+xml;base64,...',
 }
 render(guiCode, containerEl, assetMap)
 ```
 
-The renderer handles: auto-layout (flex and grid), absolute positioning, gradients, shadows, blur effects, blend modes, image fills with crop/fit modes, SVG embedding, mixed-style text, font loading (Google Fonts), arc shapes, and zoom via CSS `zoom`.
+The renderer handles: auto-layout (flex and grid), absolute positioning, gradients, shadows, blur effects, blend modes, image fills with crop/fit modes, raster and SVG assets via `<img>`, `<rect>` / `<ellipse>` / `<line>` geometry tags, ordered border stacks (including per-side borders), mixed-style text, font loading (Google Fonts), and zoom via CSS `zoom`. Text rendering includes variable font axes (`font-variation-settings`), OpenType features (`font-feature-settings`), baseline shift, decoration color/style/thickness, list markers, and overflow control.
 
 Returns a zoom setter or `null` if parsing fails.
 

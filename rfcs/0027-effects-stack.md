@@ -1,7 +1,7 @@
 ---
 rfc: 0027
 title: Ordered effects stack
-status: Draft
+status: Implemented
 introduced-in: 0.3
 date: 2026-05-22
 ---

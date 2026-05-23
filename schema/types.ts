@@ -30,7 +30,7 @@ export type AssetRef = string
 export type ImgFitMode = 'cover' | 'contain' | 'fill' | 'none'
 
 /** Image fit modes for <appearance><fill> image fills */
-export type AppearanceFitMode = 'cover' | 'contain' | 'crop' | 'tile'
+export type AppearanceFitMode = 'cover' | 'contain' | 'crop' | 'tile' | 'fill' | 'none'
 
 /** @deprecated Use ImgFitMode or AppearanceFitMode. Union of all fit values. */
 export type FitMode = ImgFitMode | AppearanceFitMode
@@ -180,12 +180,19 @@ export interface Tokens {
 export interface TextStyleDeclaration {
   name: string                          // Figma style name, e.g. "Heading/H1"
   'font-family'?: string
+  'font-postscript'?: string            // PostScript name (best-effort)
+  'font-style-name'?: string            // Original style name, e.g. "Bold Italic"
   'font-size'?: number                  // px
   'font-weight'?: number                // 100–900
   'font-style'?: 'italic'              // omitted when normal
+  'font-variation'?: string             // CSS font-variation-settings value
+  'font-feature'?: string               // CSS font-feature-settings value
   'line-height'?: number | string       // px or %, omitted when auto
   'letter-spacing'?: number | string    // px or %, omitted when 0
   decoration?: 'underline' | 'strikethrough'
+  'decoration-color'?: string
+  'decoration-style'?: 'solid' | 'dashed' | 'dotted' | 'wavy' | 'double'
+  'decoration-thickness'?: number
   'text-case'?: 'uppercase' | 'lowercase' | 'capitalize' | 'small-caps'
 }
 
@@ -248,10 +255,16 @@ export interface AppearanceFill {
   // crop offsets and dimensions (when fit="crop")
   x?: number
   y?: number
-  width?: number
-  height?: number
+  w?: number
+  h?: number
   // fill-level opacity
   opacity?: number
+  // paint-level blend mode (omitted when normal)
+  blend?: BlendMode
+  // optional — emitted only when preserving hidden paints
+  visible?: boolean
+  // compact transform matrix for exact image/gradient mapping
+  transform?: string
 }
 
 export interface AppearanceEffect {
@@ -266,6 +279,9 @@ export interface AppearanceEffect {
   // layer-blur / background-blur: radius is reused
   // glass: backdrop blur + saturation boost
   saturation?: number            // percentage, e.g. 180 = 180%
+  // rf027: ordered effects stack
+  opacity?: number               // effect-level opacity when separate from color alpha
+  visible?: boolean              // optional; false = preserve the effect in the file but skip rendering
 }
 
 export interface Appearance {
@@ -280,14 +296,25 @@ export interface Appearance {
 export interface TextSegment {
   value: string
   'font-family'?: string
+  'font-postscript'?: string        // PostScript name, e.g. "Inter-Bold" (best-effort)
+  'font-style-name'?: string        // Original style name, e.g. "Bold Italic"
   'font-size'?: number
   'font-weight'?: number
   'font-style'?: 'normal' | 'italic'
+  'font-variation'?: string         // CSS font-variation-settings value, e.g. '"wght" 600'
+  'font-feature'?: string           // CSS font-feature-settings value, e.g. 'tnum, ss01'
   fill?: HexColor | TokenRef
   'line-height'?: number | string
   'letter-spacing'?: number | string
+  'baseline-shift'?: number         // Baseline offset in px (positive = up)
   decoration?: 'underline' | 'strikethrough'
+  'decoration-color'?: HexColor     // Color of the text decoration line
+  'decoration-style'?: 'solid' | 'dashed' | 'dotted' | 'wavy' | 'double'
+  'decoration-thickness'?: number   // Thickness in px
   'text-case'?: 'uppercase' | 'lowercase' | 'capitalize' | 'small-caps'
+  'list'?: 'disc' | 'decimal' | 'none'
+  'list-level'?: number             // Nesting depth, 0-based
+  'list-marker'?: string            // Custom marker string
   href?: string
 }
 
@@ -305,21 +332,34 @@ export interface SingleStyleText extends VisualAttrs {
   'text-style'?: string          // reference to <text-style name="...">
   'fill-style'?: string          // reference to <fill-style name="...">
   'font-family'?: string
+  'font-postscript'?: string        // PostScript name, e.g. "Inter-Bold" (best-effort)
+  'font-style-name'?: string        // Original style name, e.g. "Bold Italic"
   'font-size'?: number
   'font-weight'?: number
   'font-style'?: 'normal' | 'italic'
+  'font-variation'?: string         // CSS font-variation-settings value, e.g. '"wght" 600'
+  'font-feature'?: string           // CSS font-feature-settings value, e.g. 'tnum, ss01'
   fill?: HexColor | TokenRef
   'line-height'?: number | string
   'letter-spacing'?: number | string
+  'baseline-shift'?: number         // Baseline offset in px
   'paragraph-spacing'?: number
   'paragraph-indent'?: number
   align?: 'left' | 'center' | 'right' | 'justified'
   'vertical-align'?: 'top' | 'center' | 'bottom'
   decoration?: 'underline' | 'strikethrough'
+  'decoration-color'?: HexColor     // Color of the text decoration line
+  'decoration-style'?: 'solid' | 'dashed' | 'dotted' | 'wavy' | 'double'
+  'decoration-thickness'?: number   // Thickness in px
   'text-case'?: 'uppercase' | 'lowercase' | 'capitalize' | 'small-caps' | 'small-caps-forced'
   'leading-trim'?: 'cap-height' | 'normal'
+  'text-resize'?: 'hug' | 'hug-height' | 'fixed' | 'truncate'
   truncate?: boolean
   'max-lines'?: number
+  overflow?: 'clip' | 'ellipsis'
+  'list'?: 'disc' | 'decimal' | 'none'
+  'list-level'?: number
+  'list-marker'?: string
   href?: string
 }
 

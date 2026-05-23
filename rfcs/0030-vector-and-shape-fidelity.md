@@ -1,11 +1,14 @@
 ---
 rfc: 0030
 title: Vector and shape fidelity
-status: Draft
+status: Superseded
+superseded-by: 0023
 introduced-in: 0.3
 date: 2026-05-22
 related: 0023
 ---
+
+> **Superseded by RFC 0023.** All decisions here — `<rect>`, `<ellipse>`, `<line>` as native tags, vector paths as SVG assets via `<img>`, arc/donut shapes as assets — are fully covered by RFC 0023 (Implemented). This file is kept for history only.
 
 # Vector and shape fidelity
 

@@ -86,7 +86,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0020](0020-svg-inline-content.md) | Inline SVG content on the `<svg>` tag | Implemented |
+| [0020](0020-svg-inline-content.md) | Inline SVG content on the `<svg>` tag | Superseded by 0023 |
 
 ### 0.2 — Canvas Model
 
@@ -105,11 +105,16 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0024](0024-complete-paint-model.md) | Complete paint model for visual export fidelity | Draft |
-| [0025](0025-complete-stroke-border-model.md) | Complete stroke and border model for UI outlines | Draft |
-| [0026](0026-text-rendering-fidelity.md) | Text rendering fidelity | Draft |
-| [0027](0027-effects-stack.md) | Ordered effects stack | Draft |
+| [0024](0024-complete-paint-model.md) | Complete paint model for visual export fidelity | Accepted |
+| [0025](0025-complete-stroke-border-model.md) | Complete stroke and border model for UI outlines | Implemented |
+| [0026](0026-text-rendering-fidelity.md) | Text rendering fidelity | Implemented |
+| [0027](0027-effects-stack.md) | Ordered effects stack | Implemented |
 | [0028](0028-clipping-and-masks.md) | Clipping and masks for visual export | Draft |
-| [0029](0029-layout-geometry-fidelity.md) | Layout geometry fidelity | Draft |
-| [0030](0030-vector-and-shape-fidelity.md) | Vector and shape fidelity | Draft |
+| [0030](0030-vector-and-shape-fidelity.md) | Vector and shape fidelity | Superseded by 0023 |
 | [0031](0031-images-and-assets.md) | Images and assets as self-contained visual dependencies | Implemented |
+
+### 0.3 — Grid System
+
+| RFC | Title | Status |
+|---|---|---|
+| [0032](0032-grid-system.md) | Grid system — track grid and unit grid | Implemented |
