@@ -199,106 +199,223 @@ All raster images are converted to WebP by the plugin (0.85 quality). The render
 
 ### Components & Instances
 
-Reusable UI building blocks. A `<components>` block at the top of the document holds all component definitions. Components declare their overridable surface area through a `<props>` block. Instances reference a component by id and pass values for those props as attributes.
+Reusable UI building blocks. A `<components>` block at the top of the document holds all component definitions. Each component declares its overridable surface via a `<props>` block. Instances reference a component by id and pass prop values as flat attributes.
 
-#### `<component>` — Standalone component definition
+#### Structure
 
 ```xml
 <components>
-  <component name="Card/Product" id="comp-card-product">
+  <component name="Button" id="comp-button">
     <props>
-      <prop name="title" type="text" target="title" />
-      <prop name="show-badge" type="visible" target="show-badge" />
+      <prop name="label" type="string" target="label" />
+      <prop name="show-icon" type="boolean" target="icon" />
+      <prop name="bg" type="color" target="surface" />
     </props>
-    <col w="320" radius="12" fill="#fff">
-      <text id="title" value="Product Name" font-size="18" font-weight="700" fill="#1C1C1E" />
-      <rect id="show-badge" w="8" h="8" radius="4" fill="$red" />
-    </col>
-  </component>
-</components>
-```
-
-#### `<component-set>` — Variant group
-
-Maps to a Figma component set. Each `<variant>` is a member of the set and carries its own `<props>`.
-
-```xml
-<components>
-  <component-set name="Button" id="compset-button">
-    <variant id="comp-button-style-primary" style="primary">
-      <props>
-        <prop name="label" type="text" target="label" />
-      </props>
-      <row gap="8" p="12 24" fill="$primary" radius="8">
-        <text id="label" value="Label" font-size="16" font-weight="600" fill="#fff" />
-      </row>
-    </variant>
-    <variant id="comp-button-style-secondary" style="secondary">
-      <props>
-        <prop name="label" type="text" target="label" />
-      </props>
-      <row gap="8" p="12 24" fill="none" border="1.5 $primary" radius="8">
-        <text id="label" value="Label" font-size="16" font-weight="600" fill="$primary" />
-      </row>
-    </variant>
-  </component-set>
-</components>
-```
-
-#### `<instance>` — Component usage
-
-References a component or variant by `component` id. Prop overrides are inline attributes — prop name = override value.
-
-```xml
-<instance component="comp-card-product" x="24" y="120"
-  title="Nike Air Max 90"
-  show-badge="false" />
-
-<instance component="comp-button-style-primary" x="24" y="400"
-  label="Get Started" />
-```
-
-#### `<prop>` — Overridable property declaration
-
-| Attr | Description |
-|---|---|
-| `name` | Prop name used as attribute on `<instance>` |
-| `type` | `text` — text content override; `visible` — show/hide layer |
-| `target` | Matches the `id` on the element inside the component body |
-
-#### Prop types
-
-| type | Effect |
-|---|---|
-| `text` | Overrides the text content (`value` attr) of the target layer |
-| `visible` | Hides the target layer when set to `"false"` |
-
-#### Two override approaches
-
-**Declared props (recommended)** — the designer explicitly declares component properties in Figma's properties panel. These become a `<props>` block in the component definition. Prop targets are matched via Figma's internal prop reference, making them immune to duplicate layer names. The instance passes overrides using the prop name as the attribute key.
-
-**Ad-hoc overrides** — the designer edits text or visibility directly on an instance without declaring a formal prop. The plugin detects these via `InstanceNode.overrides` in the Figma API and emits the sanitized layer name as the attribute key. No `<props>` block is needed.
-
-```xml
-<!-- Ad-hoc: no props declared, override matched by layer name -->
-<components>
-  <component name="Button/Primary" id="comp-button-primary">
-    <row gap="8" p="12 24" fill="$primary" radius="8">
-      <text id="label" value="Label" font-size="16" font-weight="600" fill="#fff" />
+    <row id="surface" gap="8" p="12 24" fill="$primary" radius="8">
+      <svg id="icon" src="$svg-arrow" w="16" h="16" />
+      <text id="label" value="Button" font-size="16" font-weight="600" fill="#fff" />
     </row>
   </component>
 </components>
 
-<instance component="comp-button-primary" x="24" y="400" label="Get Started" />
+<instance component="comp-button" x="24" y="48"
+  label="Get Started"
+  show-icon="false"
+  bg="#FF3B30" />
 ```
 
-Ad-hoc overrides work as long as layer names are unique within the component. If two layers share the same name, only the first is addressable — declare formal props to avoid this edge case.
+---
+
+#### Prop types
+
+Every `<prop>` has a data type that determines how the value is applied to the target layer when an instance passes it.
+
+| type | Applied as | `bind` required |
+|---|---|---|
+| `string` | `value` attr on the target `<text>` layer | no |
+| `boolean` | Removes target layer from render when `"false"` | no |
+| `color` | `fill` attr on the target layer | no |
+| `image` | `src` attr on the target `<img>` layer | no |
+| `component` | `component` attr on a target `<instance>` — swaps the nested instance | no |
+| `number` | The layout or visual property named by `bind` | **yes** |
+
+`bind` accepts: `radius`, `opacity`, `gap`, `font-size`, `stroke-width`, `font-weight`, `letter-spacing`, `line-height`, `padding`, `pt`, `pr`, `pb`, `pl`.
+
+---
+
+#### `target` — binding a prop to layers
+
+`target` is the `id` of the layer this prop applies to.
+
+**Optional for `string`** when the component body has exactly one `<text>` layer:
+
+```xml
+<!-- implicit — only one text layer -->
+<prop name="label" type="string" />
+
+<!-- explicit — multiple text layers require disambiguation -->
+<prop name="title"    type="string" target="card-title" />
+<prop name="subtitle" type="string" target="card-subtitle" />
+```
+
+**Space-separated list** to apply one value to multiple layers at once:
+
+```xml
+<!-- accent color drives icon, label, and indicator together -->
+<prop name="accent" type="color" target="icon label indicator" />
+```
+
+Works for all prop types. A `boolean` prop can show/hide multiple layers; a `number` with `bind="opacity"` can fade multiple layers together.
+
+---
+
+#### 1. String — text content
+
+```xml
+<props>
+  <prop name="title"    type="string" target="card-title" />
+  <prop name="subtitle" type="string" target="card-subtitle" />
+</props>
+
+<instance component="comp-card" title="Hello" subtitle="World" />
+```
+
+---
+
+#### 2. Boolean — show / hide a layer
+
+The component body defines the default state. Passing `"false"` removes the layer from render.
+
+```xml
+<props>
+  <prop name="show-icon" type="boolean" target="icon" />
+</props>
+
+<!-- icon visible (default) -->
+<instance component="comp-button" label="Continue" />
+
+<!-- icon hidden -->
+<instance component="comp-button" label="Skip" show-icon="false" />
+```
+
+---
+
+#### 3. Color — fill override
+
+```xml
+<props>
+  <prop name="bg"    type="color" target="surface" />
+  <prop name="color" type="color" target="label" />
+</props>
+
+<instance component="comp-badge" label="Live"  bg="#FF3B30"  color="#fff" />
+<instance component="comp-badge" label="Draft" bg="$gray-200" color="$gray-800" />
+```
+
+Token references (`$name`) work the same as hex values.
+
+---
+
+#### 4. Image — asset swap
+
+```xml
+<props>
+  <prop name="photo" type="image" target="photo" />
+</props>
+
+<instance component="comp-avatar" photo="$img-user-1" />
+<instance component="comp-avatar" photo="$img-user-2" />
+```
+
+---
+
+#### 5. Component — nested instance swap
+
+Replaces a nested `<instance>` inside the component body with a different component. The value is the replacement component's id.
+
+```xml
+<props>
+  <prop name="leading-icon" type="component" target="leading-icon" />
+</props>
+
+<instance component="comp-list-item" label="Notifications" leading-icon="comp-icon-bell" />
+<instance component="comp-list-item" label="Settings"      leading-icon="comp-icon-gear" />
+```
+
+---
+
+#### 6. Number — numeric property override
+
+Overrides any numeric layout or visual property. The `bind` attr names the property.
+
+```xml
+<props>
+  <prop name="radius"  type="number" target="surface" bind="radius" />
+  <prop name="opacity" type="number" target="surface" bind="opacity" />
+  <prop name="gap"     type="number" target="body"    bind="gap" />
+</props>
+
+<instance component="comp-card" title="Pill" radius="99" />
+<instance component="comp-card" title="Faded" opacity="0.4" />
+```
+
+---
+
+#### Component sets (variants)
+
+A `<component-set>` groups related variants. Each `<variant>` has key-value attrs identifying it and its own `<props>` block. Instances always reference a specific variant id — not the component-set id.
+
+```xml
+<components>
+  <component-set name="Button" id="compset-button">
+    <variant id="comp-button-primary" style="primary">
+      <props>
+        <prop name="label"     type="string"  target="label" />
+        <prop name="show-icon" type="boolean" target="icon" />
+        <prop name="bg"        type="color"   target="surface" />
+      </props>
+      <row id="surface" gap="8" p="12 24" fill="$primary" radius="8">
+        <svg id="icon" src="$svg-arrow" w="16" h="16" />
+        <text id="label" value="Button" font-size="16" font-weight="600" fill="#fff" />
+      </row>
+    </variant>
+    <variant id="comp-button-secondary" style="secondary">
+      <props>
+        <prop name="label" type="string" target="label" />
+      </props>
+      <row gap="8" p="12 24" border="1.5 $primary" radius="8">
+        <text id="label" value="Button" font-size="16" font-weight="600" fill="$primary" />
+      </row>
+    </variant>
+  </component-set>
+</components>
+
+<instance component="comp-button-primary"   label="Continue" />
+<instance component="comp-button-secondary" label="Cancel" />
+<instance component="comp-button-primary"   label="Buy Now" show-icon="false" bg="#FF3B30" />
+```
+
+---
+
+#### Detached instances
+
+When an instance overrides more than 75% of the component body's layers (minimum 4 layers), it is considered structurally diverged. It is emitted as an inline node tree rather than an `<instance>` reference. A `component` attr is preserved as origin metadata — it is informational only and carries no rendering semantics.
+
+```xml
+<!-- detached — too many overrides, emitted as inline tree -->
+<col component="comp-card" gap="16" p="16" fill="#FF3B30" radius="12">
+  <text value="Custom title" font-size="18" font-weight="700" fill="#fff" />
+  <img src="$img-custom" w="fill" h="120" fit="cover" radius="8" />
+</col>
+```
+
+---
 
 #### Id generation
 
-Every node inside a component body is assigned `id` = its Figma layer name, sanitized to lowercase kebab-case (e.g. `"Button Label"` → `id="button-label"`). Duplicate names within a component are deduplicated: the first occurrence keeps the base id, subsequent occurrences get a numeric suffix (`id="icon"`, `id="icon-2"`, `id="icon-3"`, …).
+Every node inside a component body gets `id` = its layer name sanitized to lowercase kebab-case (`"Button Label"` → `id="button-label"`). Duplicates are suffixed: first `"Icon"` → `id="icon"`, second → `id="icon-2"`, and so on.
 
-Declared props match targets via Figma's internal prop reference — duplicate ids do not affect prop resolution. Ad-hoc overrides match by layer name — unique names are strongly recommended.
+`target` on a `<prop>` is a direct id reference — find the layer with that id in the component body and apply the prop value to it.
 
 ### Layout Tags
 

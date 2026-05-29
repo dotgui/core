@@ -163,16 +163,40 @@ function isHexColor(value: string): boolean {
   return /^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/.test(value)
 }
 
+/** rgba(r, g, b, a) — alpha as 0–1 float */
+function isRgbaColor(value: string): boolean {
+  return /^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*[\d.]+\s*\)$/.test(value)
+}
+
+/** oklch(l c h) or oklch(l c h / a) */
+function isOklchColor(value: string): boolean {
+  return /^oklch\(/.test(value)
+}
+
+/** Any supported color notation: hex, rgba, or oklch */
+function isColorValue(value: string): boolean {
+  return isHexColor(value) || isRgbaColor(value) || isOklchColor(value)
+}
+
 function isGradient(value: string): boolean {
   return /^(linear-gradient|radial-gradient|conic-gradient)\(/.test(value)
 }
 
 function isValidFill(value: string): boolean {
-  return isHexColor(value) || isGradient(value) || isTokenRef(value)
+  return isColorValue(value) || isGradient(value) || isTokenRef(value)
 }
 
 function isValidColor(value: string): boolean {
-  return isHexColor(value) || isTokenRef(value)
+  return isColorValue(value) || isTokenRef(value)
+}
+
+/** A valid dimension: bare number, or string with an allowed unit */
+function isValidDimension(value: string): boolean {
+  if (/^-?\d+(\.\d+)?$/.test(value)) return true           // bare number → px
+  if (/^\d+(\.\d+)?(px|%|rem|vw|vh)$/.test(value)) return true  // explicit unit
+  if (/^calc\(/.test(value)) return true                    // calc() — content not validated
+  if (value === 'fill' || value === 'hug' || value === 'auto') return true
+  return false
 }
 
 function isNumeric(value: string): boolean {
@@ -246,8 +270,8 @@ export function validate(guiXml: string): ValidationResult {
         err('TOKEN_NO_VALUE', `Token "${t.attrs.name}" missing required attribute: value`, `gui > tokens > ${t.tag}`)
         continue
       }
-      if (t.tag === 'color' && !isHexColor(t.attrs.value)) {
-        err('TOKEN_INVALID_COLOR', `Color token "${t.attrs.name}" has invalid hex value: ${t.attrs.value}`, `gui > tokens > color`)
+      if (t.tag === 'color' && !isColorValue(t.attrs.value)) {
+        err('TOKEN_INVALID_COLOR', `Color token "${t.attrs.name}" has invalid color value: ${t.attrs.value}. Expected hex, rgba(), or oklch().`, `gui > tokens > color`)
       }
       tokenNames.add(t.attrs.name)
     }
@@ -271,8 +295,8 @@ export function validate(guiXml: string): ValidationResult {
       } else if (s.tag === 'fill-style') {
         if (!s.attrs.value) {
           err('MISSING_ATTR', `<fill-style name="${s.attrs.name}"> missing required attribute: value`, stylePath)
-        } else if (!isHexColor(s.attrs.value)) {
-          err('INVALID_FILL_STYLE_VALUE', `<fill-style> value must be a hex color, got "${s.attrs.value}"`, stylePath)
+        } else if (!isColorValue(s.attrs.value)) {
+          err('INVALID_FILL_STYLE_VALUE', `<fill-style> value must be a color (hex, rgba, or oklch), got "${s.attrs.value}"`, stylePath)
         }
         fillStyleNames.add(s.attrs.name)
       } else if (s.tag === 'effect-style') {

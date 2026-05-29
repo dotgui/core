@@ -118,3 +118,9 @@ Each RFC has frontmatter followed by these sections:
 | RFC | Title | Status |
 |---|---|---|
 | [0032](0032-grid-system.md) | Grid system — track grid and unit grid | Implemented |
+
+### 0.3 — Component System
+
+| RFC | Title | Status |
+|---|---|---|
+| [0034](0034-component-prop-types.md) | Component prop types — data-typed vocab and override inference | Draft |

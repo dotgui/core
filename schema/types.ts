@@ -14,6 +14,19 @@
 /** A hex color: #RRGGBB or #RRGGBBAA */
 export type HexColor = string
 
+/** An rgba color: rgba(r, g, b, a) — preferred for any color with opacity */
+export type RgbaColor = string
+
+/**
+ * An oklch color: oklch(l c h) or oklch(l c h / a)
+ * Wide-gamut — cannot be losslessly converted to sRGB hex.
+ * Always stored and rendered as-is.
+ */
+export type OklchColor = string
+
+/** Any supported color notation: hex, rgba, or oklch */
+export type ColorValue = HexColor | RgbaColor | OklchColor
+
 /** A CSS-style gradient string: linear-gradient(...), radial-gradient(...), conic-gradient(...) */
 export type GradientValue = string
 
@@ -21,7 +34,19 @@ export type GradientValue = string
 export type TokenRef = string
 
 /** A fill value — color, gradient, or token reference */
-export type FillValue = HexColor | GradientValue | TokenRef
+export type FillValue = ColorValue | GradientValue | TokenRef
+
+/**
+ * A dimension value.
+ * - Bare number → treated as px (e.g. 320 → "320px")
+ * - 'fill' → 100% of parent
+ * - 'hug' → fit-content
+ * - '50%' → 50% of parent container
+ * - '1.5rem' → relative to root font size
+ * - '100vw' / '50vh' → viewport-relative
+ * - 'calc(100% - 16px)' → CSS math, passed through verbatim
+ */
+export type DimensionValue = number | string
 
 /** An asset reference: $asset-id */
 export type AssetRef = string
@@ -76,6 +101,24 @@ export type BorderStyle = 'solid' | 'dashed' | 'dotted'
 /** @deprecated Use BorderAlign */
 export type StrokePosition = BorderAlign
 
+export type FlipValue = 'h' | 'v' | 'both'
+export type FillRule = 'nonzero' | 'evenodd'
+export type StrokeJoin = 'miter' | 'round' | 'bevel'
+export type MaskMode = 'alpha' | 'luminance'
+export type MaskComposite = 'add' | 'subtract' | 'intersect' | 'exclude'
+export type WritingMode = 'horizontal-tb' | 'vertical-rl' | 'vertical-lr'
+export type TextDirection = 'ltr' | 'rtl'
+export type FontSmoothing = 'auto' | 'antialiased' | 'subpixel-antialiased' | 'none'
+export type TextRendering = 'auto' | 'optimizeSpeed' | 'optimizeLegibility' | 'geometricPrecision'
+export type ImageRendering = 'auto' | 'pixelated' | 'crisp-edges'
+export type FontOpticalSizing = 'auto' | 'none'
+export type OverflowValue = 'hidden' | 'visible' | 'scroll' | 'auto'
+export type TextWrap = 'wrap' | 'nowrap' | 'balance' | 'pretty' | 'stable'
+export type WhiteSpace = 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line'
+export type WordBreak = 'normal' | 'break-all' | 'keep-all' | 'break-word'
+export type Overflow = 'clip' | 'ellipsis'
+export type FontStretch = 'ultra-condensed' | 'extra-condensed' | 'condensed' | 'semi-condensed' | 'normal' | 'semi-expanded' | 'expanded' | 'extra-expanded' | 'ultra-expanded'
+
 /** Stroke cap style (for line shapes) */
 export type StrokeCap = 'round' | 'square' | 'arrow-lines' | 'arrow-equilateral'
 
@@ -126,23 +169,36 @@ export interface VisualAttrs {
    * Absent = hug (valid on row/col/stack/text/instance only).
    * "fill" = grow to fill parent.
    * number = fixed px.
-   * Not valid on frame/shape/img/svg — those require explicit values.
+   * String forms: '50%' (of parent), '1.5rem', '100vw', 'calc(100% - 16px)'
+   * Not valid on frame/img/svg — those require explicit values.
    */
-  w?: number | 'fill'
+  w?: DimensionValue
   /**
    * Unified height. Replaces height + sizing-v.
    * Absent = hug (valid on row/col/stack/text/instance only).
    * "fill" = grow to fill parent.
    * number = fixed px.
-   * Not valid on frame/shape/img/svg — those require explicit values.
+   * String forms: '50%' (of parent), '1.5rem', '100vh', 'calc(100% - 16px)'
+   * Not valid on frame/img/svg — those require explicit values.
    */
-  h?: number | 'fill'
+  h?: DimensionValue
   /** Absolute child inside auto-layout. Presence = true. Replaces layout-position="absolute". */
   abs?: boolean
   'min-width'?: number
   'max-width'?: number
   'min-height'?: number
   'max-height'?: number
+  flip?: FlipValue                  // mirror transform — 'h' | 'v' | 'both'
+  filter?: string                   // CSS filter string, e.g. "brightness(1.2) contrast(0.9)"
+  isolation?: boolean               // true = isolation: isolate (new stacking context for blend modes)
+  'transform-origin'?: string       // e.g. "top-left", "center", "0% 0%"
+  'scale-x'?: number                // CSS scaleX, e.g. 1.5
+  'scale-y'?: number                // CSS scaleY, e.g. 0.8
+  'skew-x'?: number                 // degrees
+  'skew-y'?: number                 // degrees
+  'aspect-ratio'?: string           // e.g. "16/9", "1/1"
+  'z-index'?: number                // explicit CSS z-index
+  visible?: boolean                 // false = visibility:hidden (preserved in file, skipped in render)
 }
 
 // ---------------------------------------------------------------------------
@@ -151,7 +207,7 @@ export interface VisualAttrs {
 
 export interface ColorToken {
   name: string
-  value: HexColor
+  value: ColorValue
 }
 
 export interface NumberToken {
@@ -199,7 +255,7 @@ export interface TextStyleDeclaration {
 /** Named fill/color style */
 export interface FillStyleDeclaration {
   name: string                          // Figma style name, e.g. "Brand/Primary"
-  value: HexColor
+  value: ColorValue
 }
 
 /** Named effect style, contains one or more effects */
@@ -246,7 +302,7 @@ export type Asset = ImageAsset
 export interface AppearanceFill {
   type: AppearanceFillType
   // for color
-  value?: HexColor
+  value?: ColorValue
   // for gradients (same syntax as inline fill)
   gradient?: GradientValue
   // for image
@@ -265,6 +321,16 @@ export interface AppearanceFill {
   visible?: boolean
   // compact transform matrix for exact image/gradient mapping
   transform?: string
+  // Image fill position (for cover/contain modes)
+  'object-position'?: string        // e.g. "center", "top left", "50% 20%"
+  // Image fill color adjustments (Figma imageFilters)
+  'filter-exposure'?: number        // -1 to 1
+  'filter-contrast'?: number        // -1 to 1
+  'filter-saturation'?: number      // -1 to 1
+  'filter-temperature'?: number     // -1 to 1
+  'filter-tint'?: number            // -1 to 1
+  'filter-highlights'?: number      // -1 to 1
+  'filter-shadows'?: number         // -1 to 1
 }
 
 export interface AppearanceEffect {
@@ -274,7 +340,7 @@ export interface AppearanceEffect {
   y?: number
   radius?: number
   spread?: number
-  color?: HexColor
+  color?: ColorValue
   blend?: BlendMode
   // layer-blur / background-blur: radius is reused
   // glass: backdrop blur + saturation boost
@@ -284,9 +350,24 @@ export interface AppearanceEffect {
   visible?: boolean              // optional; false = preserve the effect in the file but skip rendering
 }
 
+export interface AppearanceStroke {
+  color?: ColorValue
+  gradient?: GradientValue        // gradient stroke (SVG-based)
+  width?: number
+  align?: BorderAlign             // inside | outside | center
+  style?: BorderStyle             // solid | dashed | dotted
+  'dash-array'?: string           // e.g. "8 4" for custom dash pattern
+  'dash-offset'?: number
+  join?: StrokeJoin               // miter | round | bevel
+  'miter-limit'?: number
+  opacity?: number
+  visible?: boolean
+}
+
 export interface Appearance {
   fills: AppearanceFill[]
   effects: AppearanceEffect[]
+  strokes?: AppearanceStroke[]
 }
 
 // ---------------------------------------------------------------------------
@@ -303,12 +384,12 @@ export interface TextSegment {
   'font-style'?: 'normal' | 'italic'
   'font-variation'?: string         // CSS font-variation-settings value, e.g. '"wght" 600'
   'font-feature'?: string           // CSS font-feature-settings value, e.g. 'tnum, ss01'
-  fill?: HexColor | TokenRef
+  fill?: ColorValue | TokenRef
   'line-height'?: number | string
   'letter-spacing'?: number | string
   'baseline-shift'?: number         // Baseline offset in px (positive = up)
   decoration?: 'underline' | 'strikethrough'
-  'decoration-color'?: HexColor     // Color of the text decoration line
+  'decoration-color'?: ColorValue   // Color of the text decoration line
   'decoration-style'?: 'solid' | 'dashed' | 'dotted' | 'wavy' | 'double'
   'decoration-thickness'?: number   // Thickness in px
   'text-case'?: 'uppercase' | 'lowercase' | 'capitalize' | 'small-caps'
@@ -316,6 +397,7 @@ export interface TextSegment {
   'list-level'?: number             // Nesting depth, 0-based
   'list-marker'?: string            // Custom marker string
   href?: string
+  'font-stretch'?: FontStretch
 }
 
 /** Single-style text: value attr present, no children */
@@ -339,7 +421,7 @@ export interface SingleStyleText extends VisualAttrs {
   'font-style'?: 'normal' | 'italic'
   'font-variation'?: string         // CSS font-variation-settings value, e.g. '"wght" 600'
   'font-feature'?: string           // CSS font-feature-settings value, e.g. 'tnum, ss01'
-  fill?: HexColor | TokenRef
+  fill?: ColorValue | TokenRef
   'line-height'?: number | string
   'letter-spacing'?: number | string
   'baseline-shift'?: number         // Baseline offset in px
@@ -348,7 +430,7 @@ export interface SingleStyleText extends VisualAttrs {
   align?: 'left' | 'center' | 'right' | 'justified'
   'vertical-align'?: 'top' | 'center' | 'bottom'
   decoration?: 'underline' | 'strikethrough'
-  'decoration-color'?: HexColor     // Color of the text decoration line
+  'decoration-color'?: ColorValue   // Color of the text decoration line
   'decoration-style'?: 'solid' | 'dashed' | 'dotted' | 'wavy' | 'double'
   'decoration-thickness'?: number   // Thickness in px
   'text-case'?: 'uppercase' | 'lowercase' | 'capitalize' | 'small-caps' | 'small-caps-forced'
@@ -361,6 +443,18 @@ export interface SingleStyleText extends VisualAttrs {
   'list-level'?: number
   'list-marker'?: string
   href?: string
+  'font-stretch'?: FontStretch
+  direction?: TextDirection
+  'writing-mode'?: WritingMode
+  'white-space'?: WhiteSpace
+  'word-break'?: WordBreak
+  'word-spacing'?: number           // px
+  'text-underline-offset'?: number  // px
+  'text-decoration-skip-ink'?: boolean
+  'text-wrap'?: TextWrap
+  'font-optical-sizing'?: FontOpticalSizing
+  'font-smoothing'?: FontSmoothing
+  'text-rendering'?: TextRendering
 }
 
 /** Mixed-style text: no value attr, has <segment> children */
@@ -394,10 +488,12 @@ export interface ImgNode extends VisualAttrs {
   radius?: number | string
   'corner-smoothing'?: number
   border?: string
-  'border-color'?: HexColor | TokenRef
+  'border-color'?: ColorValue | TokenRef
   'border-width'?: number
   'border-style'?: BorderStyle
   'border-align'?: BorderAlign
+  'object-position'?: string        // e.g. "center top", "50% 20%"
+  'image-rendering'?: ImageRendering
 }
 
 export interface SvgNode extends VisualAttrs {
@@ -433,11 +529,12 @@ export interface RectShape extends VisualAttrs {
   radius?: number | string
   'corner-smoothing'?: number
   border?: string
-  'border-color'?: HexColor | TokenRef
+  'border-color'?: ColorValue | TokenRef
   'border-width'?: number
   'border-style'?: BorderStyle
   'border-align'?: BorderAlign
   shadow?: string
+  'fill-rule'?: FillRule
 }
 
 export interface EllipseShape extends VisualAttrs {
@@ -454,11 +551,12 @@ export interface EllipseShape extends VisualAttrs {
   'fill-style'?: string
   'effect-style'?: string
   border?: string
-  'border-color'?: HexColor | TokenRef
+  'border-color'?: ColorValue | TokenRef
   'border-width'?: number
   'border-style'?: BorderStyle
   'border-align'?: BorderAlign
   shadow?: string
+  'fill-rule'?: FillRule
   // Arc / donut segment
   'arc-start'?: number
   'arc-end'?: number
@@ -473,9 +571,13 @@ export interface LineShape extends VisualAttrs {
   y?: number
   /** Required on line shape */
   w: number
-  stroke?: HexColor | TokenRef
+  stroke?: ColorValue | TokenRef
   'stroke-width'?: number
   'stroke-cap'?: StrokeCap
+  join?: StrokeJoin
+  'miter-limit'?: number
+  'dash-array'?: string
+  'dash-offset'?: number
 }
 
 export interface PathShape extends VisualAttrs {
@@ -491,9 +593,14 @@ export interface PathShape extends VisualAttrs {
   fill?: FillValue
   'fill-style'?: string
   'effect-style'?: string
-  stroke?: HexColor | TokenRef
+  stroke?: ColorValue | TokenRef
   'stroke-width'?: number
   'stroke-position'?: StrokePosition
+  'fill-rule'?: FillRule
+  join?: StrokeJoin
+  'miter-limit'?: number
+  'dash-array'?: string
+  'dash-offset'?: number
   /** SVG path data — emitted as a <path d="..." /> child element */
   d?: string
 }
@@ -519,11 +626,12 @@ export interface RectNode extends VisualAttrs {
   radius?: number | string
   'corner-smoothing'?: number
   border?: string
-  'border-color'?: HexColor | TokenRef
+  'border-color'?: ColorValue | TokenRef
   'border-width'?: number
   'border-style'?: BorderStyle
   'border-align'?: BorderAlign
   shadow?: string
+  'fill-rule'?: FillRule
 }
 
 /** Oval or circle — radius is always 50%, not exposed as an attribute */
@@ -538,11 +646,12 @@ export interface EllipseNode extends VisualAttrs {
   'fill-style'?: string
   'effect-style'?: string
   border?: string
-  'border-color'?: HexColor | TokenRef
+  'border-color'?: ColorValue | TokenRef
   'border-width'?: number
   'border-style'?: BorderStyle
   'border-align'?: BorderAlign
   shadow?: string
+  'fill-rule'?: FillRule
 }
 
 /** Thin visual separator — horizontal by default */
@@ -555,7 +664,7 @@ export interface LineNode extends VisualAttrs {
   direction?: 'horizontal' | 'vertical'
   /** Line thickness in px. Default: 1 */
   thickness?: number
-  fill?: HexColor | TokenRef
+  fill?: ColorValue | TokenRef
   'fill-style'?: string
   opacity?: number
 }
@@ -600,13 +709,19 @@ export interface FrameNode extends VisualAttrs {
   radius?: number | string
   'corner-smoothing'?: number
   border?: string
-  'border-color'?: HexColor | TokenRef
+  'border-color'?: ColorValue | TokenRef
   'border-width'?: number
   'border-style'?: BorderStyle
   'border-align'?: BorderAlign
   shadow?: string
   clip?: boolean
   appearance?: Appearance
+  'clip-path'?: string              // CSS clip-path value, e.g. "polygon(0 0, 100% 0, 100% 80%, 0 100%)"
+  'overflow-x'?: OverflowValue
+  'overflow-y'?: OverflowValue
+  'border-image'?: string           // CSS border-image shorthand
+  outline?: string                  // CSS outline shorthand e.g. "2 #000 solid"
+  'outline-offset'?: number
   children: GUIChild[]
 }
 
@@ -663,13 +778,19 @@ export interface StackNode extends VisualAttrs {
   radius?: number | string
   'corner-smoothing'?: number
   border?: string
-  'border-color'?: HexColor | TokenRef
+  'border-color'?: ColorValue | TokenRef
   'border-width'?: number
   'border-style'?: BorderStyle
   'border-align'?: BorderAlign
   shadow?: string
   clip?: boolean
   appearance?: Appearance
+  'clip-path'?: string              // CSS clip-path value, e.g. "polygon(0 0, 100% 0, 100% 80%, 0 100%)"
+  'overflow-x'?: OverflowValue
+  'overflow-y'?: OverflowValue
+  'border-image'?: string           // CSS border-image shorthand
+  outline?: string                  // CSS outline shorthand e.g. "2 #000 solid"
+  'outline-offset'?: number
   children: GUIChild[]
 }
 
@@ -688,6 +809,8 @@ export interface GroupNode extends VisualAttrs {
   'mask-y'?: number
   'mask-width'?: number
   'mask-height'?: number
+  'mask-mode'?: MaskMode            // alpha | luminance
+  'mask-composite'?: MaskComposite  // add | subtract | intersect | exclude
   children: GUIChild[]
 }
 
