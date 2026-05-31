@@ -125,3 +125,4 @@ Each RFC has frontmatter followed by these sections:
 |---|---|---|
 | [0034](0034-component-prop-types.md) | Component prop types — data-typed vocab and override inference | Draft |
 | [0035](0035-detached-from.md) | `detached-from` — origin traceability for heavily-overridden instances | Draft |
+| [0036](0036-gui-meta-block.md) | `platform` on `<gui>` and `<meta>` block for provenance | Draft |
