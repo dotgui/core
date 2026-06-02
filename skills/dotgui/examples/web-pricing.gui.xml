@@ -1,0 +1,214 @@
+<gui version="0.2" name="Pricing">
+  <tokens>
+    <color name="bg" value="#0A0A0F" />
+    <color name="surface" value="#13131A" />
+    <color name="surface-elevated" value="#1A1A23" />
+    <color name="text-primary" value="#F4F4F5" />
+    <color name="text-secondary" value="#A1A1AA" />
+    <color name="text-tertiary" value="#71717A" />
+    <color name="border" value="#27272F" />
+    <color name="border-bright" value="#3F3F4A" />
+    <color name="primary" value="#A78BFA" />
+    <color name="primary-soft" value="#A78BFA1A" />
+    <color name="accent" value="#22D3EE" />
+    <number name="radius-sm" value="8" />
+    <number name="radius-md" value="12" />
+    <number name="radius-lg" value="16" />
+    <number name="space-2" value="8" />
+    <number name="space-3" value="12" />
+    <number name="space-4" value="16" />
+    <number name="space-6" value="24" />
+    <number name="space-8" value="32" />
+    <number name="space-12" value="48" />
+    <number name="space-16" value="64" />
+  </tokens>
+
+  <styles>
+    <text-style name="Hero" font-family="Inter" font-size="64" font-weight="700" line-height="72" letter-spacing="-2" />
+    <text-style name="H2" font-family="Inter" font-size="32" font-weight="700" line-height="40" letter-spacing="-0.5" />
+    <text-style name="H3" font-family="Inter" font-size="22" font-weight="600" line-height="30" />
+    <text-style name="Body" font-family="Inter" font-size="15" font-weight="400" line-height="24" />
+    <text-style name="BodyLarge" font-family="Inter" font-size="17" font-weight="400" line-height="26" />
+    <text-style name="Label" font-family="Inter" font-size="13" font-weight="500" line-height="18" />
+    <text-style name="Eyebrow" font-family="Inter" font-size="12" font-weight="600" line-height="16" letter-spacing="1.2" />
+  </styles>
+
+  <fonts>
+    <font family="Inter" source="google" weights="400 500 600 700" styles="normal" />
+  </fonts>
+
+  <col w="1440" fill="$bg">
+    <!-- Nav -->
+    <row h="72" p="0 64" align="middle-left" gap="$space-8" fill="$bg">
+      <row gap="$space-2" align="middle-left">
+        <row w="28" h="28" radius="8" fill="linear-gradient(135deg, #A78BFA 0%, #22D3EE 100%)" align="middle-center">
+          <img src="https://api.iconify.design/lucide/check.svg?color=%230A0A0F" w="16" h="16" />
+        </row>
+        <text value="Voltage" font-family="Inter" font-size="17" font-weight="700" color="$text-primary" letter-spacing="-0.3" />
+      </row>
+      <row gap="$space-6" align="middle-left">
+        <text text-style="Label" value="Product" color="$text-secondary" />
+        <text text-style="Label" value="Solutions" color="$text-secondary" />
+        <text text-style="Label" value="Pricing" color="$text-primary" />
+        <text text-style="Label" value="Docs" color="$text-secondary" />
+        <text text-style="Label" value="Customers" color="$text-secondary" />
+      </row>
+      <col w="fill" />
+      <row gap="$space-3" align="middle-left">
+        <text text-style="Label" value="Sign in" color="$text-secondary" />
+        <row h="36" p="0 16" radius="$radius-sm" fill="$text-primary" align="middle-center">
+          <text text-style="Label" value="Start free" color="$bg" />
+        </row>
+      </row>
+    </row>
+
+    <!-- Hero -->
+    <col p="80 64 64 64" align="top-center" gap="$space-6">
+      <col w="900" align="top-center" gap="$space-6">
+        <row h="28" p="0 12" radius="999" fill="$primary-soft" align="middle-center" gap="$space-2">
+          <row w="6" h="6" radius="3" fill="$primary" />
+          <text text-style="Label" value="Now with team workspaces" color="$primary" />
+        </row>
+        <text text-style="Hero" value="Pricing that scales when you do." color="$text-primary" text-align="center" />
+        <col w="640" align="top-center">
+          <text text-style="BodyLarge" value="Start free for as long as you need. Upgrade when your team grows. No per-seat surprises, no annual lock-in." color="$text-secondary" text-align="center" />
+        </col>
+      </col>
+
+      <!-- Billing toggle -->
+      <row h="40" p="4" radius="$radius-sm" fill="$surface" align="middle-center" gap="0">
+        <row h="32" p="0 16" radius="6" fill="$surface-elevated" align="middle-center">
+          <text text-style="Label" value="Monthly" color="$text-primary" />
+        </row>
+        <row h="32" p="0 16" align="middle-center" gap="$space-2">
+          <text text-style="Label" value="Annual" color="$text-secondary" />
+          <row h="20" p="0 6" radius="999" fill="$primary-soft" align="middle-center">
+            <text font-family="Inter" font-size="11" font-weight="600" color="$primary" value="−20%" />
+          </row>
+        </row>
+      </row>
+    </col>
+
+    <!-- Pricing tiers -->
+    <row p="0 64 96 64" gap="$space-4" align="top-center">
+      <!-- Starter -->
+      <col w="320" fill="$surface" radius="$radius-lg" p="$space-8" gap="$space-6">
+        <col gap="$space-3">
+          <text text-style="H3" value="Starter" color="$text-primary" />
+          <text text-style="Body" value="For solo builders shipping their first project." color="$text-secondary" />
+        </col>
+        <row gap="$space-2" align="bottom-left">
+          <text font-family="Inter" font-size="48" font-weight="700" color="$text-primary" value="$0" line-height="48" letter-spacing="-1" />
+          <text text-style="Body" value="/ month" color="$text-tertiary" />
+        </row>
+        <row h="44" radius="$radius-sm" fill="none" stroke="$border-bright" stroke-width="1" align="middle-center">
+          <text text-style="Label" value="Get started" color="$text-primary" />
+        </row>
+        <col gap="$space-3">
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%23A78BFA" w="16" h="16" />
+            <text text-style="Body" value="Up to 3 projects" color="$text-primary" />
+          </row>
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%23A78BFA" w="16" h="16" />
+            <text text-style="Body" value="100k requests/month" color="$text-primary" />
+          </row>
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%23A78BFA" w="16" h="16" />
+            <text text-style="Body" value="Community support" color="$text-primary" />
+          </row>
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%23A78BFA" w="16" h="16" />
+            <text text-style="Body" value="Basic analytics" color="$text-primary" />
+          </row>
+        </col>
+      </col>
+
+      <!-- Team (featured) -->
+      <col w="340" fill="$surface-elevated" radius="$radius-lg" p="$space-8" gap="$space-6" stroke="$primary" stroke-width="1">
+        <row align="middle-left">
+          <col gap="$space-3" w="fill">
+            <text text-style="H3" value="Team" color="$text-primary" />
+            <text text-style="Body" value="For growing teams that need more headroom." color="$text-secondary" />
+          </col>
+          <row h="24" p="0 10" radius="999" fill="linear-gradient(135deg, #A78BFA 0%, #22D3EE 100%)" align="middle-center">
+            <text text-style="Eyebrow" value="POPULAR" color="#0A0A0F" />
+          </row>
+        </row>
+        <row gap="$space-2" align="bottom-left">
+          <text font-family="Inter" font-size="48" font-weight="700" color="$text-primary" value="$29" line-height="48" letter-spacing="-1" />
+          <text text-style="Body" value="/ month" color="$text-tertiary" />
+        </row>
+        <row h="44" radius="$radius-sm" fill="$primary" align="middle-center">
+          <text text-style="Label" value="Start 14-day trial" color="$bg" />
+        </row>
+        <col gap="$space-3">
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%23A78BFA" w="16" h="16" />
+            <text text-style="Body" value="Unlimited projects" color="$text-primary" />
+          </row>
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%23A78BFA" w="16" h="16" />
+            <text text-style="Body" value="5M requests/month" color="$text-primary" />
+          </row>
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%23A78BFA" w="16" h="16" />
+            <text text-style="Body" value="Priority support" color="$text-primary" />
+          </row>
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%23A78BFA" w="16" h="16" />
+            <text text-style="Body" value="Advanced analytics" color="$text-primary" />
+          </row>
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%23A78BFA" w="16" h="16" />
+            <text text-style="Body" value="Team workspaces, up to 10 seats" color="$text-primary" />
+          </row>
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%23A78BFA" w="16" h="16" />
+            <text text-style="Body" value="Custom domains" color="$text-primary" />
+          </row>
+        </col>
+      </col>
+
+      <!-- Enterprise -->
+      <col w="320" fill="$surface" radius="$radius-lg" p="$space-8" gap="$space-6">
+        <col gap="$space-3">
+          <text text-style="H3" value="Enterprise" color="$text-primary" />
+          <text text-style="Body" value="For organizations with security and compliance needs." color="$text-secondary" />
+        </col>
+        <row gap="$space-2" align="bottom-left">
+          <text font-family="Inter" font-size="32" font-weight="700" color="$text-primary" value="Let's talk" line-height="40" letter-spacing="-0.5" />
+        </row>
+        <row h="44" radius="$radius-sm" fill="none" stroke="$border-bright" stroke-width="1" align="middle-center">
+          <text text-style="Label" value="Contact sales" color="$text-primary" />
+        </row>
+        <col gap="$space-3">
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%2322D3EE" w="16" h="16" />
+            <text text-style="Body" value="Everything in Team, plus:" color="$text-primary" />
+          </row>
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%2322D3EE" w="16" h="16" />
+            <text text-style="Body" value="SSO &amp; SCIM provisioning" color="$text-primary" />
+          </row>
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%2322D3EE" w="16" h="16" />
+            <text text-style="Body" value="Dedicated infrastructure" color="$text-primary" />
+          </row>
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%2322D3EE" w="16" h="16" />
+            <text text-style="Body" value="SOC 2 Type II, HIPAA, GDPR" color="$text-primary" />
+          </row>
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%2322D3EE" w="16" h="16" />
+            <text text-style="Body" value="99.99% SLA &amp; 24/7 support" color="$text-primary" />
+          </row>
+          <row gap="$space-3" align="middle-left">
+            <img src="https://api.iconify.design/lucide/check.svg?color=%2322D3EE" w="16" h="16" />
+            <text text-style="Body" value="Custom contract terms" color="$text-primary" />
+          </row>
+        </col>
+      </col>
+    </row>
+  </col>
+</gui>
