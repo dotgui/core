@@ -149,6 +149,95 @@ Design system primitives. Referenced anywhere in the tree with `$name`.
 <rect fill="$primary" radius="$radius-card" />
 ```
 
+### Token Modes
+
+A token may hold more than one value — one per **mode**. Light/dark is the
+common case; brand and density are others. The mechanism is generic: a *mode* is
+any dimension along which a design's values change. (RFC-0037.)
+
+**Scope:** modes apply to the scalar token types only — `color`, `number`,
+`string`. They swap *values*; they never restructure the tree.
+
+#### 1. Declare the axes
+
+A mode **axis** is document-level metadata, sibling to `<tokens>` / `<fonts>`,
+never rendered. The axis is named: `name` is its identity, `values` enumerates
+its modes, `default` picks the one used when none is active.
+
+One axis uses the bare, self-closing `<mode>`:
+
+```xml
+<mode name="theme" values="light dark" default="light" />
+```
+
+Two or more axes wrap each `<mode>` in a `<modes>` container:
+
+```xml
+<modes>
+  <mode name="theme"   values="light dark"          default="light" />
+  <mode name="density" values="comfortable compact" default="comfortable" />
+</modes>
+```
+
+| Attr | Description |
+|---|---|
+| `name` | Axis identity, author-chosen (`theme`, `brand`, `density`, …) |
+| `values` | Space-separated list of the axis's mode values |
+| `default` | Value used when no mode is active; must be one of `values` (falls back to the first value if omitted) |
+
+#### 2. Give a token per-mode values
+
+A token varies by mode with `{axis}-{value}` attributes. A token with a plain
+`value` (and no axis-prefixed attributes) is **constant across all modes** — the
+single-value form is unchanged.
+
+```xml
+<tokens>
+  <color  name="bg"          theme-light="#FFFFFF" theme-dark="#000000" />
+  <color  name="primary"     theme-light="#007AFF" theme-dark="#0A84FF" />
+  <string name="cta"         theme-light="Get started" theme-dark="Start now" />
+  <number name="radius-card" value="12" />                  <!-- constant -->
+</tokens>
+```
+
+A token that omits one of an axis's values falls back to that axis's `default`
+at resolution time.
+
+#### 3. Apply a mode — root or any layer
+
+A mode is made active with a `mode-{axis}` attribute on the root node or any
+layout node. It applies to that node and everything beneath it, until a
+descendant overrides it (nearest ancestor wins — exactly Figma's per-frame mode).
+Axes are independent attributes and compose.
+
+```xml
+<col mode-theme="dark" mode-density="compact">   <!-- dark + compact subtree -->
+  <text fill="$primary" value="…" />
+  <col mode-theme="light">                       <!-- override: this card is light -->
+    <text fill="$primary" value="…" />
+  </col>
+</col>
+```
+
+**The file declares the mode; the renderer resolves the value.** The tree stores
+`$token` references plus which mode is active where — never a resolved color. The
+resolution cascade for an axis at a node, in order:
+
+1. the nearest ancestor-or-self `mode-{axis}` attribute, else
+2. the active mode supplied by the consumer at render time (optional), else
+3. that axis's `default`, else
+4. the token's constant value.
+
+Because of step 2, a file that pins no mode is fully consumer-controllable — a
+renderer or playground can flip it to dark at render time. A subtree that pins
+`mode-{axis}` keeps its mode regardless (a deliberate design choice, like a light
+hero on a dark page). Two sibling subtrees with different pins render both
+appearances side by side in one pass.
+
+**To make a value themeable, it must be a token.** Per-mode values live only on
+token definitions in `<tokens>`; an inline literal is static across modes — the
+same rule as Figma, where only variable-bound properties change between modes.
+
 ### Styles
 
 Named text styles from the design system. Each `<text-style>` captures a full typography definition. Text nodes reference a style by name — individual font attrs are omitted when a style is applied.

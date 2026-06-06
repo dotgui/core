@@ -59,6 +59,7 @@ Before producing anything, internalize the format. The spec is the constitution:
 - All SVG/vector icons and images are declared inline using `<img>` pointing directly to relative `assets/` or public URLs — the `<assets>` metadata block and `<svg>` tag are completely removed.
 - Padding shorthand: `p="24"`, `p="24 16"`, `p="8 16 12 16"`. Or per-side: `pt`, `pr`, `pb`, `pl`.
 - Tokens are referenced with `$name` after being declared in `<tokens>`.
+- **Token modes (light/dark, etc.):** only when a design ships more than one appearance. Declare an axis (`<mode name="theme" values="light dark" default="light" />`, or wrap multiple in `<modes>`), give tokens per-mode values (`<color name="bg" theme-light="#FFF" theme-dark="#000" />`), and activate with `mode-theme="dark"` on the root or any node (it cascades). Only `color`/`number`/`string` can vary by mode; a token with a plain `value` is constant. For a single-appearance design, skip modes and use plain `value=` tokens.
 - `<text>` is single-style with a `value` attribute, OR mixed-style with `<segment>` children.
 - Fills support hex (with optional alpha byte), CSS gradient functions, and `$token` refs.
 

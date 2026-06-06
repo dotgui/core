@@ -91,6 +91,7 @@ The goal is to grow this — more entry points, more design software integration
 
 | Path | Purpose |
 |---|---|
+| [`PRINCIPLES.md`](PRINCIPLES.md) | The constitution — durable design tenets every RFC must satisfy |
 | [`spec/DOTGUI.md`](spec/DOTGUI.md) | Full format specification — every tag, attribute, and rule |
 | [`rfcs/`](rfcs/) | Every design decision, debated and recorded |
 | [`schema/types.ts`](schema/types.ts) | TypeScript type definitions for every element |
@@ -103,7 +104,7 @@ The goal is to grow this — more entry points, more design software integration
 
 Every non-trivial decision about the format lives in [`rfcs/`](rfcs/) as a numbered document. RFCs cover the rationale, the alternatives considered, and the final decision. If you want to know *why* the format works the way it does — why it is XML and not JSON, why the package format, why layout works the way it does — the RFCs are where to look.
 
-The spec in [`spec/DOTGUI.md`](spec/DOTGUI.md) is the normative reference. RFCs are the reasoning behind it.
+The spec in [`spec/DOTGUI.md`](spec/DOTGUI.md) is the normative reference. RFCs are the reasoning behind it. And [`PRINCIPLES.md`](PRINCIPLES.md) is the constitution every RFC is judged against — a proposal cannot contradict a principle without explicitly amending it.
 
 ---
 

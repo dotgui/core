@@ -4,6 +4,8 @@ Request for Comments — the decision log for the dotgui format.
 
 Every significant design decision lives here as an RFC. This includes decisions that were accepted, rejected, and superseded. Especially rejected ones — they document why certain ideas were deliberately not pursued, so the same ground isn't covered twice.
 
+Every RFC is judged against the format's constitution: [**../PRINCIPLES.md**](../PRINCIPLES.md). An RFC may not contradict a principle without explicitly amending it. Use the `dotgui-rfc` skill to run a proposal through the principles before drafting.
+
 ---
 
 ## Format Versions
@@ -126,3 +128,11 @@ Each RFC has frontmatter followed by these sections:
 | [0034](0034-component-prop-types.md) | Component prop types — data-typed vocab and override inference | Draft |
 | [0035](0035-detached-from.md) | `detached-from` — origin traceability for heavily-overridden instances | Draft |
 | [0036](0036-gui-meta-block.md) | `platform` on `<gui>` and `<meta>` block for provenance | Draft |
+
+### 1.0 — Token System Completion (visual-layer freeze)
+
+| RFC | Title | Status |
+|---|---|---|
+| [0037](0037-token-modes-theming.md) | Token modes — multi-value tokens | Proposed |
+| [0038](0038-composite-token-types.md) | Composite token types — shadow, typography, border, aliases | Draft |
+| [0039](0039-rejected-render-wrapper-tag.md) | REJECTED: `<render>` wrapper tag | Rejected |

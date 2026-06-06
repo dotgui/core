@@ -6,7 +6,8 @@ This is the spec you write against. Every tag and attribute Claude emits must ap
 
 1. [Document shape](#document-shape)
 2. [Tokens](#tokens)
-3. [Styles](#styles)
+3. [Token modes](#token-modes)
+4. [Styles](#styles)
 4. [Fonts](#fonts)
 5. [No Assets Block (Inline Assets)](#no-assets-block-inline-assets)
 6. [Layout tags](#layout-tags)
@@ -75,6 +76,67 @@ Reference example:
 ```
 
 Three token types: `color`, `number`, `string`. References resolve at render time.
+
+---
+
+## Token modes
+
+A token can hold one value per **mode** — light/dark being the obvious case,
+brand and density being others. Only the scalar token types (`color`, `number`,
+`string`) can vary by mode. Modes swap *values*; they never change layout
+structure. (RFC-0037.)
+
+**Declare the axes** as document metadata (sibling to `<tokens>`). One axis uses
+the bare `<mode>`; two or more wrap each in `<modes>`:
+
+```xml
+<!-- one axis -->
+<mode name="theme" values="light dark" default="light" />
+
+<!-- multiple axes -->
+<modes>
+  <mode name="theme"   values="light dark"          default="light" />
+  <mode name="density" values="comfortable compact" default="comfortable" />
+</modes>
+```
+
+- `name` — axis identity (author-chosen).
+- `values` — space-separated mode values.
+- `default` — value used when no mode is active (must be one of `values`).
+
+**Give a token per-mode values** with `{axis}-{value}` attributes. A token with
+a plain `value` is constant across all modes:
+
+```xml
+<tokens>
+  <color  name="bg"      theme-light="#FFFFFF" theme-dark="#000000" />
+  <color  name="primary" theme-light="#007AFF" theme-dark="#0A84FF" />
+  <number name="radius"  value="12" />               <!-- constant -->
+</tokens>
+```
+
+**Apply a mode** with `mode-{axis}` on the root or any layout node. It cascades
+to that subtree until a descendant overrides it (nearest ancestor wins). Axes
+compose:
+
+```xml
+<col mode-theme="dark">              <!-- this subtree resolves dark -->
+  <rect fill="$bg" w="100" h="40" />
+  <col mode-theme="light">           <!-- override: this card resolves light -->
+    <rect fill="$bg" w="80" h="32" />
+  </col>
+</col>
+```
+
+Resolution order per axis: nearest `mode-{axis}` → render-time mode → axis
+`default` → the token's constant value. **To make a value themeable, it must be
+a token** — an inline literal is static across modes.
+
+**Authoring guidance:** pin `mode-{axis}` only where the design genuinely needs a
+fixed appearance (a permanently-dark hero). Leave the rest unpinned so the file
+stays consumer-controllable — a renderer can flip the whole screen to dark at
+render time. For most single-appearance designs, skip modes entirely and use
+plain `value=` tokens.
 
 ---
 
