@@ -100,8 +100,16 @@ function parse(xml: string): El {
       }
       if (xml[pos] === '<' && xml[pos + 1] !== '!') {
         children.push(parseEl())
+      } else if (xml.startsWith('<!--', pos)) {
+        // Comment — skip to its terminator. Must advance pos or we loop forever.
+        const end = xml.indexOf('-->', pos)
+        pos = end === -1 ? xml.length : end + 3
+      } else if (xml[pos] === '<') {
+        // <!...> declaration / CDATA — skip to the next '>'.
+        while (pos < xml.length && xml[pos] !== '>') pos++
+        pos++
       } else {
-        // Skip text content and comments
+        // Text content — skip to the next tag.
         while (pos < xml.length && xml[pos] !== '<') pos++
       }
     }
@@ -405,8 +413,8 @@ export function validate(guiXml: string): ValidationResult {
 
     switch (el.tag) {
       case 'frame': {
-        if (!el.attrs.width) err('MISSING_ATTR', `<frame> missing required attribute: width`, path)
-        if (!el.attrs.height) err('MISSING_ATTR', `<frame> missing required attribute: height`, path)
+        if (!el.attrs.w) err('MISSING_ATTR', `<frame> missing required attribute: w`, path)
+        if (!el.attrs.h) err('MISSING_ATTR', `<frame> missing required attribute: h`, path)
         validateChildren(el, path)
         break
       }
@@ -467,8 +475,8 @@ export function validate(guiXml: string): ValidationResult {
           else if (!el.attrs.src.startsWith('https://') && !el.attrs.src.startsWith('http://'))
             warn('IMG_INLINE_SRC', `<img src> is not an asset reference or URL — expected "$asset-id" or "https://..."`, path)
         }
-        if (!el.attrs.width) err('MISSING_ATTR', `<img> missing required attribute: width`, path)
-        if (!el.attrs.height) err('MISSING_ATTR', `<img> missing required attribute: height`, path)
+        if (!el.attrs.w) err('MISSING_ATTR', `<img> missing required attribute: w`, path)
+        if (!el.attrs.h) err('MISSING_ATTR', `<img> missing required attribute: h`, path)
         if (el.attrs.fit && !FIT_MODES.has(el.attrs.fit)) {
           err('INVALID_FIT', `<img> fit must be cover|contain|fill|none, got "${el.attrs.fit}"`, path)
         }
@@ -484,8 +492,8 @@ export function validate(guiXml: string): ValidationResult {
           if (isTokenRef(el.attrs.src)) resolveRef(el.attrs.src, path, 'asset')
         }
         // inline SVG children are raw SVG markup — skip .gui child validation for them
-        if (!el.attrs.width) err('MISSING_ATTR', `<svg> missing required attribute: width`, path)
-        if (!el.attrs.height) err('MISSING_ATTR', `<svg> missing required attribute: height`, path)
+        if (!el.attrs.w) err('MISSING_ATTR', `<svg> missing required attribute: w`, path)
+        if (!el.attrs.h) err('MISSING_ATTR', `<svg> missing required attribute: h`, path)
         break
       }
 
@@ -495,9 +503,9 @@ export function validate(guiXml: string): ValidationResult {
         } else if (!SHAPE_TYPES.has(el.attrs.type)) {
           err('INVALID_SHAPE_TYPE', `<shape> type must be rect|ellipse|line|path, got "${el.attrs.type}"`, path)
         }
-        if (!el.attrs.width) err('MISSING_ATTR', `<shape> missing required attribute: width`, path)
-        if (el.attrs.type !== 'line' && !el.attrs.height) {
-          err('MISSING_ATTR', `<shape type="${el.attrs.type}"> missing required attribute: height`, path)
+        if (!el.attrs.w) err('MISSING_ATTR', `<shape> missing required attribute: w`, path)
+        if (el.attrs.type !== 'line' && !el.attrs.h) {
+          err('MISSING_ATTR', `<shape type="${el.attrs.type}"> missing required attribute: h`, path)
         }
         if (el.attrs.fill) validateFill(el.attrs.fill, path)
         if (el.attrs['fill-style']) resolveStyleRef(el.attrs['fill-style'], 'fill-style', path)

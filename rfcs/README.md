@@ -136,3 +136,10 @@ Each RFC has frontmatter followed by these sections:
 | [0037](0037-token-modes-theming.md) | Token modes — multi-value tokens | Proposed |
 | [0038](0038-composite-token-types.md) | Composite token types — shadow, typography, border, aliases | Draft |
 | [0039](0039-rejected-render-wrapper-tag.md) | REJECTED: `<render>` wrapper tag | Rejected |
+
+### 0.2 — Quality
+
+| RFC | Title | Status |
+|---|---|---|
+| [0040](0040-quality-scoring-model.md) | Quality scoring model — CCACT | Proposed |
+| [0041](0041-role-attribute.md) | `role` attribute — UI role vocabulary | Draft |
