@@ -1,5 +1,6 @@
 ---
 role: hyperlink
+reach: full
 platforms: web, ios, android
 ---
 

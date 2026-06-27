@@ -1,5 +1,6 @@
 ---
 role: segmented-control
+reach: full
 platforms: web, ios, android
 ---
 

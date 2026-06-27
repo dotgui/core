@@ -1,5 +1,6 @@
 ---
 role: context-menu
+reach: full
 platforms: web, ios, android
 ---
 

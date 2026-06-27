@@ -1,5 +1,6 @@
 ---
 role: toast
+reach: full
 platforms: web, ios, android
 ---
 

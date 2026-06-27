@@ -1,5 +1,6 @@
 ---
 role: top-navigation-bar
+reach: 1
 platforms: web, ios, android
 ---
 

@@ -1,5 +1,6 @@
 ---
 role: switch
+reach: full
 platforms: web, ios, android
 ---
 

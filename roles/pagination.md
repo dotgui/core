@@ -1,5 +1,6 @@
 ---
 role: pagination
+reach: full
 platforms: web, android
 ---
 

@@ -6,11 +6,16 @@
   "types": "./schema/types.ts",
   "exports": {
     ".": "./schema/types.ts",
-    "./validate": "./schema/validate.ts"
+    "./types": "./schema/types.ts",
+    "./spec": "./spec/spec.json"
   },
   "files": [
     "schema/",
     "spec/",
     "examples/"
-  ]
+  ],
+  "scripts": {
+    "gen:docs": "bun run scripts/gen-docs.ts",
+    "gen:docs:check": "bun run scripts/gen-docs.ts && git diff --exit-code spec/REFERENCE.md"
+  }
 }

@@ -158,12 +158,18 @@ export type GapValue = string | number
 // ---------------------------------------------------------------------------
 
 export interface VisualAttrs {
-  opacity?: number              // 0–1, omitted when 1
-  blend?: BlendMode             // omitted when 'normal' or 'pass-through'
-  mask?: boolean                // true = alpha mask for subsequent siblings
-  rotation?: number             // degrees, omitted when 0
-  'constraint-h'?: ConstraintH  // omitted when 'left'
-  'constraint-v'?: ConstraintV  // omitted when 'top'
+  /** Layer opacity, 0–1. Omitted when 1. */
+  opacity?: number
+  /** Blend mode against layers below. Omitted when normal. */
+  blend?: BlendMode
+  /** Presence = true. Acts as an alpha mask for subsequent siblings. */
+  mask?: boolean
+  /** Rotation in degrees. Omitted when 0. */
+  rotation?: number
+  /** Horizontal pin/resize behavior. Default left (omitted). */
+  'constraint-h'?: ConstraintH
+  /** Vertical pin/resize behavior. Default top (omitted). */
+  'constraint-v'?: ConstraintV
   /**
    * Unified width. Replaces width + sizing-h.
    * Absent = hug (valid on row/col/stack/text/instance only).
@@ -184,21 +190,36 @@ export interface VisualAttrs {
   h?: DimensionValue
   /** Absolute child inside auto-layout. Presence = true. Replaces layout-position="absolute". */
   abs?: boolean
+  /** Minimum width in px. Omitted when unset. */
   'min-width'?: number
+  /** Maximum width in px. Omitted when unset. */
   'max-width'?: number
+  /** Minimum height in px. Omitted when unset. */
   'min-height'?: number
+  /** Maximum height in px. Omitted when unset. */
   'max-height'?: number
-  flip?: FlipValue                  // mirror transform — 'h' | 'v' | 'both'
-  filter?: string                   // CSS filter string, e.g. "brightness(1.2) contrast(0.9)"
-  isolation?: boolean               // true = isolation: isolate (new stacking context for blend modes)
-  'transform-origin'?: string       // e.g. "top-left", "center", "0% 0%"
-  'scale-x'?: number                // CSS scaleX, e.g. 1.5
-  'scale-y'?: number                // CSS scaleY, e.g. 0.8
-  'skew-x'?: number                 // degrees
-  'skew-y'?: number                 // degrees
-  'aspect-ratio'?: string           // e.g. "16/9", "1/1"
-  'z-index'?: number                // explicit CSS z-index
-  visible?: boolean                 // false = visibility:hidden (preserved in file, skipped in render)
+  /** Mirror transform — 'h', 'v', or 'both'. */
+  flip?: FlipValue
+  /** CSS filter string, e.g. "brightness(1.2) contrast(0.9)". */
+  filter?: string
+  /** Presence = true. New stacking context for blend modes (isolation: isolate). */
+  isolation?: boolean
+  /** Transform origin, e.g. "top-left", "center", "0% 0%". */
+  'transform-origin'?: string
+  /** CSS scaleX, e.g. 1.5. */
+  'scale-x'?: number
+  /** CSS scaleY, e.g. 0.8. */
+  'scale-y'?: number
+  /** Horizontal skew in degrees. */
+  'skew-x'?: number
+  /** Vertical skew in degrees. */
+  'skew-y'?: number
+  /** Aspect ratio, e.g. "16/9", "1/1". */
+  'aspect-ratio'?: string
+  /** Explicit CSS z-index. */
+  'z-index'?: number
+  /** false = visibility:hidden (preserved in file, skipped in render). */
+  visible?: boolean
 }
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 ---
 role: navigation-menu
+reach: 2
 platforms: web, ios, android
 ---
 

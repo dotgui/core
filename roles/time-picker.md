@@ -1,5 +1,6 @@
 ---
 role: time-picker
+reach: full
 platforms: web, ios, android
 ---
 

@@ -1,5 +1,6 @@
 ---
 role: banner
+reach: full
 platforms: web, ios, android
 ---
 

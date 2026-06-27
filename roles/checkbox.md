@@ -1,5 +1,6 @@
 ---
 role: checkbox
+reach: full
 platforms: web, ios, android
 ---
 

@@ -1,5 +1,6 @@
 ---
 role: breadcrumb
+reach: full
 platforms: web, android
 ---
 

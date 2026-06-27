@@ -1,5 +1,6 @@
 ---
 role: divider
+reach: full
 platforms: web, ios, android
 ---
 

@@ -1,5 +1,6 @@
 ---
 role: table
+reach: 2
 platforms: web, ios, android
 ---
 

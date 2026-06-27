@@ -77,9 +77,9 @@ We are building the format that lets those tools talk to each other — and to A
 
 | Tool | Repo | What it does |
 |---|---|---|
-| **dotgui-core** | this repo | Format spec, types, validator |
+| **dotgui-core** | this folder | Format spec, principles, RFCs, roles — the authority |
+| **@dotgui/kit** | `kit/` | The implementation: parser, **validator**, types, renderer, scorer |
 | **dotgui-figma** | `dotgui/figma` | Figma plugin — exports screens as `.gui` |
-| **dotgui-render** | `dotgui/render` | Renders `.gui` to a live DOM |
 | **gui-optimizer** | `dotgui/optimizer` | Cleans and optimizes raw `.gui` output |
 | **dotgui-landing** | `dotgui/web` | Website |
 
@@ -92,11 +92,18 @@ The goal is to grow this — more entry points, more design software integration
 | Path | Purpose |
 |---|---|
 | [`PRINCIPLES.md`](PRINCIPLES.md) | The constitution — durable design tenets every RFC must satisfy |
-| [`spec/DOTGUI.md`](spec/DOTGUI.md) | Full format specification — every tag, attribute, and rule |
+| [`GOVERNANCE.md`](GOVERNANCE.md) | How an accepted RFC becomes the spec and propagates to the docs, kit, and website |
+| [`spec/DOTGUI.md`](spec/DOTGUI.md) | Full format specification — every tag, attribute, and rule (prose, hand-authored) |
+| [`spec/REFERENCE.md`](spec/REFERENCE.md) | Generated element/attribute reference — always in sync with the types (`bun run gen:docs`) |
 | [`rfcs/`](rfcs/) | Every design decision, debated and recorded |
-| [`schema/types.ts`](schema/types.ts) | TypeScript type definitions for every element |
-| [`schema/validate.ts`](schema/validate.ts) | Validator — checks structure, token refs, asset refs |
+| [`roles/`](roles/) | The `role=` controlled vocabulary — one file per recognized UI role |
+| [`spec/QUALITY.md`](spec/QUALITY.md) | The CCAC quality model — the authority the scorer implements |
 | [`examples/`](examples/) | Reference `.gui` files that conform to the spec |
+
+The **types and validator** are not here — they are the implementation, and live in
+[`@dotgui/kit`](../kit/src/schema/) (`kit/src/schema/types.ts`, `kit/src/schema/validate.ts`),
+the single package that also owns the parser, renderer, and scorer. This folder is the
+**spec/authority**; the kit is the **implementation**, so the two cannot drift.
 
 ---
 
@@ -153,8 +160,10 @@ Every `.gui` file declares which version of the spec it targets:
 
 ## Using the validator
 
+The validator ships in [`@dotgui/kit`](../kit), not this folder:
+
 ```typescript
-import { validate } from 'dotgui-core'
+import { validate } from '@dotgui/kit/validate'
 
 const result = validate(guiString)
 

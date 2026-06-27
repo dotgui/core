@@ -1,5 +1,6 @@
 ---
 role: action-sheet
+reach: full
 platforms: ios, android
 ---
 

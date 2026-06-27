@@ -1,5 +1,6 @@
 ---
 role: floating-action-button
+reach: full
 platforms: web, ios, android
 ---
 

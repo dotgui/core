@@ -1,5 +1,6 @@
 ---
 role: badge
+reach: full
 platforms: web, ios, android
 ---
 

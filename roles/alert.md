@@ -1,5 +1,6 @@
 ---
 role: alert
+reach: full
 platforms: web, ios, android
 ---
 

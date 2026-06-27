@@ -1,5 +1,6 @@
 ---
 role: avatar
+reach: full
 platforms: web, ios, android
 ---
 

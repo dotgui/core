@@ -1,5 +1,6 @@
 ---
 role: date-picker
+reach: full
 platforms: web, ios, android
 ---
 

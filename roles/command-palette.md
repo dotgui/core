@@ -1,5 +1,6 @@
 ---
 role: command-palette
+reach: 1
 platforms: web
 ---
 

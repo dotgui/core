@@ -1,5 +1,6 @@
 ---
 role: sidebar
+reach: 2
 platforms: web, ios, android
 ---
 

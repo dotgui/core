@@ -1,5 +1,6 @@
 ---
 role: full-screen-overlay
+reach: 1
 platforms: web, ios, android
 ---
 

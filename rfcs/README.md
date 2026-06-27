@@ -141,5 +141,5 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0040](0040-quality-scoring-model.md) | Quality scoring model — CCACT | Proposed |
+| [0040](0040-quality-scoring-model.md) | Quality scoring model — CCAC | Proposed |
 | [0041](0041-role-attribute.md) | `role` attribute — UI role vocabulary | Draft |

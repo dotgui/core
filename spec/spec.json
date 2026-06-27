@@ -1,0 +1,3127 @@
+{
+  "$generated": "DO NOT EDIT — run `bun run gen:spec` in the kit. Source: core/schema/types.ts + spec.content.ts",
+  "formatVersion": "0.2",
+  "categoryOrder": [
+    "Format",
+    "Metadata",
+    "Layout",
+    "Content",
+    "Geometry",
+    "Appearance"
+  ],
+  "sharedAttributes": [
+    {
+      "name": "opacity",
+      "type": "number",
+      "required": false,
+      "description": "Layer opacity, 0–1. Omitted when 1."
+    },
+    {
+      "name": "blend",
+      "type": "BlendMode",
+      "required": false,
+      "description": "Blend mode against layers below. Omitted when normal.",
+      "enum": [
+        "normal",
+        "multiply",
+        "screen",
+        "overlay",
+        "darken",
+        "lighten",
+        "color-dodge",
+        "color-burn",
+        "hard-light",
+        "soft-light",
+        "difference",
+        "exclusion",
+        "hue",
+        "saturation",
+        "color",
+        "luminosity",
+        "linear-burn",
+        "linear-dodge"
+      ]
+    },
+    {
+      "name": "mask",
+      "type": "boolean",
+      "required": false,
+      "description": "Presence = true. Acts as an alpha mask for subsequent siblings."
+    },
+    {
+      "name": "rotation",
+      "type": "number",
+      "required": false,
+      "description": "Rotation in degrees. Omitted when 0."
+    },
+    {
+      "name": "constraint-h",
+      "type": "ConstraintH",
+      "required": false,
+      "description": "Horizontal pin/resize behavior. Default left (omitted).",
+      "enum": [
+        "left",
+        "right",
+        "center",
+        "scale",
+        "stretch"
+      ]
+    },
+    {
+      "name": "constraint-v",
+      "type": "ConstraintV",
+      "required": false,
+      "description": "Vertical pin/resize behavior. Default top (omitted).",
+      "enum": [
+        "center",
+        "scale",
+        "stretch",
+        "top",
+        "bottom"
+      ]
+    },
+    {
+      "name": "abs",
+      "type": "boolean",
+      "required": false,
+      "description": "Absolute child inside auto-layout. Presence = true. Replaces layout-position=\"absolute\"."
+    },
+    {
+      "name": "min-width",
+      "type": "number",
+      "required": false,
+      "description": "Minimum width in px. Omitted when unset."
+    },
+    {
+      "name": "max-width",
+      "type": "number",
+      "required": false,
+      "description": "Maximum width in px. Omitted when unset."
+    },
+    {
+      "name": "min-height",
+      "type": "number",
+      "required": false,
+      "description": "Minimum height in px. Omitted when unset."
+    },
+    {
+      "name": "max-height",
+      "type": "number",
+      "required": false,
+      "description": "Maximum height in px. Omitted when unset."
+    },
+    {
+      "name": "flip",
+      "type": "FlipValue",
+      "required": false,
+      "description": "Mirror transform — 'h', 'v', or 'both'.",
+      "enum": [
+        "h",
+        "v",
+        "both"
+      ]
+    },
+    {
+      "name": "filter",
+      "type": "string",
+      "required": false,
+      "description": "CSS filter string, e.g. \"brightness(1.2) contrast(0.9)\"."
+    },
+    {
+      "name": "isolation",
+      "type": "boolean",
+      "required": false,
+      "description": "Presence = true. New stacking context for blend modes (isolation: isolate)."
+    },
+    {
+      "name": "transform-origin",
+      "type": "string",
+      "required": false,
+      "description": "Transform origin, e.g. \"top-left\", \"center\", \"0% 0%\"."
+    },
+    {
+      "name": "scale-x",
+      "type": "number",
+      "required": false,
+      "description": "CSS scaleX, e.g. 1.5."
+    },
+    {
+      "name": "scale-y",
+      "type": "number",
+      "required": false,
+      "description": "CSS scaleY, e.g. 0.8."
+    },
+    {
+      "name": "skew-x",
+      "type": "number",
+      "required": false,
+      "description": "Horizontal skew in degrees."
+    },
+    {
+      "name": "skew-y",
+      "type": "number",
+      "required": false,
+      "description": "Vertical skew in degrees."
+    },
+    {
+      "name": "aspect-ratio",
+      "type": "string",
+      "required": false,
+      "description": "Aspect ratio, e.g. \"16/9\", \"1/1\"."
+    },
+    {
+      "name": "z-index",
+      "type": "number",
+      "required": false,
+      "description": "Explicit CSS z-index."
+    },
+    {
+      "name": "visible",
+      "type": "boolean",
+      "required": false,
+      "description": "false = visibility:hidden (preserved in file, skipped in render)."
+    }
+  ],
+  "elements": [
+    {
+      "slug": "package",
+      "tag": null,
+      "name": ".gui package",
+      "navLabel": null,
+      "kind": "concept",
+      "category": "Format",
+      "summary": "file format",
+      "description": [
+        "A .gui file is a ZIP package. The markup, design tokens, font declarations, binary assets, and a preview thumbnail all live in one self-contained file.",
+        "Internally, the markup lives as design.guix — an implementation detail never surfaced to the outside. A program distinguishing a package from a raw markup string uses magic bytes: ZIP starts with PK, markup starts with <."
+      ],
+      "attributes": [
+        {
+          "name": "design.guix",
+          "type": "entry",
+          "required": false,
+          "description": "The UI markup — always this name inside the package."
+        },
+        {
+          "name": "preview.webp",
+          "type": "entry",
+          "required": false,
+          "description": "Thumbnail for visual verification before opening."
+        },
+        {
+          "name": "assets/",
+          "type": "entry",
+          "required": false,
+          "description": "Embedded WebP images and SVG vectors."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "checkout.gui  (ZIP)\n├── design.guix\n├── preview.webp\n└── assets/\n    ├── hero.webp\n    └── icon-close.svg",
+      "exampleLabel": "Package structure",
+      "exampleMode": "plain",
+      "related": [
+        "gui",
+        "assets",
+        "fonts"
+      ],
+      "faq": [
+        {
+          "q": "Is a .gui file just XML?",
+          "a": "No — a .gui file is a ZIP package whose markup (design.guix) is XML, alongside a preview thumbnail and an assets/ folder. A raw XML string is also valid input; tools tell them apart by magic bytes (ZIP starts with PK, markup with <)."
+        }
+      ],
+      "hubHidden": false
+    },
+    {
+      "slug": "gui",
+      "tag": "gui",
+      "name": "<gui>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Format",
+      "summary": "document root",
+      "description": [
+        "The root element is a document envelope — never rendered. Direct children are metadata blocks or exactly one root layout node. Metadata always precedes the layout root."
+      ],
+      "attributes": [
+        {
+          "name": "version",
+          "type": "string",
+          "required": true,
+          "description": "Spec version. Current: 0.2."
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Screen or layer name from the source design."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "<gui version=\"0.2\" name=\"Checkout\">\n  <tokens>\n    <color name=\"primary\" value=\"#007AFF\" />\n  </tokens>\n  <fonts>\n    <font family=\"Inter\" source=\"google\" weights=\"400 700\" />\n  </fonts>\n  <col w=\"390\" fill=\"#F2F2F7\" gap=\"16\" p=\"24\">\n    <text value=\"Checkout\"\n          font-family=\"Inter\" font-size=\"28\"\n          font-weight=\"700\" fill=\"#1C1C1E\" />\n  </col>\n</gui>",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "package",
+        "root-canvas",
+        "tokens"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "root-canvas",
+      "tag": null,
+      "name": "Root Canvas",
+      "navLabel": null,
+      "kind": "concept",
+      "category": "Format",
+      "summary": "canvas patterns",
+      "description": [
+        "The first layout tag under <gui> defines the canvas. Two patterns cover all cases."
+      ],
+      "note": "Default to <col> — it cannot clip content. <frame> children are absolutely positioned. <col> children flow vertically.",
+      "attributes": [
+        {
+          "name": "<col w=\"390\">",
+          "type": "pattern",
+          "required": false,
+          "description": "Content-driven screen, AI-authored. h absent — hugs children."
+        },
+        {
+          "name": "<frame w=\"390\" h=\"844\">",
+          "type": "pattern",
+          "required": false,
+          "description": "Fixed artboard, Figma export. h required."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "<!-- content-driven: h absent, hugs children -->\n<gui version=\"0.2\" name=\"Feed\">\n  <col w=\"390\" fill=\"#fff\" gap=\"0\">\n    ...\n  </col>\n</gui>\n\n<!-- fixed artboard: h required, children absolute -->\n<gui version=\"0.2\" name=\"Splash\">\n  <frame w=\"390\" h=\"844\" fill=\"#000\">\n    <img x=\"0\" y=\"0\" src=\"assets/bg.webp\" w=\"390\" h=\"844\" fit=\"cover\" />\n    <text x=\"24\" y=\"720\" value=\"Welcome\" font-size=\"32\"\n          font-weight=\"700\" fill=\"#fff\" />\n  </frame>\n</gui>",
+      "exampleLabel": "Both patterns",
+      "exampleMode": "hl",
+      "related": [
+        "gui",
+        "col",
+        "frame"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "tokens",
+      "tag": "tokens",
+      "name": "<tokens>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Metadata",
+      "summary": "design primitives",
+      "description": [
+        "Design system primitives. Referenced anywhere in the tree with $name. Figma Variables resolve to <tokens> entries. Only tokens used in the exported tree are emitted."
+      ],
+      "attributes": [
+        {
+          "name": "<color>",
+          "type": "token",
+          "required": false,
+          "description": "Hex color, e.g. #007AFF."
+        },
+        {
+          "name": "<number>",
+          "type": "token",
+          "required": false,
+          "description": "Numeric value, e.g. 12."
+        },
+        {
+          "name": "<string>",
+          "type": "token",
+          "required": false,
+          "description": "String value, e.g. Inter."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "<tokens>\n  <color name=\"primary\"     value=\"#007AFF\" />\n  <number name=\"radius-card\" value=\"12\" />\n  <string name=\"font-base\"  value=\"Inter\" />\n</tokens>\n\n<col fill=\"$surface\" p=\"$space-md\" gap=\"12\">\n  <rect fill=\"$primary\" radius=\"$radius-card\" w=\"fill\" h=\"52\" />\n</col>",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "styles",
+        "fonts",
+        "fill-values"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "styles",
+      "tag": "styles",
+      "name": "<styles>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Metadata",
+      "summary": "text styles",
+      "description": [
+        "Named text styles from the design system. Each <text-style> captures a full typography definition. Text nodes reference a style by name — individual font attrs are omitted when a style is applied.",
+        "Color and layout attrs are always inlined — they are not part of the text style definition. Only styles used in the exported tree are emitted."
+      ],
+      "attributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Style name, e.g. Heading/H1."
+        },
+        {
+          "name": "font-family",
+          "type": "string",
+          "required": false,
+          "description": "Font family name."
+        },
+        {
+          "name": "font-size",
+          "type": "number",
+          "required": false,
+          "description": "Size in px."
+        },
+        {
+          "name": "font-weight",
+          "type": "number",
+          "required": false,
+          "description": "Numeric weight (100–900)."
+        },
+        {
+          "name": "line-height",
+          "type": "number | string",
+          "required": false,
+          "description": "px or percent."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "<styles>\n  <text-style name=\"Heading/H1\"\n              font-family=\"Inter\" font-size=\"32\"\n              font-weight=\"700\" line-height=\"40\" />\n</styles>\n\n<text text-style=\"Heading/H1\" value=\"Welcome\" fill=\"#1C1C1E\" />",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "text",
+        "tokens",
+        "fonts"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "fonts",
+      "tag": "fonts",
+      "name": "<fonts>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Metadata",
+      "summary": "font declarations",
+      "description": [
+        "Font declarations for the renderer to load Google Fonts or fall back gracefully. Text nodes still carry their own font-family and font-weight — the fonts block makes those families resolvable."
+      ],
+      "attributes": [
+        {
+          "name": "family",
+          "type": "string",
+          "required": false,
+          "description": "Font family name."
+        },
+        {
+          "name": "source",
+          "type": "google | system | unresolved",
+          "required": false,
+          "description": "Where the font is resolved from."
+        },
+        {
+          "name": "category",
+          "type": "string",
+          "required": false,
+          "description": "e.g. sans-serif, serif, monospace."
+        },
+        {
+          "name": "weights",
+          "type": "string",
+          "required": false,
+          "description": "Space-separated numeric weights, e.g. 400 600 700."
+        },
+        {
+          "name": "styles",
+          "type": "string",
+          "required": false,
+          "description": "normal italic."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "<fonts>\n  <font family=\"Inter\" source=\"google\"\n        category=\"sans-serif\"\n        weights=\"400 500 600 700\" styles=\"normal italic\" />\n</fonts>",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "text",
+        "styles",
+        "tokens"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "assets",
+      "tag": null,
+      "name": "Assets",
+      "navLabel": null,
+      "kind": "concept",
+      "category": "Metadata",
+      "summary": "images & vectors",
+      "description": [
+        "Images and vector artwork are embedded in assets/ and referenced inline via src — no declaration block, no $id indirection.",
+        "All raster images are converted to WebP at 0.85 quality by the Figma plugin. External URLs are a fallback only. If a URL reference fails to load, the renderer shows an asset not loaded error state — no silent failure."
+      ],
+      "attributes": [
+        {
+          "name": "assets/img.webp",
+          "type": "pattern",
+          "required": false,
+          "description": "Embedded raster (default for all exports)."
+        },
+        {
+          "name": "assets/icon.svg",
+          "type": "pattern",
+          "required": false,
+          "description": "Embedded vector artwork."
+        },
+        {
+          "name": "https://…",
+          "type": "pattern",
+          "required": false,
+          "description": "External URL — fallback only."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "<img src=\"assets/hero.webp\" w=\"390\" h=\"240\" fit=\"cover\" />\n<img src=\"assets/icon-close.svg\" w=\"24\" h=\"24\" />\n<img src=\"https://example.com/photo.jpg\" w=\"390\" h=\"240\" fit=\"cover\" />",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "img",
+        "package",
+        "gui"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "components",
+      "tag": "components",
+      "name": "<components>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Metadata",
+      "summary": "component system",
+      "description": [
+        "A <components> block at the top of the document holds all component definitions. Instances reference a component by id and pass prop overrides as attributes.",
+        "<component> defines a single reusable component. <component-set> groups related variants. Each <variant> is a member of the set.",
+        "Declared props use a <props> block with <prop> entries. Ad-hoc overrides skip the props block and match by sanitized layer name."
+      ],
+      "attributes": [
+        {
+          "name": "text",
+          "type": "prop type",
+          "required": false,
+          "description": "Overrides value attr of the target layer."
+        },
+        {
+          "name": "visible",
+          "type": "prop type",
+          "required": false,
+          "description": "Hides target when set to \"false\"."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "<components>\n  <component name=\"Card/Product\" id=\"comp-card\">\n    <props>\n      <prop name=\"title\" type=\"text\" target=\"title\" />\n    </props>\n    <col w=\"320\" radius=\"12\" fill=\"#fff\" p=\"16\" gap=\"8\">\n      <text id=\"title\" value=\"Product Name\" font-size=\"16\" font-weight=\"600\" />\n    </col>\n  </component>\n</components>\n\n<instance component=\"comp-card\" title=\"Nike Air Max 90\" x=\"24\" y=\"120\" />",
+      "exampleLabel": "Component + instance",
+      "exampleMode": "hl",
+      "related": [
+        "gui",
+        "col",
+        "text"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "frame",
+      "tag": "frame",
+      "name": "<frame>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Layout",
+      "summary": "fixed container",
+      "description": [
+        "Fixed container. Children are absolutely positioned with x and y attributes. Maps to a Figma frame without auto-layout.",
+        "w and h are required. clip (boolean presence) clips content to bounds."
+      ],
+      "mapsToFigma": "Frame (auto-layout off)",
+      "attributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "w",
+          "type": "number | 'fill'",
+          "required": true,
+          "description": "Required on frame"
+        },
+        {
+          "name": "h",
+          "type": "number | 'fill'",
+          "required": true,
+          "description": "Required on frame"
+        },
+        {
+          "name": "fill",
+          "type": "fill",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "fill-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "effect-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "radius",
+          "type": "number | string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "corner-smoothing",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-color",
+          "type": "color | token",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-width",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-style",
+          "type": "BorderStyle",
+          "required": false,
+          "description": "",
+          "enum": [
+            "solid",
+            "dashed",
+            "dotted"
+          ]
+        },
+        {
+          "name": "border-align",
+          "type": "BorderAlign",
+          "required": false,
+          "description": "",
+          "enum": [
+            "center",
+            "inside",
+            "outside"
+          ]
+        },
+        {
+          "name": "shadow",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "clip",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "clip-path",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "overflow-x",
+          "type": "OverflowValue",
+          "required": false,
+          "description": "",
+          "enum": [
+            "hidden",
+            "visible",
+            "scroll",
+            "auto"
+          ]
+        },
+        {
+          "name": "overflow-y",
+          "type": "OverflowValue",
+          "required": false,
+          "description": "",
+          "enum": [
+            "hidden",
+            "visible",
+            "scroll",
+            "auto"
+          ]
+        },
+        {
+          "name": "border-image",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "outline",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "outline-offset",
+          "type": "number",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "sharedAttrs": true,
+      "example": "<frame w=\"390\" h=\"844\" fill=\"#FFFFFF\" clip>\n  <img x=\"0\" y=\"0\" src=\"assets/bg.webp\" w=\"390\" h=\"240\" fit=\"cover\" />\n  <text x=\"24\" y=\"260\" value=\"Good morning\"\n        font-size=\"28\" font-weight=\"700\" fill=\"#1C1C1E\" />\n</frame>",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "col",
+        "group",
+        "rect"
+      ],
+      "faq": [
+        {
+          "q": "What's the difference between frame and col?",
+          "a": "A frame positions its children absolutely with x/y and maps to a Figma frame with auto-layout off; a col flows its children vertically with auto-layout. Use frame for fixed artboards, col for content-driven screens."
+        }
+      ],
+      "hubHidden": false
+    },
+    {
+      "slug": "stack",
+      "tag": "stack",
+      "name": "<stack>",
+      "navLabel": "<stack> / <row> / <col>",
+      "kind": "tag",
+      "category": "Layout",
+      "summary": "auto-layout",
+      "description": [
+        "<row> is horizontal, <col> is vertical. <stack> requires an explicit direction. Children are flow-positioned.",
+        "w / h absent = hug content; \"fill\" = fill parent; number = fixed px. p accepts CSS shorthand (1–4 values). gap=\"auto\" distributes space evenly."
+      ],
+      "mapsToFigma": "Frame (auto-layout on)",
+      "attributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "direction",
+          "type": "LayoutDirection",
+          "required": true,
+          "description": "",
+          "enum": [
+            "horizontal",
+            "vertical",
+            "grid"
+          ]
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "w",
+          "type": "number | 'fill'",
+          "required": false,
+          "description": "Absent = hug children"
+        },
+        {
+          "name": "h",
+          "type": "number | 'fill'",
+          "required": false,
+          "description": "Absent = hug children"
+        },
+        {
+          "name": "gap",
+          "type": "gap",
+          "required": false,
+          "description": "Gap between items and (when wrapping) between rows.\n\"16\"      fixed 16px\n\"auto\"    space-between (bare attribute = auto)\n\"16 10\"   16px items, 10px rows\n\"16 auto\" 16px items, rows distributed"
+        },
+        {
+          "name": "reverse-z",
+          "type": "boolean",
+          "required": false,
+          "description": "Reverse z-order of children. Presence = true."
+        },
+        {
+          "name": "wrap",
+          "type": "boolean",
+          "required": false,
+          "description": "Enable wrapping. Presence = true."
+        },
+        {
+          "name": "grid-columns",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "grid-rows",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "grid-col-gap",
+          "type": "number | string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "grid-row-gap",
+          "type": "number | string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "p",
+          "type": "string | number",
+          "required": false,
+          "description": "Padding shorthand. Single value, \"v h\", or \"top right bottom left\".\nAlias: padding"
+        },
+        {
+          "name": "pt",
+          "type": "number",
+          "required": false,
+          "description": "Top padding override"
+        },
+        {
+          "name": "pr",
+          "type": "number",
+          "required": false,
+          "description": "Right padding override"
+        },
+        {
+          "name": "pb",
+          "type": "number",
+          "required": false,
+          "description": "Bottom padding override"
+        },
+        {
+          "name": "pl",
+          "type": "number",
+          "required": false,
+          "description": "Left padding override"
+        },
+        {
+          "name": "align",
+          "type": "AlignValue",
+          "required": false,
+          "description": "9-point alignment — direction-independent.\nReplaces justify + align.\nSpecial values: stretch, baseline.\nDefault: top-left.",
+          "enum": [
+            "stretch",
+            "top-left",
+            "top-center",
+            "top-right",
+            "middle-left",
+            "middle-center",
+            "middle-right",
+            "bottom-left",
+            "bottom-center",
+            "bottom-right",
+            "baseline"
+          ]
+        },
+        {
+          "name": "fill",
+          "type": "fill",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "fill-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "effect-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "radius",
+          "type": "number | string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "corner-smoothing",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-color",
+          "type": "color | token",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-width",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-style",
+          "type": "BorderStyle",
+          "required": false,
+          "description": "",
+          "enum": [
+            "solid",
+            "dashed",
+            "dotted"
+          ]
+        },
+        {
+          "name": "border-align",
+          "type": "BorderAlign",
+          "required": false,
+          "description": "",
+          "enum": [
+            "center",
+            "inside",
+            "outside"
+          ]
+        },
+        {
+          "name": "shadow",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "clip",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "clip-path",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "overflow-x",
+          "type": "OverflowValue",
+          "required": false,
+          "description": "",
+          "enum": [
+            "hidden",
+            "visible",
+            "scroll",
+            "auto"
+          ]
+        },
+        {
+          "name": "overflow-y",
+          "type": "OverflowValue",
+          "required": false,
+          "description": "",
+          "enum": [
+            "hidden",
+            "visible",
+            "scroll",
+            "auto"
+          ]
+        },
+        {
+          "name": "border-image",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "outline",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "outline-offset",
+          "type": "number",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "sharedAttrs": true,
+      "example": "<col w=\"fill\" gap=\"12\" p=\"16\" fill=\"#fff\" radius=\"12\">\n  <text value=\"Settings\" font-size=\"17\" font-weight=\"600\" fill=\"#1C1C1E\" />\n  <line fill=\"#E5E5EA\" />\n  <row w=\"fill\" gap=\"auto\" align=\"middle-left\">\n    <text value=\"Notifications\" font-size=\"15\" fill=\"#1C1C1E\" />\n    <text value=\"On\" font-size=\"15\" fill=\"#8E8E93\" />\n  </row>\n</col>",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "row",
+        "col",
+        "grid"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "row",
+      "tag": "row",
+      "name": "<row>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Layout",
+      "summary": "horizontal auto-layout",
+      "description": [
+        "<row> is a horizontal auto-layout container — children flow left to right. It is shorthand for <stack direction=\"horizontal\">.",
+        "w / h absent = hug content; \"fill\" = fill parent; number = fixed px. gap=\"auto\" distributes space evenly."
+      ],
+      "mapsToFigma": "Frame (horizontal auto-layout)",
+      "attributes": [
+        {
+          "name": "h",
+          "type": "number | 'fill'",
+          "required": false,
+          "description": "Absent = hug children"
+        },
+        {
+          "name": "fill",
+          "type": "fill",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "w",
+          "type": "number | 'fill'",
+          "required": false,
+          "description": "Absent = hug children"
+        },
+        {
+          "name": "gap",
+          "type": "gap",
+          "required": false,
+          "description": "Gap between items and (when wrapping) between rows.\n\"16\"      fixed 16px\n\"auto\"    space-between (bare attribute = auto)\n\"16 10\"   16px items, 10px rows\n\"16 auto\" 16px items, rows distributed"
+        },
+        {
+          "name": "reverse-z",
+          "type": "boolean",
+          "required": false,
+          "description": "Reverse z-order of children. Presence = true."
+        },
+        {
+          "name": "wrap",
+          "type": "boolean",
+          "required": false,
+          "description": "Enable wrapping. Presence = true."
+        },
+        {
+          "name": "p",
+          "type": "string | number",
+          "required": false,
+          "description": "Padding shorthand. Single value, \"v h\", or \"top right bottom left\".\nAlias: padding"
+        },
+        {
+          "name": "pt",
+          "type": "number",
+          "required": false,
+          "description": "Top padding override"
+        },
+        {
+          "name": "pr",
+          "type": "number",
+          "required": false,
+          "description": "Right padding override"
+        },
+        {
+          "name": "pb",
+          "type": "number",
+          "required": false,
+          "description": "Bottom padding override"
+        },
+        {
+          "name": "pl",
+          "type": "number",
+          "required": false,
+          "description": "Left padding override"
+        },
+        {
+          "name": "align",
+          "type": "AlignValue",
+          "required": false,
+          "description": "9-point alignment — direction-independent.\nReplaces justify + align.\nSpecial values: stretch, baseline.\nDefault: top-left.",
+          "enum": [
+            "stretch",
+            "top-left",
+            "top-center",
+            "top-right",
+            "middle-left",
+            "middle-center",
+            "middle-right",
+            "bottom-left",
+            "bottom-center",
+            "bottom-right",
+            "baseline"
+          ]
+        },
+        {
+          "name": "fill-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "effect-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "radius",
+          "type": "number | string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "corner-smoothing",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-color",
+          "type": "color | token",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-width",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-style",
+          "type": "BorderStyle",
+          "required": false,
+          "description": "",
+          "enum": [
+            "solid",
+            "dashed",
+            "dotted"
+          ]
+        },
+        {
+          "name": "border-align",
+          "type": "BorderAlign",
+          "required": false,
+          "description": "",
+          "enum": [
+            "center",
+            "inside",
+            "outside"
+          ]
+        },
+        {
+          "name": "shadow",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "clip",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "clip-path",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "overflow-x",
+          "type": "OverflowValue",
+          "required": false,
+          "description": "",
+          "enum": [
+            "hidden",
+            "visible",
+            "scroll",
+            "auto"
+          ]
+        },
+        {
+          "name": "overflow-y",
+          "type": "OverflowValue",
+          "required": false,
+          "description": "",
+          "enum": [
+            "hidden",
+            "visible",
+            "scroll",
+            "auto"
+          ]
+        },
+        {
+          "name": "border-image",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "outline",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "outline-offset",
+          "type": "number",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "sharedAttrs": true,
+      "example": "<row w=\"390\" h=\"56\" p=\"0 16\" gap=\"auto\" align=\"middle-left\" fill=\"#fff\">\n  <text value=\".gui\" font-size=\"17\" font-weight=\"600\" fill=\"#1C1C1E\" />\n  <img src=\"assets/avatar.webp\" w=\"32\" h=\"32\" radius=\"16\" fit=\"cover\" />\n</row>",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "col",
+        "stack",
+        "grid"
+      ],
+      "faq": [],
+      "hubHidden": true
+    },
+    {
+      "slug": "col",
+      "tag": "col",
+      "name": "<col>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Layout",
+      "summary": "vertical auto-layout",
+      "description": [
+        "<col> is a vertical auto-layout container — children flow top to bottom. It is shorthand for <stack direction=\"vertical\"> and the recommended default screen root.",
+        "w / h absent = hug content; \"fill\" = fill parent; number = fixed px. gap=\"auto\" distributes space evenly."
+      ],
+      "mapsToFigma": "Frame (vertical auto-layout)",
+      "attributes": [
+        {
+          "name": "h",
+          "type": "number | 'fill'",
+          "required": false,
+          "description": "Absent = hug children"
+        },
+        {
+          "name": "fill",
+          "type": "fill",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "w",
+          "type": "number | 'fill'",
+          "required": false,
+          "description": "Absent = hug children"
+        },
+        {
+          "name": "gap",
+          "type": "gap",
+          "required": false,
+          "description": "Gap between items and (when wrapping) between rows.\n\"16\"      fixed 16px\n\"auto\"    space-between (bare attribute = auto)\n\"16 10\"   16px items, 10px rows\n\"16 auto\" 16px items, rows distributed"
+        },
+        {
+          "name": "reverse-z",
+          "type": "boolean",
+          "required": false,
+          "description": "Reverse z-order of children. Presence = true."
+        },
+        {
+          "name": "wrap",
+          "type": "boolean",
+          "required": false,
+          "description": "Enable wrapping. Presence = true."
+        },
+        {
+          "name": "p",
+          "type": "string | number",
+          "required": false,
+          "description": "Padding shorthand. Single value, \"v h\", or \"top right bottom left\".\nAlias: padding"
+        },
+        {
+          "name": "pt",
+          "type": "number",
+          "required": false,
+          "description": "Top padding override"
+        },
+        {
+          "name": "pr",
+          "type": "number",
+          "required": false,
+          "description": "Right padding override"
+        },
+        {
+          "name": "pb",
+          "type": "number",
+          "required": false,
+          "description": "Bottom padding override"
+        },
+        {
+          "name": "pl",
+          "type": "number",
+          "required": false,
+          "description": "Left padding override"
+        },
+        {
+          "name": "align",
+          "type": "AlignValue",
+          "required": false,
+          "description": "9-point alignment — direction-independent.\nReplaces justify + align.\nSpecial values: stretch, baseline.\nDefault: top-left.",
+          "enum": [
+            "stretch",
+            "top-left",
+            "top-center",
+            "top-right",
+            "middle-left",
+            "middle-center",
+            "middle-right",
+            "bottom-left",
+            "bottom-center",
+            "bottom-right",
+            "baseline"
+          ]
+        },
+        {
+          "name": "fill-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "effect-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "radius",
+          "type": "number | string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "corner-smoothing",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-color",
+          "type": "color | token",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-width",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-style",
+          "type": "BorderStyle",
+          "required": false,
+          "description": "",
+          "enum": [
+            "solid",
+            "dashed",
+            "dotted"
+          ]
+        },
+        {
+          "name": "border-align",
+          "type": "BorderAlign",
+          "required": false,
+          "description": "",
+          "enum": [
+            "center",
+            "inside",
+            "outside"
+          ]
+        },
+        {
+          "name": "shadow",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "clip",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "clip-path",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "overflow-x",
+          "type": "OverflowValue",
+          "required": false,
+          "description": "",
+          "enum": [
+            "hidden",
+            "visible",
+            "scroll",
+            "auto"
+          ]
+        },
+        {
+          "name": "overflow-y",
+          "type": "OverflowValue",
+          "required": false,
+          "description": "",
+          "enum": [
+            "hidden",
+            "visible",
+            "scroll",
+            "auto"
+          ]
+        },
+        {
+          "name": "border-image",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "outline",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "outline-offset",
+          "type": "number",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "sharedAttrs": true,
+      "example": "<col w=\"fill\" gap=\"12\" p=\"16\" fill=\"#fff\" radius=\"12\">\n  <text value=\"Title\" font-size=\"17\" font-weight=\"600\" fill=\"#1C1C1E\" />\n  <text value=\"Subtitle\" font-size=\"14\" fill=\"#8E8E93\" />\n</col>",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "row",
+        "stack",
+        "frame"
+      ],
+      "faq": [],
+      "hubHidden": true
+    },
+    {
+      "slug": "grid",
+      "tag": "grid",
+      "name": "<grid>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Layout",
+      "summary": "track & unit grid",
+      "description": [
+        "Two modes determined by which attrs are present. Track grid (columns/rows): parent declares track sizes, children place themselves. Unit grid: fixed coordinate canvas.",
+        "A grid range fills the spanned tracks (no w/h needed). A single value hugs content."
+      ],
+      "attributes": [
+        {
+          "name": "columns",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "rows",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "col-gap",
+          "type": "number | string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "row-gap",
+          "type": "number | string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "h",
+          "type": "number | 'fill'",
+          "required": false,
+          "description": "Absent = hug children"
+        },
+        {
+          "name": "fill",
+          "type": "fill",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "w",
+          "type": "number | 'fill'",
+          "required": false,
+          "description": "Absent = hug children"
+        },
+        {
+          "name": "p",
+          "type": "string | number",
+          "required": false,
+          "description": "Padding shorthand. Single value, \"v h\", or \"top right bottom left\".\nAlias: padding"
+        },
+        {
+          "name": "pt",
+          "type": "number",
+          "required": false,
+          "description": "Top padding override"
+        },
+        {
+          "name": "pr",
+          "type": "number",
+          "required": false,
+          "description": "Right padding override"
+        },
+        {
+          "name": "pb",
+          "type": "number",
+          "required": false,
+          "description": "Bottom padding override"
+        },
+        {
+          "name": "pl",
+          "type": "number",
+          "required": false,
+          "description": "Left padding override"
+        },
+        {
+          "name": "fill-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "effect-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "radius",
+          "type": "number | string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "corner-smoothing",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-color",
+          "type": "color | token",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-width",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-style",
+          "type": "BorderStyle",
+          "required": false,
+          "description": "",
+          "enum": [
+            "solid",
+            "dashed",
+            "dotted"
+          ]
+        },
+        {
+          "name": "border-align",
+          "type": "BorderAlign",
+          "required": false,
+          "description": "",
+          "enum": [
+            "center",
+            "inside",
+            "outside"
+          ]
+        },
+        {
+          "name": "shadow",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "clip",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "clip-path",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "overflow-x",
+          "type": "OverflowValue",
+          "required": false,
+          "description": "",
+          "enum": [
+            "hidden",
+            "visible",
+            "scroll",
+            "auto"
+          ]
+        },
+        {
+          "name": "overflow-y",
+          "type": "OverflowValue",
+          "required": false,
+          "description": "",
+          "enum": [
+            "hidden",
+            "visible",
+            "scroll",
+            "auto"
+          ]
+        },
+        {
+          "name": "border-image",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "outline",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "outline-offset",
+          "type": "number",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "sharedAttrs": true,
+      "example": "<grid columns=\"200 1fr\" rows=\"56 1fr\" gap=\"0\" w=\"fill\" h=\"fill\">\n  <row gc=\"1/-1\" gr=\"1\" fill=\"#fff\" p=\"0 20\" align=\"middle-left\">\n    <text value=\"Dashboard\" font-size=\"17\" font-weight=\"600\" />\n  </row>\n  <col gc=\"1\" gr=\"2\" fill=\"#f7f7f7\" p=\"12\" gap=\"4\">...</col>\n  <col gc=\"2\" gr=\"2\" p=\"32\" gap=\"16\">...</col>\n</grid>",
+      "exampleLabel": "Track grid — dashboard layout",
+      "exampleMode": "hl",
+      "related": [
+        "stack",
+        "frame",
+        "col"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "group",
+      "tag": "group",
+      "name": "<group>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Layout",
+      "summary": "logical grouping",
+      "description": [
+        "No layout behavior. Children are absolutely positioned relative to the group origin. Maps to a Figma group node.",
+        "When the first child of a Figma group is a mask node, the mask shape is extracted as an SVG asset and hoisted onto the <group> as mask-src attrs."
+      ],
+      "mapsToFigma": "Group",
+      "attributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "w",
+          "type": "number",
+          "required": true,
+          "description": "Required on group — no content to derive size from"
+        },
+        {
+          "name": "h",
+          "type": "number",
+          "required": true,
+          "description": "Required on group — no content to derive size from"
+        },
+        {
+          "name": "mask-src",
+          "type": "asset",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-x",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-width",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-height",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-mode",
+          "type": "MaskMode",
+          "required": false,
+          "description": "",
+          "enum": [
+            "alpha",
+            "luminance"
+          ]
+        },
+        {
+          "name": "mask-composite",
+          "type": "MaskComposite",
+          "required": false,
+          "description": "",
+          "enum": [
+            "add",
+            "subtract",
+            "intersect",
+            "exclude"
+          ]
+        }
+      ],
+      "sharedAttrs": true,
+      "example": "<group x=\"0\" y=\"0\" w=\"390\" h=\"200\"\n       mask-src=\"assets/mask-1.svg\"\n       mask-x=\"0\" mask-y=\"0\" mask-width=\"390\" mask-height=\"200\">\n  <img x=\"0\" y=\"0\" src=\"assets/texture.webp\" w=\"390\" h=\"200\" fit=\"cover\" />\n</group>",
+      "exampleLabel": "Group with mask",
+      "exampleMode": "hl",
+      "related": [
+        "frame",
+        "img",
+        "appearance"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "text",
+      "tag": "text",
+      "name": "<text>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Content",
+      "summary": "text node",
+      "description": [
+        "Single-style text is self-closing with a value attribute. Mixed-style text has <segment> children — each segment overrides font attrs for its run.",
+        "text-style references a named style; individual font attrs are omitted when a style is referenced. Variable fonts use font-variation; OpenType features use font-feature."
+      ],
+      "mapsToFigma": "Text",
+      "attributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "w",
+          "type": "number | 'fill'",
+          "required": false,
+          "description": "w absent = hug text content"
+        },
+        {
+          "name": "h",
+          "type": "number | 'fill'",
+          "required": false,
+          "description": "h absent = hug text content"
+        },
+        {
+          "name": "text-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "fill-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "font-family",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "font-postscript",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "font-style-name",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "font-size",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "font-weight",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "font-style",
+          "type": "'normal' | 'italic'",
+          "required": false,
+          "description": "",
+          "enum": [
+            "normal",
+            "italic"
+          ]
+        },
+        {
+          "name": "font-variation",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "font-feature",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "fill",
+          "type": "color | token",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "line-height",
+          "type": "number | string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "letter-spacing",
+          "type": "number | string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "baseline-shift",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "paragraph-spacing",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "paragraph-indent",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "align",
+          "type": "'left' | 'center' | 'right' | 'justified'",
+          "required": false,
+          "description": "",
+          "enum": [
+            "left",
+            "right",
+            "center",
+            "justified"
+          ]
+        },
+        {
+          "name": "vertical-align",
+          "type": "'top' | 'center' | 'bottom'",
+          "required": false,
+          "description": "",
+          "enum": [
+            "center",
+            "top",
+            "bottom"
+          ]
+        },
+        {
+          "name": "decoration",
+          "type": "'underline' | 'strikethrough'",
+          "required": false,
+          "description": "",
+          "enum": [
+            "underline",
+            "strikethrough"
+          ]
+        },
+        {
+          "name": "decoration-color",
+          "type": "color",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "decoration-style",
+          "type": "'solid' | 'dashed' | 'dotted' | 'wavy' | 'double'",
+          "required": false,
+          "description": "",
+          "enum": [
+            "solid",
+            "dashed",
+            "dotted",
+            "wavy",
+            "double"
+          ]
+        },
+        {
+          "name": "decoration-thickness",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "text-case",
+          "type": "'uppercase' | 'lowercase' | 'capitalize' | 'small-caps' | 'small-caps-forced'",
+          "required": false,
+          "description": "",
+          "enum": [
+            "uppercase",
+            "lowercase",
+            "capitalize",
+            "small-caps",
+            "small-caps-forced"
+          ]
+        },
+        {
+          "name": "leading-trim",
+          "type": "'cap-height' | 'normal'",
+          "required": false,
+          "description": "",
+          "enum": [
+            "normal",
+            "cap-height"
+          ]
+        },
+        {
+          "name": "text-resize",
+          "type": "'hug' | 'hug-height' | 'fixed' | 'truncate'",
+          "required": false,
+          "description": "",
+          "enum": [
+            "hug",
+            "hug-height",
+            "fixed",
+            "truncate"
+          ]
+        },
+        {
+          "name": "truncate",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "max-lines",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "overflow",
+          "type": "'clip' | 'ellipsis'",
+          "required": false,
+          "description": "",
+          "enum": [
+            "clip",
+            "ellipsis"
+          ]
+        },
+        {
+          "name": "list",
+          "type": "'disc' | 'decimal' | 'none'",
+          "required": false,
+          "description": "",
+          "enum": [
+            "disc",
+            "decimal",
+            "none"
+          ]
+        },
+        {
+          "name": "list-level",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "list-marker",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "href",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "font-stretch",
+          "type": "FontStretch",
+          "required": false,
+          "description": "",
+          "enum": [
+            "normal",
+            "ultra-condensed",
+            "extra-condensed",
+            "condensed",
+            "semi-condensed",
+            "semi-expanded",
+            "expanded",
+            "extra-expanded",
+            "ultra-expanded"
+          ]
+        },
+        {
+          "name": "direction",
+          "type": "TextDirection",
+          "required": false,
+          "description": "",
+          "enum": [
+            "ltr",
+            "rtl"
+          ]
+        },
+        {
+          "name": "writing-mode",
+          "type": "WritingMode",
+          "required": false,
+          "description": "",
+          "enum": [
+            "horizontal-tb",
+            "vertical-rl",
+            "vertical-lr"
+          ]
+        },
+        {
+          "name": "white-space",
+          "type": "WhiteSpace",
+          "required": false,
+          "description": "",
+          "enum": [
+            "normal",
+            "nowrap",
+            "pre",
+            "pre-wrap",
+            "pre-line"
+          ]
+        },
+        {
+          "name": "word-break",
+          "type": "WordBreak",
+          "required": false,
+          "description": "",
+          "enum": [
+            "normal",
+            "break-all",
+            "keep-all",
+            "break-word"
+          ]
+        },
+        {
+          "name": "word-spacing",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "text-underline-offset",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "text-decoration-skip-ink",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "text-wrap",
+          "type": "TextWrap",
+          "required": false,
+          "description": "",
+          "enum": [
+            "wrap",
+            "nowrap",
+            "balance",
+            "pretty",
+            "stable"
+          ]
+        },
+        {
+          "name": "font-optical-sizing",
+          "type": "FontOpticalSizing",
+          "required": false,
+          "description": "",
+          "enum": [
+            "auto",
+            "none"
+          ]
+        },
+        {
+          "name": "font-smoothing",
+          "type": "FontSmoothing",
+          "required": false,
+          "description": "",
+          "enum": [
+            "auto",
+            "none",
+            "antialiased",
+            "subpixel-antialiased"
+          ]
+        },
+        {
+          "name": "text-rendering",
+          "type": "TextRendering",
+          "required": false,
+          "description": "",
+          "enum": [
+            "auto",
+            "optimizeSpeed",
+            "optimizeLegibility",
+            "geometricPrecision"
+          ]
+        }
+      ],
+      "sharedAttrs": true,
+      "example": "<text value=\"Welcome back\"\n      font-family=\"Inter\" font-size=\"22\"\n      font-weight=\"700\" fill=\"#1C1C1E\" />\n\n<text x=\"24\" y=\"80\" w=\"300\">\n  <segment value=\"Pay \" fill=\"#6E6E73\" font-size=\"16\" />\n  <segment value=\"$42.00\" fill=\"#1C1C1E\" font-size=\"16\" font-weight=\"700\" />\n</text>",
+      "exampleLabel": "Single, mixed, decorated",
+      "exampleMode": "hl",
+      "related": [
+        "styles",
+        "fonts",
+        "fill-values"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "img",
+      "tag": "img",
+      "name": "<img>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Content",
+      "summary": "image & vector",
+      "description": [
+        "Handles both raster and vector assets. The renderer detects format from the file extension at render time — the author only writes src, w, and h.",
+        "The name attribute carries the Figma layer name. fit controls image scaling within the bounding box."
+      ],
+      "mapsToFigma": "Rectangle with image fill / vector",
+      "attributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "src",
+          "type": "asset",
+          "required": true,
+          "description": ""
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "w",
+          "type": "number | 'fill'",
+          "required": true,
+          "description": "Required on img — no content to derive size from"
+        },
+        {
+          "name": "h",
+          "type": "number | 'fill'",
+          "required": true,
+          "description": "Required on img — no content to derive size from"
+        },
+        {
+          "name": "fit",
+          "type": "ImgFitMode",
+          "required": false,
+          "description": "",
+          "enum": [
+            "fill",
+            "none",
+            "cover",
+            "contain"
+          ]
+        },
+        {
+          "name": "radius",
+          "type": "number | string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "corner-smoothing",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-color",
+          "type": "color | token",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-width",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-style",
+          "type": "BorderStyle",
+          "required": false,
+          "description": "",
+          "enum": [
+            "solid",
+            "dashed",
+            "dotted"
+          ]
+        },
+        {
+          "name": "border-align",
+          "type": "BorderAlign",
+          "required": false,
+          "description": "",
+          "enum": [
+            "center",
+            "inside",
+            "outside"
+          ]
+        },
+        {
+          "name": "object-position",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "image-rendering",
+          "type": "ImageRendering",
+          "required": false,
+          "description": "",
+          "enum": [
+            "auto",
+            "pixelated",
+            "crisp-edges"
+          ]
+        }
+      ],
+      "sharedAttrs": true,
+      "example": "<img name=\"Hero Image\" src=\"assets/hero.webp\" w=\"390\" h=\"240\" fit=\"cover\" />\n<img src=\"assets/avatar.webp\" w=\"48\" h=\"48\" radius=\"24\" fit=\"cover\" />\n<img src=\"assets/icon-check.svg\" w=\"20\" h=\"20\" />",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "assets",
+        "rect",
+        "frame"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "rect",
+      "tag": "rect",
+      "name": "<rect>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Geometry",
+      "summary": "rectangle",
+      "description": [
+        "Sugar for a childless <frame>. Signals decorative intent — no layout children. w and h are required.",
+        "Supports all visual attributes: fill, border, radius, opacity, blend, rotation, appearance. Does not accept layout attributes.",
+        "Border shorthand: \"[width] [color] [style] [align]\". Defaults: 1px solid center."
+      ],
+      "mapsToFigma": "Rectangle",
+      "attributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "w",
+          "type": "number | 'fill'",
+          "required": true,
+          "description": "Unified width. Replaces width + sizing-h.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nString forms: '50%' (of parent), '1.5rem', '100vw', 'calc(100% - 16px)'\nNot valid on frame/img/svg — those require explicit values."
+        },
+        {
+          "name": "h",
+          "type": "number | 'fill'",
+          "required": true,
+          "description": "Unified height. Replaces height + sizing-v.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nString forms: '50%' (of parent), '1.5rem', '100vh', 'calc(100% - 16px)'\nNot valid on frame/img/svg — those require explicit values."
+        },
+        {
+          "name": "fill",
+          "type": "fill",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "fill-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "effect-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "radius",
+          "type": "number | string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "corner-smoothing",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-color",
+          "type": "color | token",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-width",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-style",
+          "type": "BorderStyle",
+          "required": false,
+          "description": "",
+          "enum": [
+            "solid",
+            "dashed",
+            "dotted"
+          ]
+        },
+        {
+          "name": "border-align",
+          "type": "BorderAlign",
+          "required": false,
+          "description": "",
+          "enum": [
+            "center",
+            "inside",
+            "outside"
+          ]
+        },
+        {
+          "name": "shadow",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "fill-rule",
+          "type": "FillRule",
+          "required": false,
+          "description": "",
+          "enum": [
+            "nonzero",
+            "evenodd"
+          ]
+        }
+      ],
+      "sharedAttrs": true,
+      "example": "<rect fill=\"$primary\" w=\"342\" h=\"52\" radius=\"12\" />\n<rect fill=\"$surface\" w=\"320\" h=\"80\" radius=\"12\" border=\"1 #E5E5EA\" />\n<rect fill=\"linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%)\" w=\"fill\" h=\"160\" radius=\"16\" />",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "ellipse",
+        "line",
+        "frame"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "ellipse",
+      "tag": "ellipse",
+      "name": "<ellipse>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Geometry",
+      "summary": "oval & circle",
+      "description": [
+        "Sugar for <frame radius=\"9999\">. Full-radius rendering is the contract — radius is not an attribute on <ellipse>. Equal dimensions produce a circle.",
+        "Arc and donut shapes (progress rings, pie segments) are SVG assets referenced via <img>."
+      ],
+      "mapsToFigma": "Ellipse",
+      "attributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "w",
+          "type": "number | 'fill'",
+          "required": true,
+          "description": "Unified width. Replaces width + sizing-h.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nString forms: '50%' (of parent), '1.5rem', '100vw', 'calc(100% - 16px)'\nNot valid on frame/img/svg — those require explicit values."
+        },
+        {
+          "name": "h",
+          "type": "number | 'fill'",
+          "required": true,
+          "description": "Unified height. Replaces height + sizing-v.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nString forms: '50%' (of parent), '1.5rem', '100vh', 'calc(100% - 16px)'\nNot valid on frame/img/svg — those require explicit values."
+        },
+        {
+          "name": "fill",
+          "type": "fill",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "fill-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "effect-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-color",
+          "type": "color | token",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-width",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "border-style",
+          "type": "BorderStyle",
+          "required": false,
+          "description": "",
+          "enum": [
+            "solid",
+            "dashed",
+            "dotted"
+          ]
+        },
+        {
+          "name": "border-align",
+          "type": "BorderAlign",
+          "required": false,
+          "description": "",
+          "enum": [
+            "center",
+            "inside",
+            "outside"
+          ]
+        },
+        {
+          "name": "shadow",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "fill-rule",
+          "type": "FillRule",
+          "required": false,
+          "description": "",
+          "enum": [
+            "nonzero",
+            "evenodd"
+          ]
+        }
+      ],
+      "sharedAttrs": true,
+      "example": "<ellipse fill=\"#FF3B30\" w=\"8\" h=\"8\" />\n<ellipse fill=\"#E5E5EA\" w=\"48\" h=\"48\" />\n<ellipse fill=\"none\" border=\"2 $primary\" w=\"48\" h=\"48\" />",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "rect",
+        "line",
+        "img"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "line",
+      "tag": "line",
+      "name": "<line>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Geometry",
+      "summary": "separator",
+      "description": [
+        "Sugar for a thin frame used as a visual divider. Default: horizontal, thickness=\"1\", w=\"fill\"."
+      ],
+      "mapsToFigma": "Line",
+      "attributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "w",
+          "type": "number | 'fill'",
+          "required": false,
+          "description": "Unified width. Replaces width + sizing-h.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nString forms: '50%' (of parent), '1.5rem', '100vw', 'calc(100% - 16px)'\nNot valid on frame/img/svg — those require explicit values."
+        },
+        {
+          "name": "direction",
+          "type": "'horizontal' | 'vertical'",
+          "required": false,
+          "description": "",
+          "enum": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        {
+          "name": "thickness",
+          "type": "number",
+          "required": false,
+          "description": "Line thickness in px. Default: 1"
+        },
+        {
+          "name": "fill",
+          "type": "color | token",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "fill-style",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "opacity",
+          "type": "number",
+          "required": false,
+          "description": "Layer opacity, 0–1. Omitted when 1."
+        }
+      ],
+      "sharedAttrs": true,
+      "example": "<line fill=\"#E5E5EA\" />\n<line fill=\"#007AFF\" thickness=\"2\" />\n<line fill=\"#E5E5EA\" direction=\"vertical\" />",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "rect",
+        "ellipse",
+        "stack"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "appearance",
+      "tag": "appearance",
+      "name": "<appearance>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Appearance",
+      "summary": "paint & effects stack",
+      "description": [
+        "A non-layout child that describes the parent's complete paint and effect stack. Used when a node has multiple fills, complex borders, or multiple effects.",
+        "All three stacks — fills, borders, effects — are ordered in document order. When <appearance> contains at least one <border>, the border shorthand on the parent is ignored."
+      ],
+      "attributes": [
+        {
+          "name": "<fill>",
+          "type": "child",
+          "required": false,
+          "description": "color, linear-gradient, radial-gradient, angular-gradient, image."
+        },
+        {
+          "name": "<border>",
+          "type": "child",
+          "required": false,
+          "description": "color, w, align (inside/center/outside), style, dash, cap, join."
+        },
+        {
+          "name": "<effect>",
+          "type": "child",
+          "required": false,
+          "description": "drop-shadow, inner-shadow, layer-blur, background-blur, glass."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "<frame w=\"320\" h=\"180\" radius=\"16\">\n  <appearance>\n    <fill type=\"image\" src=\"assets/hero.webp\" fit=\"cover\" />\n    <fill type=\"linear-gradient\" value=\"linear-gradient(180deg, #00000000 0%, #000000CC 100%)\" />\n    <effect type=\"drop-shadow\" x=\"0\" y=\"8\" radius=\"24\" color=\"#00000033\" />\n  </appearance>\n</frame>",
+      "exampleLabel": "Multi-fill + shadow",
+      "exampleMode": "hl",
+      "related": [
+        "fill-values",
+        "shared-attrs",
+        "frame"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "fill-values",
+      "tag": null,
+      "name": "Fill Values",
+      "navLabel": null,
+      "kind": "property",
+      "category": "Appearance",
+      "summary": "fill attribute formats",
+      "description": [
+        "The fill attribute accepts hex colors, gradient functions, and token references. Alpha is encoded as the last byte of an 8-digit hex: #1C1C1ECC.",
+        "Gradient syntax mirrors CSS — linear-gradient(), radial-gradient(), conic-gradient(). Token references use $name syntax."
+      ],
+      "attributes": [
+        {
+          "name": "Hex opaque",
+          "type": "format",
+          "required": false,
+          "description": "#1C1C1E."
+        },
+        {
+          "name": "Hex + alpha",
+          "type": "format",
+          "required": false,
+          "description": "#1C1C1ECC (last byte = alpha)."
+        },
+        {
+          "name": "Linear gradient",
+          "type": "format",
+          "required": false,
+          "description": "linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%)."
+        },
+        {
+          "name": "Radial gradient",
+          "type": "format",
+          "required": false,
+          "description": "radial-gradient(circle at 50% 30%, #FFF 0%, #000 100%)."
+        },
+        {
+          "name": "Angular gradient",
+          "type": "format",
+          "required": false,
+          "description": "conic-gradient(from 0deg at 50% 50%, #F00 0deg, #00F 360deg)."
+        },
+        {
+          "name": "Token",
+          "type": "format",
+          "required": false,
+          "description": "$primary."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "<rect fill=\"#1C1C1ECC\" w=\"100\" h=\"100\" />\n<rect fill=\"linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%)\" w=\"fill\" h=\"160\" />\n<rect fill=\"$primary\" w=\"fill\" h=\"52\" radius=\"12\" />",
+      "exampleLabel": "Fill values in use",
+      "exampleMode": "hl",
+      "related": [
+        "tokens",
+        "appearance",
+        "rect"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "shared-attrs",
+      "tag": null,
+      "name": "Shared Attrs",
+      "navLabel": null,
+      "kind": "property",
+      "category": "Appearance",
+      "summary": "all nodes",
+      "description": [
+        "Visual attributes available on all layout, content, and geometry nodes.",
+        "Boolean presence convention: bare attributes without a value are treated as true. <frame clip> = <frame clip=\"true\">. Applies to: clip, mask, wrap, abs, truncate, reverse-z."
+      ],
+      "attributes": [
+        {
+          "name": "opacity",
+          "type": "number",
+          "required": false,
+          "description": "Layer opacity, 0–1. Omitted when 1."
+        },
+        {
+          "name": "blend",
+          "type": "BlendMode",
+          "required": false,
+          "description": "Blend mode against layers below. Omitted when normal.",
+          "enum": [
+            "normal",
+            "multiply",
+            "screen",
+            "overlay",
+            "darken",
+            "lighten",
+            "color-dodge",
+            "color-burn",
+            "hard-light",
+            "soft-light",
+            "difference",
+            "exclusion",
+            "hue",
+            "saturation",
+            "color",
+            "luminosity",
+            "linear-burn",
+            "linear-dodge"
+          ]
+        },
+        {
+          "name": "mask",
+          "type": "boolean",
+          "required": false,
+          "description": "Presence = true. Acts as an alpha mask for subsequent siblings."
+        },
+        {
+          "name": "rotation",
+          "type": "number",
+          "required": false,
+          "description": "Rotation in degrees. Omitted when 0."
+        },
+        {
+          "name": "constraint-h",
+          "type": "ConstraintH",
+          "required": false,
+          "description": "Horizontal pin/resize behavior. Default left (omitted).",
+          "enum": [
+            "left",
+            "right",
+            "center",
+            "scale",
+            "stretch"
+          ]
+        },
+        {
+          "name": "constraint-v",
+          "type": "ConstraintV",
+          "required": false,
+          "description": "Vertical pin/resize behavior. Default top (omitted).",
+          "enum": [
+            "center",
+            "scale",
+            "stretch",
+            "top",
+            "bottom"
+          ]
+        },
+        {
+          "name": "abs",
+          "type": "boolean",
+          "required": false,
+          "description": "Absolute child inside auto-layout. Presence = true. Replaces layout-position=\"absolute\"."
+        },
+        {
+          "name": "min-width",
+          "type": "number",
+          "required": false,
+          "description": "Minimum width in px. Omitted when unset."
+        },
+        {
+          "name": "max-width",
+          "type": "number",
+          "required": false,
+          "description": "Maximum width in px. Omitted when unset."
+        },
+        {
+          "name": "min-height",
+          "type": "number",
+          "required": false,
+          "description": "Minimum height in px. Omitted when unset."
+        },
+        {
+          "name": "max-height",
+          "type": "number",
+          "required": false,
+          "description": "Maximum height in px. Omitted when unset."
+        },
+        {
+          "name": "flip",
+          "type": "FlipValue",
+          "required": false,
+          "description": "Mirror transform — 'h', 'v', or 'both'.",
+          "enum": [
+            "h",
+            "v",
+            "both"
+          ]
+        },
+        {
+          "name": "filter",
+          "type": "string",
+          "required": false,
+          "description": "CSS filter string, e.g. \"brightness(1.2) contrast(0.9)\"."
+        },
+        {
+          "name": "isolation",
+          "type": "boolean",
+          "required": false,
+          "description": "Presence = true. New stacking context for blend modes (isolation: isolate)."
+        },
+        {
+          "name": "transform-origin",
+          "type": "string",
+          "required": false,
+          "description": "Transform origin, e.g. \"top-left\", \"center\", \"0% 0%\"."
+        },
+        {
+          "name": "scale-x",
+          "type": "number",
+          "required": false,
+          "description": "CSS scaleX, e.g. 1.5."
+        },
+        {
+          "name": "scale-y",
+          "type": "number",
+          "required": false,
+          "description": "CSS scaleY, e.g. 0.8."
+        },
+        {
+          "name": "skew-x",
+          "type": "number",
+          "required": false,
+          "description": "Horizontal skew in degrees."
+        },
+        {
+          "name": "skew-y",
+          "type": "number",
+          "required": false,
+          "description": "Vertical skew in degrees."
+        },
+        {
+          "name": "aspect-ratio",
+          "type": "string",
+          "required": false,
+          "description": "Aspect ratio, e.g. \"16/9\", \"1/1\"."
+        },
+        {
+          "name": "z-index",
+          "type": "number",
+          "required": false,
+          "description": "Explicit CSS z-index."
+        },
+        {
+          "name": "visible",
+          "type": "boolean",
+          "required": false,
+          "description": "false = visibility:hidden (preserved in file, skipped in render)."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "<img src=\"assets/overlay.webp\" w=\"390\" h=\"240\" opacity=\"0.6\" blend=\"multiply\" />\n<rect fill=\"#FF3B30\" w=\"40\" h=\"40\" radius=\"4\" rotation=\"45\" />\n<rect fill=\"$primary\" w=\"fill\" h=\"52\" constraint-v=\"bottom\" />",
+      "exampleLabel": "Shared attrs in use",
+      "exampleMode": "hl",
+      "related": [
+        "appearance",
+        "fill-values",
+        "frame"
+      ],
+      "faq": [],
+      "hubHidden": false
+    }
+  ]
+}

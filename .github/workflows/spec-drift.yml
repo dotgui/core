@@ -1,0 +1,45 @@
+# Fails if the generated spec (spec.json / REFERENCE.md) is out of date with the
+# source (schema/types.ts + schema/spec.content.ts). core stays dependency-free,
+# so this checks out the kit alongside it to borrow the generator (which needs
+# the TypeScript compiler the kit already depends on).
+name: spec drift check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - 'schema/types.ts'
+      - 'schema/spec.content.ts'
+      - 'spec/spec.json'
+      - 'spec/REFERENCE.md'
+      - 'scripts/gen-docs.ts'
+
+jobs:
+  spec-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout core
+        uses: actions/checkout@v4
+        with:
+          path: core
+      - name: Checkout kit (provides the generator)
+        uses: actions/checkout@v4
+        with:
+          repository: dotgui/kit
+          path: kit
+      - uses: oven-sh/setup-bun@v2
+      - name: Install kit deps (TypeScript)
+        run: bun install --frozen-lockfile
+        working-directory: kit
+      - name: Regenerate spec.json (kit) + REFERENCE.md (core)
+        run: |
+          (cd kit && bun run gen:spec)
+          (cd core && bun run gen:docs)
+      - name: Fail if generated artifacts are stale
+        working-directory: core
+        run: |
+          if ! git diff --exit-code spec/spec.json spec/REFERENCE.md; then
+            echo "::error::Generated spec is stale. In the kit run 'bun run gen:spec', in core run 'bun run gen:docs', then commit core."
+            exit 1
+          fi

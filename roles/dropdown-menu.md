@@ -1,5 +1,6 @@
 ---
 role: dropdown-menu
+reach: full
 platforms: web, ios, android
 ---
 

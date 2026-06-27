@@ -1,5 +1,6 @@
 ---
 role: select
+reach: full
 platforms: web, ios, android
 ---
 

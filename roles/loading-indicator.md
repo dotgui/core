@@ -1,5 +1,6 @@
 ---
 role: loading-indicator
+reach: full
 platforms: web, ios, android
 ---
 

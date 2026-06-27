@@ -1,5 +1,6 @@
 ---
 role: stepper
+reach: full
 platforms: web, ios, android
 ---
 

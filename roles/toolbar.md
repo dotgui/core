@@ -1,5 +1,6 @@
 ---
 role: toolbar
+reach: 1
 platforms: web, ios, android
 ---
 

@@ -1,5 +1,6 @@
 ---
 role: search-bar
+reach: full
 platforms: web, ios, android
 ---
 

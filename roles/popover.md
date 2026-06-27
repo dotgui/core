@@ -1,5 +1,6 @@
 ---
 role: popover
+reach: full
 platforms: web, ios, android
 ---
 

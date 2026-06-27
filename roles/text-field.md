@@ -1,5 +1,6 @@
 ---
 role: text-field
+reach: full
 platforms: web, ios, android
 ---
 

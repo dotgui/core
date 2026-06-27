@@ -1,5 +1,6 @@
 ---
 role: color-picker
+reach: full
 platforms: web, ios, android
 ---
 

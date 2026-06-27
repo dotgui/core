@@ -1,5 +1,6 @@
 ---
 role: file-uploader
+reach: full
 platforms: web
 ---
 

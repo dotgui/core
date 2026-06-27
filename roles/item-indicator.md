@@ -1,5 +1,6 @@
 ---
 role: item-indicator
+reach: full
 platforms: web, ios, android
 ---
 

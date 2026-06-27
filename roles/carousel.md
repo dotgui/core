@@ -1,5 +1,6 @@
 ---
 role: carousel
+reach: 2
 platforms: web, ios, android
 ---
 

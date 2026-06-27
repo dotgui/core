@@ -1,5 +1,6 @@
 ---
 role: empty-state
+reach: 1
 platforms: web, ios, android
 ---
 

@@ -1,5 +1,6 @@
 ---
 role: combobox
+reach: full
 platforms: web
 ---
 

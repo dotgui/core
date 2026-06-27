@@ -1,5 +1,6 @@
 ---
 role: tooltip
+reach: full
 platforms: web, ios, android
 ---
 

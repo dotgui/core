@@ -1,5 +1,6 @@
 ---
 role: launch-screen
+reach: full
 platforms: ios, android
 ---
 

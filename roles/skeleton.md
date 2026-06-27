@@ -1,5 +1,6 @@
 ---
 role: skeleton
+reach: full
 platforms: web, ios, android
 ---
 

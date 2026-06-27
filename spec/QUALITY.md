@@ -15,6 +15,29 @@ gui-score       →  the reference implementation
 
 ---
 
+## What this measures — and what it does not
+
+**The score measures the file, not the design.**
+
+This is the founding distinction, and getting it right is the whole point of this document. An HTML validator does not tell you whether a web page is a good-looking website — it tells you whether the HTML is well-built: valid, semantic, no dead markup, readable. dotgui scoring is the same kind of tool. It answers *"is this a good `.gui` file?"* — never *"is this a good design?"*
+
+These are different questions with different owners:
+
+- **Is this a good file?** Objective, stable, true for everyone, forever. Clean structure, self-agreement, physical legibility, self-description. → **This document.**
+- **Is this good design?** Subjective, plural, ever-evolving. Beauty, composition, hierarchy, taste, what is current. → **Not scored.** That belongs to human judgement and to gui.farm's library of good examples.
+
+The test for whether something belongs in the score:
+
+> **Would another designer disagree? Would I disagree next year?**
+> If yes, it is design taste — it is out. If it is true for everyone, always, it is a file property — it can be scored.
+
+Every level below passes that test. Two consequences follow, and both are non-negotiable:
+
+- **Zero-AI.** Pure rule evaluation over the parsed tree and fixed, declared vocabularies. Same input → same output. The same trustworthiness standard as the producing pipeline (P14, RFC-0010).
+- **Fully local and offline.** No external service, no network, no corpus. The score is a self-contained package that runs with a file and nothing else. **gui.farm is not part of scoring** — it is a separate service for *creating* interfaces (ideation, examples, discovery), and it has no role in measuring file quality.
+
+---
+
 ## The Gate
 
 Before quality is measured, two conditions must hold. Both are binary — pass or fail, no score.
@@ -33,16 +56,15 @@ If either condition fails, return an error. There is no report.
 
 ---
 
-## CCACT — The Five Levels
+## CCAC — The Four Levels
 
-Quality is scored across five levels, ordered from most to least objective. The first three are fully local and deterministic. The last two require the gui.farm corpus.
+Quality is scored across four levels. **All four are local, deterministic, and zero-AI** — they run on the parsed tree and fixed vocabularies, with no external service.
 
 ```
-C — Clean         local, deterministic
-C — Consistent    local, deterministic
-A — Accessible    local, deterministic (WCAG 2.2 visual criteria)
-C — Conventional  remote, gui.farm corpus
-T — Trend         remote, gui.farm corpus + temporal data
+C — Clean         is the file built without waste?
+C — Consistent    does the file agree with itself?
+A — Accessible    is the file physically legible?     (WCAG 2.2 visual criteria)
+C — Comprehensible how AI-ready is the file as semantics? (core/roles vocabulary)
 ```
 
 Every level emits the same output envelope:
@@ -59,25 +81,23 @@ What lives inside `audits` differs per level. The envelope never changes.
 
 **The question:** how much unnecessary work does the file contain?
 
-A clean file is one the optimizer barely touches. Every node earns its place. Layout is expressed as auto-layout, not absolute coordinates. Assets are deduplicated. Tokens are referenced, not inlined.
+A clean file earns every node. Layout is expressed as auto-layout, not absolute coordinates. Assets are deduplicated. Tokens are referenced, not inlined. No designer defends dead nodes or spacer hacks — this is a file property, not a taste call.
 
 **How it is measured:**
 
-Run `gui-optimizer` and read its diff as a quality signal — not a cleanup log. The optimizer's 21 rules are the format's own definition of structural messiness. Inverting them gives a structure score:
+Clean analyses the parsed tree directly. (It does not run the optimizer — the optimizer is the separate tool that can later *apply* the fixes Clean marks safe.) A node counts as **dead weight** only if it passes a **two-gate** test:
 
-- Optimizer barely changes the file → high Clean score
-- Optimizer rewrites significant portions → low Clean score
+1. **Renders nothing** — no paint, or `visible=false` / `opacity=0` / zero-size / empty text.
+2. **Removal is safe** — breaks no instance/component/mask contract, and does not move its siblings.
 
-Each fired rule becomes a named audit with a severity, a path, a reason, and an autofix flag. Autofixable audits delegate directly to the optimizer.
+Gate 2 is **parent-aware**: under an auto-layout parent an `opacity=0` node still holds its slot, so removing it collapses the layout. That node is not dead weight — it is a **spacer hack** (use `gap`/padding), flagged but never silently deleted.
 
-Supplementary ratios (not covered by optimizer rules):
-- Fraction of positioned nodes using auto-layout vs. absolute position
-- Component reuse rate — duplicated subtrees that should be `<instance>` references
+Buckets scored: **A** dead weight · **B** redundant wrappers · **C** hard-way layout (absolute positioning + spacer hacks). Each finding is a named audit with a severity, a path, a reason, and an autofix flag. Autofixable audits delegate to the optimizer.
 
 **Audit shape:**
 ```json
 {
-  "rule": "rule-02-flatten-wrappers",
+  "rule": "redundant-wrapper",
   "severity": "warn",
   "path": "gui > col[0] > row[2]",
   "why": "wrapper adds nesting with no layout or visual purpose",
@@ -91,7 +111,7 @@ Supplementary ratios (not covered by optimizer rules):
 
 **The question:** does the file agree with itself?
 
-A consistent file uses the same spacing, the same type scale, the same color palette — and expresses them through tokens, not repeated inline literals. Its token system is coherent: tokens are defined, used, used correctly, and named with intent.
+A consistent file uses the same spacing, the same type scale, the same color palette — and expresses them through tokens, not repeated inline literals. Its token system is coherent: tokens are defined, used, used correctly, and named with intent. Every check here is self-referential — the file judged against its own declared intent, no external standard.
 
 **How it is measured — value entropy:**
 
@@ -130,8 +150,6 @@ A name should declare what the token *means*, not what it *is*. Well-structured 
 | `spacing-gap-md` | Pass |
 | `radius-corner-sm` | Pass |
 
-**Cross-level signal from Trend:** if Level 5 (Trend) detects multiple style categories with high confidence simultaneously — e.g. glassmorphism 0.81 and brutalism 0.79 — the file is stylistically split. This fires a Consistent audit: the design speaks two incompatible visual languages.
-
 **Audit shape:**
 ```json
 {
@@ -150,9 +168,11 @@ A name should declare what the token *means*, not what it *is*. Well-structured 
 
 ### A — Accessible
 
-**The question:** can a human actually read and interact with this design?
+**The question:** can a human physically read this design?
 
 Accessibility here means visual and physical readability — contrast, legibility, reachability. It does not mean document or interaction accessibility (ARIA, keyboard navigation, focus management, screen reader support). Those are out of scope per P5: `.gui` is a visual surface, not a document.
+
+This is the one level anchored to an *external* standard rather than the file itself. But the standard is not taste: no designer argues that 2:1 contrast becomes readable next year. WCAG thresholds are physical facts, so this level still passes the test.
 
 **Standard:** WCAG 2.2 visual criteria only.
 
@@ -188,80 +208,52 @@ APCA (Accessible Perceptual Contrast Algorithm) is noted as the modern alternati
 
 ---
 
-### C — Conventional
+### C — Comprehensible
 
-**The question:** does the file use recognized UI patterns, or does it reinvent them?
+**The question:** how AI-ready is the file *as semantics* — how much meaning does it carry that an agent can translate into dev-ready code, with context?
 
-A conventional file builds navbars like navbars, card grids like card grids, tab bars like tab bars. Pattern recognition is not prescriptive — a file can score low on Conventional and still be excellent. But low Conventional is a signal worth surfacing.
+The carrier of that meaning is the `role=` attribute ([RFC-0041](../rfcs/0041-role-attribute.md)). A role names what a structure *is* — nav-bar, tab-bar, card — the way `<nav>` does in HTML. An agent reading `role="tab-bar"` knows what it is looking at and can re-emit it into SwiftUI, into HTML with the right ARIA, into another tool. An anonymous `<row>` of boxes forces every consumer to guess.
 
-**How it is measured:**
+**This is not a design judgement.** Comprehensible does *not* ask "is using a nav bar good design?" — an unconventional, convention-breaking design can be an excellent, highly-comprehensible *file*. It asks the **semantic-markup** question: *does the file say what it is?* Using `<nav>` does not make a page prettier; it makes the file **self-describing** — good practice, not good taste, and it does not change with fashion. (Renamed from *Conventional*, which wrongly implied "follows conventions"; the property is self-description / AI-readiness.)
 
-Compare structural signatures in the file against a pattern catalog maintained on gui.farm. A navigation bar has a known shape in `.gui` markup — a `<row>` near the top of the tree containing a logo node, a set of link-like nodes, and an action node. The file either matches that signature or it doesn't.
+**How it is measured — reach-coverage.**
 
-This level requires the gui.farm corpus. It runs as a remote service call. Omitting `--remote` leaves this level absent from the report — not zeroed.
+The score is the fraction of the tree a declared role *documents*, where each role reaches only as far down its subtree as its **`reach`** allows. That bound is what makes coverage honest instead of gameable, and it keeps the score zero-AI: it is computed from two facts — *is there a role* and *how far is its reach* — never from a guess about which untagged node "should" have one.
 
-**Audit shape:**
+Every role in `core/roles/` declares a `reach`:
+
+| `reach` | covers | roles |
+|---|---|---|
+| `full` | the whole subtree (it's all the widget's anatomy) | every input, every menu, button, switch, slider, tab-bar, indicators… |
+| `2` | a two-level grammar (group→item, row→cell) | table, tree, navigation-menu, carousel, gallery, sidebar |
+| `1` | one chrome level; payload self-labels | card, dialog, drawer, accordion, toolbar, top-navigation-bar |
+
+A node is **documented** if it has a role, or sits within the `reach` of some roled ancestor. **Comprehensible = documented ÷ content nodes** (the root canvas wrapper is excluded as scaffolding). Roles are read at **face value** — like SEO trusting a `<nav>`, the score does not check whether the structure "really looks like" its role.
+
+Two failures of naive coverage are closed by `reach`: a lazy `role="card"` on the whole screen no longer claims 100% (it reaches one level); and a plain node lowers the score not because we *decided* it should be tagged, but because it factually sits beyond any declared role's reach. A wall of anonymous boxes scores low — a true statement about its translatability. (A page of `<div>` is valid but not self-described — which costs AI-readiness the way all-`<div>` markup costs SEO.)
+
+There is **no inference of undeclared roles.** Suggesting a role for untagged structure belongs at *creation time* — the optimizer's opt-in `--annotate-roles` pass ([RFC-0041](../rfcs/0041-role-attribute.md)) — never in the score.
+
+**Audit shape** — a plain inventory fact, one per declared role:
 ```json
 {
-  "pattern": "navigation-bar",
-  "found": true,
-  "confidence": 0.94
+  "role": "tab-bar",
+  "path": "gui > col[0] > row[3]"
 }
-```
-```json
-{
-  "pattern": "tab-bar",
-  "found": false,
-  "confidence": 0.61,
-  "note": "bottom row resembles a tab bar but does not match signature"
-}
-```
-
----
-
-### T — Trend
-
-**The question:** is this design current?
-
-Not just what visual language the file speaks — but whether that language is where design is *right now*. A well-executed brutalist file can score low on Trend if brutalism is not an active movement in the current corpus. Trend is not a measure of taste; it is a measure of temporal alignment.
-
-**How it is measured:**
-
-`.gui` is text, and visual style is explicitly declared in it. No rendering required. Attribute combinations, token naming patterns, spacing ratios, effect stacks, and typographic choices are unambiguous signals:
-
-| Signals in markup | Style category |
-|---|---|
-| `blur` + low-opacity `fill` + `glass` | glassmorphism |
-| tight spacing + hard borders + no radius + monospace font | brutalism |
-| `$surface` / `$primary` tokens + 8pt grid + soft shadow | material / clean modern |
-| wide letter-spacing + muted palette + thin borders + uppercase text | editorial / luxury |
-| heavy shadow stacks + saturated gradients | skeuomorphic |
-
-The file is fingerprinted against a labeled, temporally-aware library of `.gui` files on gui.farm. Each detected category gets a confidence score. The overall Trend score reflects alignment with currently active movements in the corpus.
-
-Multiple high-confidence categories detected simultaneously — e.g. glassmorphism 0.81 and brutalism 0.79 — indicate a stylistically split file. This fires a cross-level audit in Consistent (see above).
-
-This level requires the gui.farm corpus with temporal metadata. Omitting `--remote` leaves this level absent — not zeroed.
-
-**Audit shape:**
-```json
-{ "category": "glassmorphism", "confidence": 0.81 }
-{ "category": "editorial",     "confidence": 0.64 }
-{ "category": "brutalism",     "confidence": 0.21 }
 ```
 
 ---
 
 ## Output
 
-A passing gate followed by a full CCACT report:
+A passing gate followed by a full CCAC report:
 
 ```json
 {
   "clean": {
     "score": 74,
     "audits": [
-      { "rule": "rule-02-flatten-wrappers", "severity": "warn", "path": "gui > col[0] > row[2]", "why": "...", "autofixable": true }
+      { "rule": "redundant-wrapper", "severity": "warn", "path": "gui > col[0] > row[2]", "why": "...", "autofixable": true }
     ]
   },
   "consistent": {
@@ -276,19 +268,12 @@ A passing gate followed by a full CCACT report:
       { "criterion": "contrast-ratio", "wcag-ref": "1.4.3", "severity": "warn", "computed": "3.8:1", "required": "4.5:1", "autofixable": false }
     ]
   },
-  "conventional": {
-    "score": 62,
-    "audits": [
-      { "pattern": "navigation-bar", "found": true,  "confidence": 0.94 },
-      { "pattern": "tab-bar",        "found": false, "confidence": 0.61 }
-    ]
-  },
-  "trend": {
+  "comprehensible": {
     "score": 78,
     "audits": [
-      { "category": "glassmorphism", "confidence": 0.81 },
-      { "category": "editorial",     "confidence": 0.64 },
-      { "category": "brutalism",     "confidence": 0.21 }
+      { "role": "top-navigation-bar", "path": "gui > col[0] > row[0]" },
+      { "role": "card",               "path": "gui > col[0] > col[1]" },
+      { "role": "tab-bar",            "path": "gui > col[0] > row[2]" }
     ]
   }
 }
@@ -309,10 +294,11 @@ A gate failure returns an error — no report:
 
 ## What This Document Is Not
 
-- **Not a style guide.** It defines measurable quality, not aesthetic preference.
+- **Not a design critic.** It measures the file, not the design. Beauty, composition, hierarchy, taste, and whether a design is *current* are out of scope — they are subjective, plural, and ever-evolving. That judgement belongs to humans and to gui.farm's library of good examples, never to this score.
+- **Not a style guide.** It defines measurable file quality, not aesthetic preference.
 - **Not a validator.** Conformance to the spec is the gate — `validate.ts` is the authority there.
 - **Not a complete accessibility standard.** Only WCAG 2.2 visual criteria are in scope. Interaction and document accessibility are out of scope per P5.
-- **Not a trend oracle.** Trend scores reflect the gui.farm corpus at the time of scoring. They change as the corpus grows and the design landscape shifts.
+- **Not dependent on gui.farm or any service.** All four levels run locally and offline. gui.farm helps people *create* interfaces; it plays no part in measuring quality.
 
 ---
 
@@ -320,4 +306,4 @@ A gate failure returns an error — no report:
 
 This document tracks the format version. Breaking changes to scoring criteria — new levels, removed audits, changed thresholds — are proposed as RFCs and reflected here.
 
-Current version: `0.2` (CCACT model, RFC-0040)
+Current version: `0.2` (CCAC model, RFC-0040). The earlier CCACT model included a fifth level, **Trend**, which scored a design's fashion-alignment against a temporal corpus. Trend was removed (RFC-0040, 2026-06-17): fashion is not a file property, it changes year to year, and optimizing for it homogenizes the ecosystem. Style fingerprinting survives only as a gui.farm discovery facet, never as a score.

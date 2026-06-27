@@ -10,7 +10,7 @@ date: 2026-06-12
 
 ## Context
 
-The CCACT quality model (RFC-0040) defines a Conventional level that measures whether a `.gui` file composes UI using recognized, globally-understood roles — navigation bars, tab bars, cards, dialogs. As specified in RFC-0040, the Conventional level runs structural signature matching against a role catalog on gui.farm to infer what roles are present.
+The CCAC quality model (RFC-0040) defines a **Comprehensible** level that measures how **AI-ready** a `.gui` file is *as semantics* — how much of its meaning an agent can translate into code because the recognized UI structures (navigation bars, tab bars, cards, dialogs) are **labeled** with a canonical role rather than left as anonymous boxes. The level reads the **declared** `role=` values at face value and scores by **reach-coverage** — each role documents its subtree as far as its `reach` allows, and the score is the fraction of nodes so documented (a fully local, deterministic, zero-AI computation; no remote corpus, no inference of untagged nodes, no confidence). This RFC defines the catalog, the `role=` attribute, and the per-role `reach` it is keyed on.
 
 Inference is useful but incomplete. It cannot distinguish between a node that *resembles* a nav-bar and one that *is* a nav-bar by author intent. A breadcrumb trail and a navigation bar can share the same structural shape; inference alone cannot disambiguate them. And an AI generator — the primary author of `.gui` files (P7) — knows exactly what it is building at write time. There is no mechanism to state that knowledge in the file.
 
@@ -52,6 +52,7 @@ Downstream consumers — HTML code generators, accessibility-layer skills — ma
 Valid values come exclusively from `core/roles/`. Each role is a separate `.md` file defining:
 
 - **Canonical name** (kebab-case, the `role=` value)
+- **`reach`** — `full` / `2` / `1`: how far down its own subtree the role documents content, consumed by the Comprehensible quality level (RFC-0040). `full` = self-contained widget (whole subtree is its anatomy); `2` = two-level grammar (group→item, row→cell); `1` = host surface (one chrome level, payload self-labels)
 - **Structural signature** — the required and optional nodes and their relationships, expressed as matchable rules (not prose)
 - **Required context** — where in the layout tree the role is typically anchored (e.g. top-level of a screen, inside a `<col>` root)
 - **Coverage** — which of the three reference platforms document this role (Web / iOS / Android)
@@ -163,53 +164,29 @@ The producing pipeline (extractor + optimizer) remains fully deterministic per P
 
 ### What gui-score does with it
 
-The Conventional level of gui-score has two distinct tasks with respect to `role`:
+The **Comprehensible** level of gui-score reads **only declared roles**, at **face value**. It does not infer roles for untagged nodes, it emits no confidence scores, and it does not check whether a declared role "really looks like" its kind — that resemblance judgement is the soft pattern-matching that wants a model and would break the zero-AI guarantee (RFC-0040). Like SEO trusting a `<nav>`, if the author wrote `role="tab-bar"`, the file *says* tab-bar and that is what is counted.
 
-**Task 1 — Validate declared roles**
+**Inventory declared roles**
 
-When `role=` is present, gui-score checks structural plausibility: does the declared role's signature match the node's actual structure? If not, a validation audit fires.
-
-```json
-{
-  "role": "nav-bar",
-  "declared": true,
-  "confidence": 1.0
-}
-```
+Walk the tree; every node with a `role=` is one semantic anchor, reported as a plain fact:
 
 ```json
-{
-  "role": "nav-bar",
-  "declared": true,
-  "confidence": 0.31,
-  "note": "declared as nav-bar but structure does not match signature — missing logo region, action region resembles a tab bar"
-}
+{ "role": "tab-bar", "path": "gui > col[0] > row[3]" }
 ```
 
-A declared role with low plausibility confidence is an audit finding (severity: `warn`), not a gate failure. The file is not lying in a way that breaks rendering; it is making a structural claim the scorer cannot verify.
+No `severity`, no `why`, no autofix — a declared role is not a finding, it just is. (The one hard check is **catalog membership**: an unknown `role=` value is a *gate* error in `validate.ts`, so it never reaches scoring — the score only ever sees valid role names.)
 
-**Task 2 — Infer undeclared roles**
+**No inference, no shape audit.** When `role=` is absent, the score leaves the node alone. Suggesting a role for untagged structure — and any resemblance checking — is an *authoring* concern, handled by the optimizer's opt-in `--annotate-roles` pass below, never by the score.
 
-When `role=` is absent on a node, gui-score runs structural signature matching from `core/roles/` against that node. This is deterministic rule evaluation — no AI, no LLM, no token cost. A nav-bar signature requires: a `<row>` at or near the top of the layout tree, containing a logo region (single `<img>` or `<text>`), a set of link-like nodes, and an action region. The node either matches or it doesn't.
+### Comprehensible score computation
 
-```json
-{
-  "role": "nav-bar",
-  "declared": false,
-  "confidence": 0.94,
-  "note": "structure matches nav-bar signature; consider adding role=\"nav-bar\""
-}
-```
+**Reach-coverage** — the fraction of content nodes a declared role documents, bounded by each role's `reach`:
 
-When `role=` is declared, inference is skipped for that node — declared intent takes precedence. **Declared > inferred** in all cases.
+- **A node is documented** if it has a role, or sits within the `reach` of some roled ancestor-or-self. `reach: full` covers the whole subtree; `2` and `1` cover that many levels down.
+- **Score = documented ÷ content nodes**, where content nodes are every node except the root canvas wrapper (scaffolding).
+- **No roles → 0.** A file with no anchors is honestly low on AI-readiness. A plain node lowers the score not because we decided it *should* be tagged, but because it factually sits beyond any role's reach.
 
-### Conventional score computation
-
-The Conventional score is computed from the combined results of both tasks:
-
-- Each recognized role that is present (declared or inferred with confidence ≥ 0.7) contributes positively.
-- Each role expected for the file's evident type (e.g. a mobile app without any `tab-bar` or `nav-bar`) and absent contributes a mild negative signal.
-- Declared roles with low plausibility confidence (`< 0.5`) contribute a negative signal — the declaration is inconsistent with the structure.
+This is coverage made honest: `reach` gives it a real denominator (no guessing which nodes should be tagged) and closes the lazy-root-tag exploit (a `card` reaches one level, not the whole screen). No confidence, no inference, no resemblance check.
 
 ## Reasoning
 
@@ -219,7 +196,7 @@ The Conventional score is computed from the combined results of both tasks:
 
 **Analogous to `detached-from` and `source-node`.** Both attributes declare intent that inference could only approximate. `detached-from` records a component origin that a renderer could guess but might get wrong. `role=` records a role identity that a scorer can mostly infer but cannot be certain about. The format's established pattern for "author-intent that inference approximates" is an explicit attribute.
 
-**Deterministic inference preserves RFC-0010.** The optimizer's annotation pass and gui-score's inference task are both pure rule evaluation over formal signatures. No AI in either path. No token cost. No variability between runs. RFC-0010's "no AI in the pipeline" boundary is the producing pipeline — the optimizer. An AI *generating* a `.gui` file directly is an AI consumer producing output, not an AI step inside the pipeline.
+**Inference lives in the optimizer, not the score.** Suggesting a role for an untagged node is structural matching that produces a *resemblance* — a confidence, not a fact. That belongs to the optimizer's opt-in `--annotate-roles` pass (a creation-time helper), where it is still deterministic rule evaluation over formal signatures — no AI, no token cost, no variability — and where a wrong guess is a discardable suggestion, not a grade. The gui-score Comprehensible level does **not** infer; it reads declared roles at face value and counts them. Keeping fuzzy matching out of the score is what lets the score stay zero-AI (RFC-0040). RFC-0010's "no AI in the pipeline" boundary is the producing pipeline — the optimizer remains rule-based; an AI *generating* a `.gui` file directly is an AI consumer, not a pipeline step.
 
 **OpenUI as anchor, behavior stripped.** OpenUI's component inventory is the closest thing to a universal, tool-neutral UI vocabulary. Taking the visual/structural anatomy only — and explicitly dropping all behavior, interaction, and accessibility — is consistent with P5. The format takes *what a nav-bar looks like*, not *what it does*.
 
@@ -239,32 +216,35 @@ The Conventional score is computed from the combined results of both tasks:
 
 **AI-driven inference in the optimizer** — Rejected (P14, RFC-0010). Role inference must be deterministic. Formal signatures in `core/roles/` make this possible without an LLM call.
 
-**Single combined confidence (declared + inferred, no distinction)** — Rejected. A declared role at confidence 1.0 is different from an inferred role at confidence 0.94 — the first is author intent, the second is a best guess. Collapsing them hides information a consumer needs and violates P15.
+**Inferring undeclared roles inside gui-score** — Rejected (and revised out, 2026-06-17). The first draft had gui-score run signature matching on untagged nodes and emit "resembles a tab bar, 0.61 confidence." A confidence float is judgment by resemblance — soft matching that wants a model — which breaks the zero-AI guarantee of the score (RFC-0040). The score now reads declared roles at face value and scores by reach-coverage. Resemblance-based suggestion survives solely in the optimizer's opt-in `--annotate-roles` authoring pass, never in the score.
+
+**Plausibility-checking declared roles in the score** — Rejected. An intermediate draft had the score fire a `warn` when a declared `role="tab-bar"` tripped a hard disqualifying-shape rule. Dropped on the SEO logic: SEO does not verify a `<nav>` "looks navigational" — the tag is taken at face value. Checking a declared role's shape is inference in a binary costume and reintroduces the resemblance judgement the score excludes. The score inventories declared roles; it does not audit their shape. (Shape correctness is the author's / annotation pass's concern.)
 
 ## Drawbacks
 
 - `core/roles/` must be maintained. Adding a new recognized role is a deliberate act — a formal signature definition. The catalog is not automatically derived from real-world usage.
-- A declared `role=` that doesn't match its signature is an audit finding, not a gate failure. A generator that emits wrong roles will produce noisy Conventional audits without breaking validation. This is intentional (P15 — the file is honest about what it claims; the scorer is honest about what it can verify).
-- Role inference confidence thresholds require calibration against real `.gui` files. Initial thresholds are conservative and will be tuned as the corpus grows.
+- The score takes declared roles at **face value** — it does not verify a `role="tab-bar"` actually looks like one. A generator that emits a wrong role inflates Comprehensible without penalty (the score counts it as an anchor). This is the deliberate trade for staying inference-free (the SEO `<nav>` logic). Role *correctness* is the author's and the `--annotate-roles` pass's concern, not the score's.
+- The optimizer's `--annotate-roles` suggestion pass uses confidence thresholds that require calibration against real `.gui` files. These live entirely in the authoring helper — the score never sees a confidence — so a miscalibration produces a noisy *suggestion*, never a wrong *grade*.
 - `role` shares its name with ARIA's `role` attribute. The vocabularies are distinct and the contexts are different (static interchange format vs. HTML runtime), but authors familiar with ARIA should be aware the values do not correspond.
 
 ## Implementation Notes
 
-**`core/roles/` directory:** Created alongside this RFC. Includes a `README.md` defining the signature format, the three-table qualification criteria, and the full role catalog above. Each role file defines: canonical name, platform scope (Web / iOS / Android coverage), structural signature (matchable rules, not prose), required context, AKA names from the Mobbin glossary, and disqualifying shapes.
+**`core/roles/` directory:** Created alongside this RFC. Includes a `README.md` defining the signature format, the three-table qualification criteria, the `reach` vocabulary, and the full role catalog above. Each role file defines: canonical name, `reach` (`full`/`2`/`1`), platform scope (Web / iOS / Android coverage), structural signature (matchable rules, not prose), required context, AKA names from the Mobbin glossary, and disqualifying shapes.
 
 **Generator:** AI authors writing `.gui` files should emit `role=` on the root node of any recognized role they generate. The canonical value is the kebab-case name from `core/roles/`. No other values are valid.
 
-**Optimizer — annotation pass:** A new pass (`--annotate-roles`) that runs structural signature matching and writes `role=` on matched nodes that lack it. Runs after structural cleanup. Separate flag. Deterministic — same input → same output. Signature matching code is shared with gui-score.
+**Optimizer — annotation pass:** A new pass (`--annotate-roles`) that runs structural signature matching and writes `role=` on matched nodes that lack it. Runs after structural cleanup. Separate flag. Deterministic — same input → same output. This is the *only* home for resemblance-based signature matching.
 
-**`gui-score` Conventional level:** Two-task architecture as specified above. Signature matching implementation is shared between the optimizer annotation pass and gui-score — one implementation, two callers. Role signatures from `core/roles/` are the authority for both.
+**`gui-score` Comprehensible level:** Reads declared roles only — a `{ role, path }` inventory scored by **reach-coverage** (documented ÷ content nodes, where each role documents its subtree as far as its `reach`). No signature inference, no shape check, no confidence. It shares the `core/roles/` *catalog* with the optimizer annotation pass (role names and their `reach`), but not a matcher: the annotation pass *suggests* roles by resemblance, the score reads declared ones at face value.
 
 **Validator (`validate.ts`):** Add `role` to the allowed property set on layout nodes. Validate that the value is a known name from `core/roles/` — unknown values are a validation error.
 
-**RFC-0040 / QUALITY.md:** Update all references from "UI patterns" / "pattern catalog" to "UI roles" / "role catalog". The Conventional level audit shape gains a `declared` boolean field.
+**RFC-0040 / QUALITY.md:** The fourth quality level is **Comprehensible** (renamed from Conventional). Its audit shape is `{ role, path }` — a plain inventory fact — and its score is the reach-coverage above.
 
 ## Unresolved Questions
 
-- **Confidence thresholds:** What confidence floor triggers a "structure matches signature" finding in gui-score? Initial proposal: 0.7 for a positive finding, 0.5 as the floor below which a declared role fires a mismatch audit. Needs calibration against real files.
+- **Annotation thresholds:** What confidence floor triggers a "structure matches signature" *suggestion* in the optimizer's `--annotate-roles` pass? Initial proposal: 0.7. This is an authoring-helper threshold only — gui-score reads declared roles and emits no confidence, so the floor never affects a score.
+- **Per-role `reach` calibration:** values are assigned by role kind (`full` / `2` / `1`). A few are judgment calls (card `1` vs `0`; popover `full` vs `1`; toolbar / top-navigation-bar `1` vs `2`). The mechanism is settled (reach is a role-file field the scorer reads); the values want tuning against real annotated files (tracked in RFC-0040).
 - **Nested roles:** Can `role="card"` appear inside `role="card-grid"`? Intuitively yes — the card is a sub-role of the grid. Permitted but scoring interaction is unspecified. Deferred.
 - **Role versioning:** What happens when a role's signature changes in `core/roles/`? Files with stale declarations are not automatically invalid. Does the validator warn? Deferred.
 - **`core/roles/` process:** Should each new role require its own RFC, or is a PR against `core/roles/` with a formal review sufficient? The first batch is defined alongside this RFC; the process for additions after that is unspecified.

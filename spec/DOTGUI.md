@@ -4,6 +4,8 @@
 
 dotgui is an open format for describing user interfaces as plain, portable markup. Export any Figma screen to a `.gui` file. Render it in a browser. Feed it to an AI agent. Build with it programmatically.
 
+> This document is the **prose specification** — the format's intent, rationale, and semantics. For the exhaustive, always-in-sync **element & attribute reference** (generated from the canonical types), see [REFERENCE.md](REFERENCE.md).
+
 No proprietary decoder. No binary blob. No context lost in translation.
 
 ---

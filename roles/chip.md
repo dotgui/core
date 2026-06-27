@@ -1,5 +1,6 @@
 ---
 role: chip
+reach: full
 platforms: web, ios, android
 ---
 

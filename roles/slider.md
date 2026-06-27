@@ -1,5 +1,6 @@
 ---
 role: slider
+reach: full
 platforms: web, ios, android
 ---
 

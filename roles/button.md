@@ -1,5 +1,6 @@
 ---
 role: button
+reach: full
 platforms: web, ios, android
 ---
 
