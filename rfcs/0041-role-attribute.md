@@ -1,9 +1,10 @@
 ---
 rfc: 0041
 title: role attribute — UI role vocabulary
-status: Draft
-targets: 0.2
+status: Accepted
+introduced-in: 0.2
 date: 2026-06-12
+updated: 2026-07-27
 ---
 
 # `role` Attribute — UI Role Vocabulary

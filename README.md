@@ -78,12 +78,15 @@ We are building the format that lets those tools talk to each other — and to A
 | Tool | Repo | What it does |
 |---|---|---|
 | **dotgui-core** | this folder | Format spec, principles, RFCs, roles — the authority |
-| **@dotgui/kit** | `kit/` | The implementation: parser, **validator**, types, renderer, scorer |
+| **@dotgui/kit** | `kit/` | The single implementation: parser, **validator**, types, renderer, scorer, linter, autofix, rasterizer, packager (and cleanup) |
+| **@dotgui/cli** | `cli/` | The `gui` command-line tool — read, write, lint, render, package |
+| **@dotgui/embed** | `embed/` | CDN embed library for rendering `.gui` in any webpage |
 | **dotgui-figma** | `dotgui/figma` | Figma plugin — exports screens as `.gui` |
-| **gui-optimizer** | `dotgui/optimizer` | Cleans and optimizes raw `.gui` output |
 | **dotgui-landing** | `dotgui/web` | Website |
 
-The goal is to grow this — more entry points, more design software integrations, more renderers, more AI-native tooling. A small, well-specified format with many readers and many writers.
+Everything that reads or writes `.gui` — parsing, validation, rendering, scoring, linting, cleanup — now lives in **one package, `@dotgui/kit`**. Earlier designs split these into separate tools (a standalone renderer, a separate optimizer); those were consolidated so there is a single implementation the spec is checked against. See [RFC-0009](rfcs/0009-optimizer-separate.md) for the original separation and why it was later folded in.
+
+The goal is to grow the *edges* — more entry points, more design software integrations, more AI-native tooling — around that one core. A small, well-specified format with many readers and many writers.
 
 ---
 
@@ -152,9 +155,9 @@ Every `.gui` file declares which version of the spec it targets:
 | Version | Status | Notes |
 |---|---|---|
 | `0.1` | Stable | Initial format design. XML over JSON, package format, token system, layout sugar tags, component/instance system. |
-| `0.2` | Current (in progress) | Layout API overhaul: unified sizing, 9-point align, gap/padding model, absolute children, complete paint and stroke model, text fidelity, effects, vector shapes, assets, grid system, component prop types. |
-| `1.0` | Planned | First public stable release. Full Figma layer coverage. Semver applies from this point. |
-| `2.0` | Future | Scroll, overlays, semantic roles, interactions. |
+| `0.2` | Current (in progress) | Layout API overhaul: unified sizing, 9-point align, gap/padding model, absolute children, complete paint and stroke model, text fidelity, effects, vector shapes, assets, grid system, component prop types. Also lands the `role=` semantic vocabulary and the CCAC quality-scoring model. |
+| `1.0` | Planned | First public stable release. Full design-tool layer coverage. Semver applies from this point. |
+| `2.0` | Future | Scroll, overlays, runtime interactions. |
 
 ---
 
@@ -171,3 +174,32 @@ if (!result.valid) {
   console.error(result.errors)
 }
 ```
+
+---
+
+## License
+
+The `.gui` format is open and free to implement, forever. This repository is
+licensed in two parts, because code and prose want different licenses:
+
+| What | License | Covers |
+|---|---|---|
+| **Code** | [MIT](LICENSE) | `schema/`, `scripts/`, and any source in this repo. The same permissive license applies to `@dotgui/kit`, `@dotgui/cli`, and `@dotgui/embed`. |
+| **Specification & docs** | [CC BY 4.0](LICENSE-DOCS) | `PRINCIPLES.md`, `GOVERNANCE.md`, `spec/`, `rfcs/`, `roles/`, `examples/` |
+
+In plain terms:
+
+- **Anyone can build a `.gui` reader or writer** — open source or commercial —
+  with no royalties, no permission, and no strings beyond keeping the copyright
+  notice (MIT) and crediting dotgui when reusing the spec text (CC BY 4.0).
+- **The format is unencumbered.** There is no patent toll and no field-of-use
+  restriction on implementing it. It belongs to no tool.
+- These licenses cover this repository and the core open-source toolchain
+  only. Products and services built *on top* of `.gui` (hosted services,
+  design libraries, and other offerings in the wider dotgui ecosystem) are
+  separate works under their own terms — the open license here does not
+  obligate them to be open.
+
+This mirrors how open standards work: the format stays a free, permanent
+public good (like SVG, PNG, or HTML), while tooling and services around it are
+free to choose their own model.

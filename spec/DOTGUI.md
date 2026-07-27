@@ -34,7 +34,9 @@ A `.gui` file is a ZIP package. Structure, styles, design tokens, font declarati
 
 ### Fidelity to source
 
-The format maps 1-1 to Figma's layer model. Auto-layout, fills, gradients, effects, constraints, mixed-style text, image crops, blend modes — everything is preserved exactly. Nothing is approximated, summarized, or dropped because it was inconvenient to encode. If it's on screen, it's in the file.
+The format belongs to no tool — it is a neutral interchange format for UI, the way SVG is for vector art (see [PRINCIPLES.md](../PRINCIPLES.md), P1). Any tool can write it and any tool can read it; a source tool's data model is an *input* to an extractor, never the format itself ([RFC-0003](../rfcs/0003-not-figma-data-model.md)).
+
+In practice we focus first on **Figma**, because that is where the overwhelming majority of UI design happens today — the format has to earn its keep in the tool people actually use. But "Figma-first" is a priority, not an identity: `.gui` is meant to describe *any* UI, from any tool, of any era. Auto-layout, fills, gradients, effects, constraints, mixed-style text, image crops, blend modes — everything a design contains is preserved exactly. Nothing is approximated, summarized, or dropped because it was inconvenient to encode. If it's on screen, it's in the file.
 
 ### Readable by machines and humans
 
@@ -42,11 +44,11 @@ Attributes are named for what they mean, not what the internal data model calls 
 
 ### No AI in the format pipeline
 
-The Figma plugin that produces `.gui` is deterministic and rule-based. The optimizer that cleans it up is deterministic and rule-based. Neither invents meaning, infers intent, or guesses at what the designer meant. The format carries what the design contains — nothing more.
+The Figma plugin that produces `.gui` is deterministic and rule-based. The cleanup pass that tidies it (now part of `@dotgui/kit`) is deterministic and rule-based. Neither invents meaning, infers intent, or guesses at what the designer meant. The format carries what the design contains — nothing more.
 
 ### Visual impact is zero
 
-The optimizer is explicitly forbidden from making changes that alter visual output. Every transformation either provably preserves the render or is skipped and logged. Structural cleanup is not an excuse to silently change what the user sees.
+The cleanup pass is explicitly forbidden from making changes that alter visual output. Every transformation either provably preserves the render or is skipped and logged. Structural cleanup is not an excuse to silently change what the user sees.
 
 ### Platform-agnostic
 
@@ -1020,11 +1022,11 @@ The Figma plugin. Select any visible layer — frame, component, group, shape, t
 
 The extractor is deterministic. Given the same Figma layer, it always produces the same output. It does not guess, summarize, or interpret.
 
-### gui-optimizer
+### Cleanup pass (in `@dotgui/kit`)
 
-A post-processing pipeline that converts raw extractor output into a cleaner, smaller, more semantically rich `.gui` file.
+A post-processing pipeline that converts raw extractor output into a cleaner, smaller, more semantically rich `.gui` file. Once a standalone optimizer ([RFC-0009](../rfcs/0009-optimizer-separate.md)), this now ships as part of the single implementation package, `@dotgui/kit`.
 
-The optimizer is also deterministic, non-AI, and rule-based. It does not invent meaning. Every transformation either provably preserves the visual render or is skipped and logged.
+The cleanup pass is also deterministic, non-AI, and rule-based. It does not invent meaning. Every transformation either provably preserves the visual render or is skipped and logged.
 
 **The one rule above all: visual impact must be zero.**
 

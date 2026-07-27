@@ -1,10 +1,10 @@
 ---
 rfc: 0040
 title: Quality scoring model — CCAC
-status: Proposed
+status: Accepted
 introduced-in: 0.2
 date: 2026-06-12
-updated: 2026-06-17
+updated: 2026-07-27
 ---
 
 # Quality Scoring Model — CCAC

@@ -67,7 +67,7 @@ Each RFC has frontmatter followed by these sections:
 | [0006](0006-layout-sugar-tags.md) | Layout sugar tags — row / col / grid | Implemented |
 | [0007](0007-appearance-block.md) | Appearance block for multi-fill | Implemented |
 | [0008](0008-component-instance-system.md) | Component and instance system | Implemented |
-| [0009](0009-optimizer-separate.md) | Optimizer separate from extractor | Implemented |
+| [0009](0009-optimizer-separate.md) | Optimizer separate from extractor | Superseded |
 | [0010](0010-no-ai-in-pipeline.md) | No AI in the pipeline | Implemented |
 
 ### 0.2 — Layout API Overhaul
@@ -141,5 +141,5 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0040](0040-quality-scoring-model.md) | Quality scoring model — CCAC | Proposed |
-| [0041](0041-role-attribute.md) | `role` attribute — UI role vocabulary | Draft |
+| [0040](0040-quality-scoring-model.md) | Quality scoring model — CCAC | Implemented |
+| [0041](0041-role-attribute.md) | `role` attribute — UI role vocabulary | Implemented |
