@@ -1,12 +1,22 @@
 ---
 rfc: 0009
 title: Optimizer separate from extractor
-status: Implemented
+status: Superseded
 introduced-in: 0.1
 date: 2026-05-20
+updated: 2026-07-27
 ---
 
 # Optimizer Separate from Extractor
+
+> **Superseded.** The core principle this RFC established still holds: cleanup is
+> deterministic, rule-based, and lives outside the extractor — the extractor's only
+> job is faithful capture. What changed is *packaging*: the optimizer is no longer a
+> standalone tool. Its cleanup logic was consolidated into the single implementation
+> package, `@dotgui/kit`, alongside the parser, validator, renderer, scorer, and
+> linter. The separation-of-concerns argument below is preserved as the reasoning;
+> the "separate repo/tool" conclusion is what the consolidation replaced. This RFC is
+> kept as the historical record.
 
 ## Context
 
