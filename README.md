@@ -171,3 +171,32 @@ if (!result.valid) {
   console.error(result.errors)
 }
 ```
+
+---
+
+## License
+
+The `.gui` format is open and free to implement, forever. This repository is
+licensed in two parts, because code and prose want different licenses:
+
+| What | License | Covers |
+|---|---|---|
+| **Code** | [MIT](LICENSE) | `schema/`, `scripts/`, and any source in this repo. The same permissive license applies to `@dotgui/kit`, `@dotgui/cli`, and `@dotgui/embed`. |
+| **Specification & docs** | [CC BY 4.0](LICENSE-DOCS) | `PRINCIPLES.md`, `GOVERNANCE.md`, `spec/`, `rfcs/`, `roles/`, `examples/` |
+
+In plain terms:
+
+- **Anyone can build a `.gui` reader or writer** — open source or commercial —
+  with no royalties, no permission, and no strings beyond keeping the copyright
+  notice (MIT) and crediting dotgui when reusing the spec text (CC BY 4.0).
+- **The format is unencumbered.** There is no patent toll and no field-of-use
+  restriction on implementing it. It belongs to no tool.
+- These licenses cover this repository and the core open-source toolchain
+  only. Products and services built *on top* of `.gui` (hosted services,
+  design libraries, and other offerings in the wider dotgui ecosystem) are
+  separate works under their own terms — the open license here does not
+  obligate them to be open.
+
+This mirrors how open standards work: the format stays a free, permanent
+public good (like SVG, PNG, or HTML), while tooling and services around it are
+free to choose their own model.
