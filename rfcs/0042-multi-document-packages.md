@@ -93,13 +93,39 @@ Two filenames are reserved and are never documents: `design.guix` (the single-do
 
 There are no subdirectories for documents. A package is a flat list of screens plus its assets — the same shape a designer already has in their head.
 
-### `library.guix` hoists the shared declarations
+### Every `.guix` file already has two halves
+
+This is worth stating because the format relies on it everywhere and has never written it down.
+
+A `.guix` document is a **library part** followed by a **screen part**:
+
+```xml
+<gui version="0.3" name="Checkout">
+  <tokens>  ... </tokens>      ┐
+  <fonts>   ... </fonts>       │  library part — declarations
+  <styles>  ... </styles>      │  (what this screen is built from)
+  <components> ... </components>┘
+  <col w="390">                ┐
+    ...                        │  screen part — the layout root
+  </col>                       ┘
+</gui>
+```
+
+There is no `<library>` or `<screen>` wrapper tag, and there should not be. The division is carried by **position** — everything before the layout root is declaration, everything from the layout root down is the screen. Naming it with tags would add two lines and an indent level to every file in existence, in service of a boundary the reader can already see ([P7](../PRINCIPLES.md), [P10](../PRINCIPLES.md)).
+
+### `library.guix` shares its library part
 
 Optional, at package root. It is an ordinary `.guix` document — same grammar, same envelope, no new file type. What makes it the library is its filename.
 
-**Sharing is decided by type, not by convention.** Declarations in `library.guix` — `<tokens>`, `<fonts>`, `<styles>`, `<components>` — are visible to every document in the package. Everything else in it, including its layout root, is local to `library.guix` and shared with nothing. There is no way to "share a frame", because a frame is not a shareable kind of thing.
+**The rule is positional: a library part shared, a screen part local.** Everything above `library.guix`'s layout root is visible to every document in the package. Its own layout root, and everything under it, is local to `library.guix` and shared with nothing.
 
-That falls out usefully: because the library may carry a layout root that nobody else sees, it doubles as the package's **style guide** — a rendered page that uses the components it defines and shows the palette it declares. Documentation and definition in one file, at no extra cost and with no extra concept.
+That is the whole definition, and it introduces no new concept — the split already exists in every file. `library.guix` only widens the scope of the half that was always declarations.
+
+Two things follow:
+
+**It is forward-compatible.** Because the rule is "above the layout root" rather than a list of blessed tags, any declaration block a future version adds to the top of a document is shared automatically. No amendment to this RFC, no enumeration to keep in sync.
+
+**The library documents itself.** Because `library.guix` may carry a layout root that nobody else sees, its screen part is free to be the package's **style guide** — a rendered page using the components it defines and showing the palette it declares. Definition and documentation in one file, at no extra cost and with no extra concept.
 
 ```xml
 <gui version="0.3" name="Library">
@@ -110,13 +136,15 @@ That falls out usefully: because the library may carry a layout root that nobody
     <component name="Button"> ... </component>
   </components>
 
-  <!-- local to this file: the style guide documenting the above -->
+  <!-- screen part: local to this file, the style guide for the above -->
   <col w="900" p="48" gap="24">
     <text value="Buttons" font-size="24" font-weight="700" />
     <instance component="Button" />
   </col>
 </gui>
 ```
+
+There is no way to share a frame, because a frame is not in the library part.
 
 ### Resolution is implicit
 
@@ -289,5 +317,5 @@ These are what stand between Draft and Proposed. The direction is considered sou
 - **Should the relationship between documents be typed?** Ordering alone leaves "three variants of one screen" and "three steps of a flow" indistinguishable, which sits uneasily with [P4](../PRINCIPLES.md).
 - **Per-document previews.** Sibling files (`02-signup.webp` beside `02-signup.guix`) would keep each screen's face intact, at the cost of a second convention and larger packages.
 - **Is there an upper bound on document count?** A 200-slide deck in one package is technically valid and practically hostile to every consumer. A soft limit with a linter warning may be warranted.
-- **Should components be split into a separate RFC?** Hoisting tokens, fonts, and styles is semantically trivial — they already resolve by name. Hoisting *components* touches prop types ([RFC-0034](0034-component-prop-types.md)), overrides, and `detached-from` ([RFC-0035](0035-detached-from.md)). That is a much larger surface and may deserve its own hearing rather than riding along here.
+- **Which component cases does the positional rule not cover?** Components are shared like every other declaration — settled, and they are the bulk of what a library is worth. But a few interactions with the component system are genuinely unanswered and may need pre-rejecting or their own RFC: a `detached-from` origin ([RFC-0035](0035-detached-from.md)) that points across documents; a `component`-typed prop ([RFC-0034](0034-component-prop-types.md)) on a library component whose slot is filled by a *document-local* component, which would make the library depend on a document; and whether component IDs must be unique package-wide. None of these arise in the tested deck, whose components use only string props — but RFC-0034 is still Draft and supersedes RFC-0008, so this should be revisited once the component system settles.
 - **Does `platform` become a package-level concept?** If documents in one package carry different `platform` values ([RFC-0036](0036-gui-meta-block.md)), consumers need a stated rule for what the package as a whole targets. Current lean: nothing — read it per document, assume no default.
