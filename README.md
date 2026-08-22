@@ -150,12 +150,14 @@ Every `.gui` file declares which version of the spec it targets:
 </gui>
 ```
 
-`version="0.2"` is the current working version. v1.0 is the planned first public stable release.
+`version="0.2"` is the current working version. Minor versions keep incrementing pre-1.0 as breaking changes land — v1.0 is a bar (the format is solid and stops moving), not a fixed next step.
 
 | Version | Status | Notes |
 |---|---|---|
 | `0.1` | Stable | Initial format design. XML over JSON, package format, token system, layout sugar tags, component/instance system. |
 | `0.2` | Current (in progress) | Layout API overhaul: unified sizing, 9-point align, gap/padding model, absolute children, complete paint and stroke model, text fidelity, effects, vector shapes, assets, grid system, component prop types. Also lands the `role=` semantic vocabulary and the CCAC quality-scoring model. |
+| `0.3` | In progress | Vocabulary and primitives, complete visual-export fidelity, grid system, component prop types, provenance — and the package model ([RFC-0042](rfcs/0042-multi-document-packages.md), multi-document packages). |
+| `0.n` | As needed | Pre-1.0 breaking changes are free. Versions keep incrementing until the format is proven solid. |
 | `1.0` | Planned | First public stable release. Full design-tool layer coverage. Semver applies from this point. |
 | `2.0` | Future | Scroll, overlays, runtime interactions. |
 

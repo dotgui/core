@@ -11,10 +11,20 @@ Every RFC is judged against the format's constitution: [**../PRINCIPLES.md**](..
 ## Format Versions
 
 ```
-0.1   →  initial format design (current)
-0.2   →  layout API overhaul (in progress)
-1.0   →  first public stable release (future)
+0.1   →  initial format design                              shipped
+0.2   →  layout API overhaul                                in progress
+0.3   →  vocabulary, visual fidelity, grid, components,
+         package model                                      in progress
+0.4   →  whatever the next set of changes turns out to be
+0.5   →  ...                                                as many as it takes
+1.0   →  first public stable release                        when the format is solid
 ```
+
+**The ladder is open-ended.** There is no fixed route from 0.3 to 1.0 — the next version is 0.4, then 0.5, for as long as the format still needs to change. Versions are cut by what actually lands in them, not by a plan. Slow and steady is the intent.
+
+**1.0 is a bar, not a date.** The point of staying pre-1.0 is to keep breaking things until the format is right — every version between here and there exists so a mistake can still be corrected for free. Reaching 1.0 early would be the failure, not the goal.
+
+**What a version is for: telling a consumer what it can handle.** A version number is a compatibility contract, not a changelog. A renderer that speaks `0.2` meeting a `0.3` file needs to know, immediately and without guessing, that the file may use vocabulary and structure it was never built for — multi-document packages, say — so it can refuse honestly instead of rendering something wrong. That is the whole job of the number: it tells a consumer whether to proceed or to update.
 
 Pre-1.0: no stability guarantees. Breaking changes are free.
 Post-1.0: semver applies. MAJOR = breaking, MINOR = additive, PATCH = clarification only.
@@ -128,6 +138,12 @@ Each RFC has frontmatter followed by these sections:
 | [0034](0034-component-prop-types.md) | Component prop types — data-typed vocab and override inference | Draft |
 | [0035](0035-detached-from.md) | `detached-from` — origin traceability for heavily-overridden instances | Draft |
 | [0036](0036-gui-meta-block.md) | `platform` on `<gui>` and `<meta>` block for provenance | Draft |
+
+### 0.3 — Package Model
+
+| RFC | Title | Status |
+|---|---|---|
+| [0042](0042-multi-document-packages.md) | Multi-document packages — many `.guix` in one `.gui` | Draft |
 
 ### 1.0 — Token System Completion (visual-layer freeze)
 
