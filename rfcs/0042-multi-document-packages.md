@@ -192,6 +192,33 @@ An agent asked to change the sign-up screen opens `02-signup.guix`. Under the al
 
 This is the same reason a codebase is many named files rather than one large one. Not to save bytes — so a reader can go straight to the part it needs.
 
+### Granularity is the benefit; tokens were the wrong yardstick
+
+The experiment removed the size argument (*Conclusions 1*), and the deck work since has confirmed it from the other side: restructuring a presentation into many documents did not help with tokens, and did help with streaming, updating, reuse, and organization. That split is not a consolation prize. It is the benefit stated precisely.
+
+Tokens and bytes measure **size**. Everything this RFC delivers is **granularity** — the package gaining a unit of work smaller than the whole. A single-document package has exactly one unit, and that unit is *all of it*, which pins the cost of every operation to the cost of the entire design:
+
+| Operation | One document | Many documents |
+|---|---|---|
+| Send one screen | the whole set travels | that one file travels |
+| Stream to a consumer | nothing is usable until the last byte | each document is usable as it lands |
+| A malformed screen | the design is unreadable | that document is unreadable, the rest are fine |
+| Edit one screen | rewrite the whole file | rewrite one file |
+| Two authors at once | serialized — one writer | one document each |
+| Diff and review | every change touches the same file | changes localize to the screen that changed |
+| Cache or re-render | any byte invalidates everything | invalidates the changed document |
+| Organize | layer names inside a tree | filenames, ordered, readable without parsing |
+
+Three of these carry design weight and are worth stating outright.
+
+**Streaming is structural, not an optimization.** A `.guix` document cannot be acted on until its root closes — XML offers no earlier guarantee, and a partial layout tree has no useful meaning. Under one document that means *a consumer waits for all twelve screens before it can draw the first*. Under many, screen one is done when its file is done. A producer emits in order, a consumer works in order, and no protocol is needed to arrange it: it falls out of the documents being separate files in a defined order.
+
+**Failure stops being total.** Today a single malformed tag anywhere costs the entire design, because there is nothing smaller to fail. With many documents the blast radius is one screen, and a consumer can report *eleven screens, one broken* instead of *unreadable*. This is not a softening of [P15](../PRINCIPLES.md): the broken document still fails loudly, by name, and is never partially rendered or guessed at. What narrows is the *scope* of the failure, not its volume. The renderer contract this implies is not settled here — see *Unresolved Questions*.
+
+**Reuse gets an addressable source.** A screen worth reusing is a file, so reusing it is copying a file. Under one document it is a subtree somebody has to locate, select, and lift out without disturbing its siblings.
+
+None of these properties are novel, and that is the argument. Every transfer format that carries parts arrives here — PDF has pages, EPUB has a spine — because this is what working with a multi-part thing requires. `.gui` did not choose single-document for an intermediate format; it inherited it from output formats (*Context*).
+
 ### One library is a stylesheet, not a library system
 
 `library.guix` introduces no new concept. It is the `<tokens>` block that already exists in every file, hoisted one level to package scope, with the same syntax and the same `$name` resolution. What it adds is a *single source*: within a package, there is exactly one definition of `$signal`, and a document that disagrees is an error rather than a silent divergence.
@@ -255,7 +282,7 @@ Supporting detail:
 
 **1. The deduplication argument does not survive.** It was the original justification for this RFC and the measurement removed it. Against *A naive* the saving is real and large (+442%), but against B there is no saving at all — C is 3% *worse*, from twelve `<gui>` envelopes. A well-built `<row>` deck already deduplicates everything. Any version of this RFC that argues size will be refuted by its own data.
 
-**2. The real and only benefit is addressability.** Reading one slide costs 5,453 tokens under B and cannot be improved — B has no smaller unit than the whole file. C halves it immediately and, once the library is in context, each further slide costs a fraction of the alternatives. The advantage widens with document count as the library amortizes.
+**2. The benefit is granularity; addressability is the part of it that has a number.** Reading one slide costs 5,453 tokens under B and cannot be improved — B has no smaller unit than the whole file. C halves it immediately and, once the library is in context, each further slide costs a fraction of the alternatives. The advantage widens with document count as the library amortizes. The rest of the benefit never appears in a token count at all: streaming, partial send, scoped failure, localized edits and diffs, and organization are consequences of the same smaller unit. The deck work found exactly that split — no token saving, everything else better — which is why the argument is made on granularity and not on size (*Reasoning*).
 
 **3. Separate files are stronger than assumed, in one narrow respect.** *A pruned* is the cheapest single cold read of any arrangement. Its costs lie elsewhere: an order of magnitude more authoring tokens in the form anyone actually writes, roughly six times the packaged bytes, no addressing better than a filename guess, and nothing forcing twelve screens to agree on a palette.
 
@@ -315,6 +342,7 @@ These are what stand between Draft and Proposed. The direction is considered sou
 - **A flow has not been tested, only a deck.** A presentation is the friendliest possible input — uniform canvas size, one author, one visual system. A genuine product flow with mixed platforms and screen sizes may behave differently.
 - **Where is the crossover?** The library is 39% of a twelve-document package. At what document count does multi-document stop being overhead and start paying — three, five, ten? This should be a documented guideline, not folklore.
 - **Should the relationship between documents be typed?** Ordering alone leaves "three variants of one screen" and "three steps of a flow" indistinguishable, which sits uneasily with [P4](../PRINCIPLES.md).
+- **Is a package with one invalid document an invalid package?** Scoped failure is one of the reasons to want many documents (*Reasoning*), but the contract has to be written down: does a consumer reject the whole package, or read the valid documents and report the broken one by name? [P15](../PRINCIPLES.md) forbids silent degradation under either answer — the open question is whether a loud, scoped failure counts as the package failing. Current lean: the package is readable, the document is not, and a consumer must say so explicitly rather than quietly presenting eleven of twelve as if that were the set.
 - **Per-document previews.** Sibling files (`02-signup.webp` beside `02-signup.guix`) would keep each screen's face intact, at the cost of a second convention and larger packages.
 - **Is there an upper bound on document count?** A 200-slide deck in one package is technically valid and practically hostile to every consumer. A soft limit with a linter warning may be warranted.
 - **Which component cases does the positional rule not cover?** Components are shared like every other declaration — settled, and they are the bulk of what a library is worth. But a few interactions with the component system are genuinely unanswered and may need pre-rejecting or their own RFC: a `detached-from` origin ([RFC-0035](0035-detached-from.md)) that points across documents; a `component`-typed prop ([RFC-0034](0034-component-prop-types.md)) on a library component whose slot is filled by a *document-local* component, which would make the library depend on a document; and whether component IDs must be unique package-wide. None of these arise in the tested deck, whose components use only string props — but RFC-0034 is still Draft and supersedes RFC-0008, so this should be revisited once the component system settles.
