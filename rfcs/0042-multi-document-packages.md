@@ -346,6 +346,35 @@ Supporting detail:
 - Hoisting all declarations into `library.guix` produced **zero name conflicts**, because one author wrote all twelve slides coherently.
 - `library.guix` is 39% of package C at twelve slides — a fixed cost that amortizes as the document count rises.
 
+### Second experiment — a flow, not a deck
+
+The first experiment used a presentation, which is the friendliest possible input: uniform canvas size, one author, one visual system. The obvious objection was that a genuine product flow might behave differently, so the same check was run on one.
+
+The format's four `skeuomorphic_*` examples are four screens of a single product — Album Details, Library, Now Playing, Audio Settings — authored as four separate packages. That is arrangement *A naive* occurring naturally, without being constructed for the test.
+
+Hoisting every declaration above each document's layout root into one `library.guix`:
+
+| | markup | library part | share |
+|---|---|---|---|
+| album | 11,431 B | 2,118 B | 18% |
+| library | 13,401 B | 2,112 B | 15% |
+| music | 16,657 B | 2,098 B | 12% |
+| settings | 17,092 B | 2,119 B | 12% |
+
+| | result |
+|---|---|
+| Declaration names, union of four files | 24 |
+| Shared by two or more files | **24 — all of them** |
+| Disagreeing on value | **0** |
+| Markup saved by hoisting | 6,329 B of 58,581 B (**10.8%**) |
+| `library.guix` as a share of the resulting package | **4.1%** |
+
+Every declaration in the set is shared. The four headers are already a library — copy-pasted four times rather than declared once.
+
+One measurement that was not expected: the previews total **853,798 B against 58,581 B of markup**. In a package of these four screens, 93% of the weight is pictures of the screens.
+
+**Caveat, stated plainly:** one author and one visual system means zero conflicts is close to the expected result. This confirms the rule stays quiet on coherent input; it does not show it stays quiet on arbitrary sets. The other direction was already shown by the twenty disagreements across five unrelated examples.
+
 ### Conclusions
 
 **1. The deduplication argument does not survive.** It was the original justification for this RFC and the measurement removed it. Against *A naive* the saving is real and large (+442%), but against B there is no saving at all — C is 3% *worse*, from twelve `<gui>` envelopes. A well-built `<row>` deck already deduplicates everything. Any version of this RFC that argues size will be refuted by its own data.
@@ -360,6 +389,9 @@ Supporting detail:
 
 **6. The true cost is not measurable in tokens.** Implicit library resolution — "not declared here, so it is the library's" — is new semantics that must be specified, validated, and error-reported. That is the actual price of this RFC, and no byte count captures it.
 
+**7. A flow behaves like a deck, and more strongly.** All twenty-four declarations in a real four-screen product flow are shared, with zero conflicts. Where the deck showed the rule was quiet on a coherent set, the flow shows the set was *already* a library that nobody had written down.
+
+**8. The crossover is a ratio, not a document count.** The question was at what document count the library stops being overhead — three, five, ten. The measurement says the question is wrong. The keynote's library is **39% of a twelve-document package**; the flow's is **4.1% of a four-document package**. Fewer documents, a drastically cheaper library, because these screens are 11–17 KB each while the slides were thin. What decides it is the ratio of library size to screen size, so any guideline should be expressed that way and not as a number of documents.
 ---
 
 ## Alternatives Considered
@@ -413,12 +445,12 @@ It is also honest about what it costs: the layout tree is made to say that ten s
 These are what stand between Draft and Proposed. The direction is considered sound; none of the below is settled.
 
 - **The edit case has not been tested.** Everything measured so far is authoring and reading. The case this RFC exists for is an agent *modifying* one screen out of many and writing it back. That test has not been run, and it is the one that either confirms the design or kills it.
-- **A flow has not been tested, only a deck.** A presentation is the friendliest possible input — uniform canvas size, one author, one visual system. A genuine product flow with mixed platforms and screen sizes may behave differently.
-- **Where is the crossover?** The library is 39% of a twelve-document package. At what document count does multi-document stop being overhead and start paying — three, five, ten? This should be a documented guideline, not folklore.
+- **A flow with mixed platforms and canvas sizes has still not been tested.** The second experiment covered a real product flow, but a uniform one — four iPhone screens by one author. A set mixing platforms ([RFC-0036](0036-gui-meta-block.md)) and screen sizes remains untested, and is the case most likely to produce genuine conflicts.
+- **Where exactly is the crossover ratio?** *Conclusions 8* establishes that the threshold is library-size over screen-size rather than a document count, which makes the guideline expressible — but not yet expressed. Somewhere between 4.1% and 39% the library stops paying for itself, and nothing has located the point.
 - **Should the relationship between documents be typed?** Ordering alone leaves "three variants of one screen" and "three steps of a flow" indistinguishable, which sits uneasily with [P4](../PRINCIPLES.md).
 - **The renderer conformance model needs its own RFC.** This RFC states the minimum (*Reasoning*): support is versioned, cumulative, and a renderer must refuse a version it does not implement. It does not define how a renderer *declares* what it supports, whether partial support is expressible, or what a validator checks. Freeing document names moved weight onto the version number, so the thing now carrying the guarantee is the thing least specified.
 - **Is a package with one invalid document an invalid package?** Scoped failure is one of the reasons to want many documents (*Reasoning*), but the contract has to be written down: does a consumer reject the whole package, or read the valid documents and report the broken one by name? [P15](../PRINCIPLES.md) forbids silent degradation under either answer — the open question is whether a loud, scoped failure counts as the package failing. Current lean: the package is readable, the document is not, and a consumer must say so explicitly rather than quietly presenting eleven of twelve as if that were the set.
-- **Per-document previews.** Sibling files (`02-signup.webp` beside `02-signup.guix`) would keep each screen's face intact, at the cost of a second convention and larger packages.
+- **Per-document previews.** Sibling files (`02-signup.webp` beside `02-signup.guix`) would keep each screen's face intact, at the cost of a second convention and larger packages. The second experiment put a number on that cost: previews are 93% of package weight on the measured set, so per-document previews are the expensive option by an order of magnitude, and a contact sheet is close to free.
 - **Is there an upper bound on document count?** A 200-slide deck in one package is technically valid and practically hostile to every consumer. A soft limit with a linter warning may be warranted.
 - **Which component cases does the positional rule not cover?** Components are shared like every other declaration — settled, and they are the bulk of what a library is worth. But a few interactions with the component system are genuinely unanswered and may need pre-rejecting or their own RFC: a `detached-from` origin ([RFC-0035](0035-detached-from.md)) that points across documents; a `component`-typed prop ([RFC-0034](0034-component-prop-types.md)) on a library component whose slot is filled by a *document-local* component, which would make the library depend on a document; and whether component IDs must be unique package-wide. None of these arise in the tested deck, whose components use only string props — but RFC-0034 is still Draft and supersedes RFC-0008, so this should be revisited once the component system settles.
 - **Does `platform` become a package-level concept?** If documents in one package carry different `platform` values ([RFC-0036](0036-gui-meta-block.md)), consumers need a stated rule for what the package as a whole targets. Current lean: nothing — read it per document, assume no default.

@@ -10,7 +10,7 @@ The canonical specification and type definitions for the `.gui` format.
 
 Like `.svg`, a `.gui` file is human-readable XML you can open in any text editor. Like `.svg`, it is portable — it doesn't belong to any one tool. Unlike `.svg`, it is built specifically for UI: layouts, components, tokens, screens. Not shapes.
 
-A `.gui` file is a **package** (a zip with a manifest), not a bare XML file. This is a deliberate decision: real UIs have assets — images, fonts, icons. Encoding those as base64 inside the XML would be a token-killer for AI pipelines and a readability nightmare for humans. The package format keeps assets separate and the markup clean.
+A `.gui` file is a **package** (a zip), not a bare XML file. This is a deliberate decision: real UIs have assets — images, fonts, icons. Encoding those as base64 inside the XML would be a token-killer for AI pipelines and a readability nightmare for humans. The package format keeps assets separate and the markup clean.
 
 ---
 
