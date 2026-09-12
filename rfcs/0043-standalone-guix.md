@@ -66,6 +66,24 @@ This is the whole constraint, and everything else follows from it. A relative pa
 
 **For editors, this is the moment to say so.** An editor working on a standalone document can change text, styles, tokens, components, layout, and remote images indefinitely. The moment the user adds a local asset, the document has outgrown the form and must be packaged. That is a thing to tell the user plainly, not to paper over.
 
+### `data:` URIs are banned, at any size
+
+> **An asset reference is an absolute URL, or — inside a package — a local path. It is never a `data:` URI.**
+
+Inlining bytes into markup is the one thing [RFC-0004](0004-package-format.md) measured and refused: base64 assets cost roughly half a token session, and the entire container exists to avoid that cost. A `data:` URI is that same cost wearing a different name, and it lands on exactly the consumer the format is built for.
+
+There is no small-asset exception. A threshold would need a number, the number would need defending, and every producer would sit just under it — while the failure mode of getting it wrong is the specific failure the format was designed around. One rule, no heuristic ([RFC-0023](0023-remove-shape.md)).
+
+This is broader than the standalone form and holds for packages too; it is stated here because the standalone document is where the temptation is strongest, since a `data:` URI is the only way to make one self-contained. [RFC-0031](0031-images-and-assets.md) should carry the same rule when it is next revised.
+
+One thing this does **not** touch: a *caller* may still hand a renderer a pre-resolved asset map with `data:` values, as `spec/DOTGUI.md` describes. That is a runtime hand-off between a host program and a renderer, not a reference written in a document, and it never travels.
+
+### A `library.guix` may be served standalone
+
+It is an ordinary document. Served on its own it resolves nothing for anybody — there is no package to be the library *of* — but it does not need to: its declarations are local to it, and anything under its own layout root reads exactly as any other screen would.
+
+That makes serving one useful rather than merely legal. `library.guix`'s screen part is the package's style guide ([RFC-0042](0042-multi-document-packages.md)), so serving it standalone serves the style guide — a rendered page of the palette and components, readable at a URL, with no special handling anywhere.
+
 ### Promotion has exactly two triggers
 
 A standalone document becomes a `.gui` package when, and only when:
@@ -74,6 +92,14 @@ A standalone document becomes a `.gui` package when, and only when:
 2. **It needs more than one screen** — because a document is exactly one screen ([RFC-0042](0042-multi-document-packages.md)), and more than one means a package.
 
 Both are mechanical. Neither requires judgment, a heuristic, or a setting. Until one of them fires, the standalone form is not a lesser version of the package — it is simply the right shape.
+
+### A standalone document declares `0.3` or higher
+
+Its vocabulary may be pure 0.2 — the standalone form adds no tags and no attributes — so on vocabulary alone a `0.2` renderer could draw it correctly. The version is required anyway, for the same reason it is required inside a multi-document package ([RFC-0042](0042-multi-document-packages.md)): **a version is a contract over rules, not only over tags.**
+
+The rules that define this form are 0.3 rules. No local asset paths, no `data:` URIs, no preview, exactly one screen. A consumer that does not know them cannot validate the document it is holding — handed a standalone file that references `assets/hero.webp`, a 0.2 renderer will try to resolve it against a package that does not exist and fail in whatever way it happens to fail. A 0.3 renderer rejects it as a defined error.
+
+So the version is what tells a consumer *which rules apply*, and a document that wants to be judged by the standalone rules has to say so. The cost is real and accepted: served documents cannot be read by 0.2 renderers. It is a small cost, because serving documents is itself new.
 
 ### There is no preview, and that is correct
 
@@ -147,7 +173,7 @@ That argument is about the future and is offered as a direction, not a justifica
 
 **Allow local asset paths, resolved against a sidecar convention** — Rejected. A document plus a folder of assets it resolves against is a package with the lid off — all of the coordination, none of the guarantees. The moment assets must travel with the markup, the container is the right answer, which is exactly what *Promotion* says.
 
-**Embed assets as `data:` URIs so standalone is self-contained** — Rejected, and already measured. RFC-0004 tested inline base64 at roughly half a token session; the whole container exists to avoid it. Re-introducing it to rescue portability would reverse the format's most expensive finding.
+**Embed assets as `data:` URIs so standalone is self-contained** — Rejected outright, and already measured. RFC-0004 tested inline base64 at roughly half a token session; the whole container exists to avoid it. Re-introducing it to rescue portability would reverse the format's most expensive finding. A size threshold was considered and refused with it — see *`data:` URIs are banned, at any size*.
 
 **Require a `standalone` attribute** — Rejected. It would be a second source of truth about a fact already evident from the content, and it would mean a flattened document is not interchangeable with an authored one.
 
@@ -156,7 +182,4 @@ That argument is about the future and is offered as a direction, not a justifica
 ## Unresolved Questions
 
 - **Media types for `.gui` and `.guix`.** Registration is the right end state — it is part of why SVG travels — but it is not what makes the format useful this week. Deferred deliberately: get the form serving and solving a problem first, register once it has proven itself.
-- **Are `data:` URIs permitted at all?** Banned outright, or allowed for genuinely small assets like a 200-byte icon? A blanket ban is simpler and harder to abuse; a threshold is more useful and needs a number.
 - **How does a host address documents now that filenames are free?** [RFC-0042](0042-multi-document-packages.md) removed the fixed `design.guix` path, so gui.farm's `<url>/design.guix` is a host convention rather than a format guarantee. Nothing is wrong with that — but the convention should be written down somewhere, and this RFC is the closest thing to its home.
-- **Can `library.guix` be served standalone?** It is an ordinary document with a screen part that doubles as a style guide, so serving it appears to be legal and possibly useful. Nothing has checked whether that creates a confusing artifact.
-- **Should a standalone document declare a minimum version?** Multi-document packages require `0.3` or higher ([RFC-0042](0042-multi-document-packages.md)) because the structure is a 0.3 structure. A standalone document uses no new vocabulary at all, so it may honestly be a `0.2` document — which means a 0.2 renderer can read it, which is either a feature or a loophole depending on what "supported form" means.
