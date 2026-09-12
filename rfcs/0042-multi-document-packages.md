@@ -179,6 +179,32 @@ A name that resolves in neither place is an error, surfaced loudly ([P15](../PRI
 
 **A document redeclaring a name the library already declares is an error, not an override.** One rule, no cascade, no merge heuristic, no modes. Deliberately the strictest possible resolution: relaxing it later is additive, tightening it later is breaking. The experiment found it fires zero times on a coherently authored set — see *Conclusions*.
 
+### A document travels alone only if it is self-contained
+
+A raw `.guix` document is already valid input on its own — the spec distinguishes a package from bare markup by magic bytes (`PK` vs `<`), and a single hosted document whose assets are URLs is a real and common shape. Multi-document packages do not change that, but they do make the condition worth stating plainly:
+
+> A document is portable on its own exactly when it declares everything it uses.
+
+A document that resolves names against `library.guix` is not portable on its own, by construction. That is not a defect to be engineered around — it is the same fact as "you cannot email one file of a program and call it the program."
+
+**The fix is a build step, not a reference.** Extracting a document for standalone use means inlining the subset of the library it actually uses — not the whole library, or a one-screen file inherits a twelve-screen palette. The transform is deterministic and offline, needs no new concept and no new syntax, and produces an ordinary single-document file.
+
+It is also **lossless**, and the strict resolution rule is why. Because a document redeclaring a library name is an error rather than an override, a flatten can never encounter a collision: there is nothing to merge, only to concatenate. Nothing leaves the document's closure, and the result resolves exactly as it did inside the package. The conservatism that looked merely cautious under *Resolution is implicit* is what makes this transform mechanical rather than a judgment call.
+
+**Flatten and hoist are inverses.** Inlining a library into a document and hoisting shared declarations out of a set are the same operation run in opposite directions, and because collisions are errors either way, neither needs a heuristic. That is a round-trip property ([P1](../PRINCIPLES.md)), and it comes free.
+
+What the transform explicitly must *not* become is a link back to the package, which is pre-rejected under *Non-goals*: the moment a document can point outside itself, resolution stops being closed and every property that made it decidable offline goes with it. The complexity is real; the answer is to keep it in tooling, where it is a flatten operation, rather than in the format, where it would be a dependency graph.
+
+**One caution about what "standalone" then means.** Flattening the library is lossless, but the other half of making a document travel — turning `assets/hero.webp` into an `https://` URL — is not. [RFC-0031](0031-images-and-assets.md) embeds assets by default and labels URL references *fallback only when embedding is not possible*, because the file is meant to resolve with no network at render time. A document can therefore be standalone as a *file* while no longer being self-contained as a *document*, and the two must not be confused:
+
+| | one file? | resolves with nothing else? |
+|---|---|---|
+| A document inside its package | no | yes |
+| Flattened, assets embedded | yes | yes |
+| Flattened, assets as URLs | yes | **no** — a host has to be up |
+
+The third row is a legitimate shape — it is what hosting a screen at a URL requires, and a hosted viewer is online by definition. But it trades away RFC-0004's founding promise that you can hand someone the file and they have everything. **The standalone document as a distribution form is out of scope here and needs its own RFC**: whether it is first-class or an implementation detail, what becomes of `preview.webp` and the version declaration, how a host addresses a document now that filenames are free, and how RFC-0031's "fallback only" is reconciled with URL assets being the norm when hosted. This RFC settles only its own consequence — that sharing declarations costs portability, and flattening is how you buy it back.
+
 ### Assets are shared at package root
 
 `assets/` stays where it is and is referenced identically (`src="assets/logo.svg"`) from any document. Producers must deduplicate assets across documents — two documents referencing the same bytes reference the same entry.
@@ -380,7 +406,7 @@ It is also honest about what it costs: the layout tree is made to say that ten s
 
 - **Free names cost single-document packages their old-reader compatibility.** A single-document package named `checkout.guix` is entirely readable by a 0.2 renderer in every way that matters, but that renderer looks up `design.guix` and finds nothing. It fails safe, but it fails a file it could have drawn. The mitigation is convention rather than rule: `design.guix` remains the recommended name for single-document packages precisely so this does not happen by accident.
 
-- **A lone `.guix` becomes less portable.** Pulled out of its package, it may no longer resolve its tokens. The counter is that RFC-0004's thesis is already that *the package* is the unit you hand someone.
+- **A lone `.guix` becomes less portable.** Pulled out of its package, a document that leans on `library.guix` no longer resolves its tokens, and hosting one standalone — a common shape where assets are URLs — requires flattening it first (*A document travels alone only if it is self-contained*). Two counters: RFC-0004's thesis is already that *the package* is the unit you hand someone, and a document that declares everything it uses is unaffected. The cost falls entirely on documents that chose to share.
 
 ## Unresolved Questions
 
