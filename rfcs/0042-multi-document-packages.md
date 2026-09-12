@@ -173,6 +173,8 @@ There is no way to share a frame, because a frame is not in the library part.
 
 A name a document does not declare resolves to `library.guix`. `$primary`, `<instance component="Button" />`, a text style — if it is not local, it is the library's. There is no import, no link, no export list, and no way to write one.
 
+**Nothing declares that the library is the library.** This is where the stylesheet analogy stops. CSS requires a `<link rel="stylesheet">` in every document that wants it — a reference that can be forgotten, misspelled, ordered wrongly, or point at something that has moved. Here the filename *is* the declaration and membership in the package *is* the link. A document says nothing about the library at all; it simply uses names, and the ones it did not define are the library's. Nothing to write means nothing to get wrong, and no second place for the truth to live ([P10](../PRINCIPLES.md)).
+
 A name that resolves in neither place is an error, surfaced loudly ([P15](../PRINCIPLES.md)). Because resolution is closed inside the package, this is always decidable offline, at parse time, with certainty.
 
 **A document redeclaring a name the library already declares is an error, not an override.** One rule, no cascade, no merge heuristic, no modes. Deliberately the strictest possible resolution: relaxing it later is additive, tightening it later is breaking. The experiment found it fires zero times on a coherently authored set — see *Conclusions*.
@@ -206,6 +208,14 @@ These are the next things someone will ask for. They are refused now so the slop
 That matters for the cost of being wrong. A tag or an attribute is permanent — once authors write it, it must be supported forever. A container convention is not: if this turns out to be a mistake, it is dropped without a single byte of markup changing meaning. This is one of the cheapest places in the format to make a reversible bet.
 
 It also leaves RFC-0021 untouched. The single-root rule is not amended, relaxed, or worked around — a document still has exactly one root, and screens are separated by being separate *documents* rather than by inventing adjacency semantics inside a layout tree. That matters because the layout tree is precisely where canvas coordinates would eventually try to appear.
+
+### The container was already paid for
+
+[RFC-0004](0004-package-format.md) chose a ZIP for one reason, and it was not extensibility: assets. Inline base64 was measured at roughly half a token session, so the markup and the binaries had to be separated, and separating them required a container. That decision was argued, paid for, and shipped in 0.1.
+
+This RFC is the second thing that container buys, and it costs nothing additional. No new file type, no new parser, no change to the markup, no migration — a ZIP that could hold one entry beside `assets/` could always hold three. The capacity was bought years before there was a use for it.
+
+It is worth noticing how narrowly that was avoided. A format that had inlined its assets as base64, or shipped as a bare `.guix` file with a sidecar convention, could not make this move at all without inventing a container *now* — which would be a genuine breaking change to every producer and consumer, rather than the additive one proposed here. The reason multi-document is cheap is that the expensive part already happened, for unrelated reasons, and turned out to be the right shape twice.
 
 ### Named documents make partial reads possible
 
