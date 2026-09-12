@@ -12,7 +12,7 @@ date: 2026-08-22
 
 ### What we assumed
 
-[RFC-0004](0004-package-format.md) established that `.gui` is always a ZIP package containing exactly one markup document, `design.guix`. One package, one screen. That has held since 0.1, and it was the right assumption to start from: a screen is the unit a designer exports, the unit a renderer draws, and the unit a reviewer looks at.
+[RFC-0004](0004-package-format.md) established that `.gui` is always a ZIP package containing exactly one markup document, named `design.guix`. This RFC supersedes both halves of that — the count and the name. One package, one screen. That has held since 0.1, and it was the right assumption to start from: a screen is the unit a designer exports, the unit a renderer draws, and the unit a reviewer looks at.
 
 ### What actually happens
 
@@ -48,7 +48,7 @@ This is also the answer to the obvious objection — that many screens in one fi
 
 ### What this RFC is not proposing
 
-The single-screen file is not being deprecated, replaced, or migrated. `design.guix` stays exactly as it is, stays the default, and stays the normal thing to produce. One screen, one file, forever. Multi-document is a capacity for designs that genuinely have parts — not a new standard everything moves to.
+The single-screen package is not being deprecated, replaced, or migrated. It stays the default and stays the normal thing to produce, and `design.guix` remains its conventional filename. One screen, one document, forever. Multi-document is a capacity for designs that genuinely have parts — not a new standard everything moves to.
 
 ## Decision
 
@@ -85,11 +85,34 @@ onboarding.gui  (ZIP)
     └── logo.svg
 ```
 
-**The discriminator is structural, not a version flag.** `design.guix` present means single-document. `design.guix` absent means every other `.guix` at the root is a document. The two are mutually exclusive; a package containing `design.guix` alongside other documents is invalid. This mirrors RFC-0004's magic-byte discrimination (`PK` vs `<`) — you can tell what you are holding by listing it, not by parsing a declaration.
+**One name is reserved: `library.guix`.** It is never a document. Every other `.guix` at the package root is one, whatever it is called.
 
-Two filenames are reserved and are never documents: `design.guix` (the single-document name) and `library.guix` (the package's shared declarations).
+**The discriminator is structural, and it is a count, not a name.** One document means single-document; more than one means multi-document. Nothing is special-cased and no filename carries the signal — you tell what you are holding by listing the package, not by looking up a known path or parsing a declaration. This is the same move as RFC-0004's magic-byte discrimination (`PK` vs `<`): the shape is self-evident from the bytes in front of you.
 
-**Order is the lexical sort of the filenames.** `01-welcome.guix` precedes `02-signup.guix`. Order is presentation order: the sequence a consumer should show them in. Nothing else is declared about the relationship — whether the documents are flow steps, slides, or platform variants is the consumer's reading, exactly as `<row>` does not declare *why* its children are in a row.
+`design.guix` therefore stops being reserved and becomes what it always actually was — a conventional name. A single-document package **should** use it, because a name every producer agrees on is worth having and because it is the one name older readers know to look for. But it is a default, not a rule. A package whose only document is `01-hello-world.guix` is an ordinary, valid single-document package — nothing looks for `design.guix` except consumers that predate this RFC. And a multi-document package may contain a document called `design.guix` like any other. The alternative — forbidding that one name among many — was considered and rejected; see *Alternatives Considered*.
+
+So, concretely, all three of these are valid:
+
+```
+hello.gui                 hello.gui                    onboarding.gui
+├── design.guix           ├── 01-hello-world.guix      ├── 01-welcome.guix
+├── preview.webp          ├── preview.webp             ├── 02-signup.guix
+└── assets/               └── assets/                  ├── library.guix
+                                                       ├── preview.webp
+                                                       └── assets/
+```
+
+> ⚠️ **This is the breaking change in this RFC, and it is a change of philosophy rather than of structure.**
+>
+> Since 0.1 the format has held that a package contains *the* markup document, at *the* known path. Both halves are now gone: there is no fixed path, and there is no guaranteed count. A consumer can no longer open a `.gui` and reach for what it expects — it must list the package and find out what it was given. That is a different contract with every reader that exists today, and it cannot be softened by a default, because a default only helps the producers who follow it.
+>
+> **A renderer claiming `0.3` is expected to implement this — not to tolerate it.** Multi-document support is not an optional extra within 0.3; enumerating the root, resolving against `library.guix`, and handling one document or many *is* what 0.3 means at the package layer. A renderer that reads 0.3 vocabulary but only accepts `design.guix` does not support 0.3, and should not claim it. See *The version is the contract*.
+
+**A filename is a document's address.** It is what a consumer names to ask for one screen, so it is load-bearing in a way a layer name is not: it should be stable across re-exports and meaningful enough to address. The container already guarantees the names are distinct; what it cannot guarantee is that they stay put.
+
+**Order is the lexical sort of the filenames.** `01-welcome.guix` precedes `02-signup.guix`. Because names are free, the numeric prefix is not decoration — it is the whole ordering mechanism, and a set named `welcome / signup / verify` will sort into the wrong order silently. Where order carries meaning, prefix it. Order is presentation order: the sequence a consumer should show them in. Nothing else is declared about the relationship — whether the documents are flow steps, slides, or platform variants is the consumer's reading, exactly as `<row>` does not declare *why* its children are in a row.
+
+**Every document in a multi-document package declares `0.3` or higher.** Multi-document packaging is 0.3 *structure*, and a version is a contract over structure as much as vocabulary — so a document sitting in such a package cannot honestly claim to be 0.2, whatever vocabulary it happens to use. This is what makes the version load-bearing rather than advisory: it is the only signal a consumer gets that is guaranteed present, and it must not be able to understate the package it lives in.
 
 There are no subdirectories for documents. A package is a flat list of screens plus its assets — the same shape a designer already has in their head.
 
@@ -225,15 +248,24 @@ None of these properties are novel, and that is the argument. Every transfer for
 
 Resolution is closed inside the ZIP. Nothing crosses a file boundary, so there is no dependency graph, no version skew, no broken links, no registry — and RFC-0004's promise survives intact: you hand someone the `.gui` and they have everything. The moment a library could point at *another* `.gui` file, all of that inverts. That is the line, and it is easy to hold because a ZIP cannot reach outside itself.
 
-### Old readers fail loudly, by two independent signals
+### The version is the contract, and checking it is the renderer's job
 
-[P15](../PRINCIPLES.md) demands that an unrepresentable case surface rather than silently degrade. Two things guarantee that here, and they operate at different layers.
+[P15](../PRINCIPLES.md) demands that an unrepresentable case surface rather than silently degrade. The guarantee is the version number, and it is the only one this RFC relies on.
 
-**The format version is the primary contract.** A multi-document package is `0.3`. A renderer built for `0.2` reads that number, knows the file may use structure it was never built for, and refuses honestly rather than rendering something wrong. This is what version numbers are for — telling a consumer whether to proceed or to update.
+A multi-document package is `0.3`, and every document in it says so. A renderer built for `0.2` reads that number, knows the file uses structure it was never built for, and refuses honestly. That is the entire mechanism, and it is what version numbers are already for.
 
-**The package structure is the backstop.** The version lives *inside* a document, so a consumer must first locate a document to read it. A `0.2` reader looks for `design.guix`, does not find it, and errors before it ever parses a version. It cannot silently render document one and imply that is the whole file.
+An earlier draft of this RFC claimed a second, structural signal — a `0.2` reader looking up `design.guix`, failing to find it, and erroring before it ever parsed a version. That argument is withdrawn. It only protects against a reader that *ignores* the version field, and such a reader is already unsafe in every other direction: it would equally swallow 0.3 vocabulary it cannot draw. A format cannot be designed around consumers that skip the field whose only purpose is to be checked. Adding a naming rule to shield them would have bought nothing real and cost the rule its only exception.
 
-The two cover different failures: the version governs the *markup vocabulary*, the structure governs the *package layout*. Neither requires a capability flag or negotiation protocol — the first is a number that already exists, the second is a consequence of the layout.
+**Renderer support is versioned and cumulative, the way browser support is.** A renderer does not implement "dotgui"; it implements a set of spec versions, and it must say which:
+
+| A renderer that supports | must |
+|---|---|
+| `0.2` | expect exactly one document, look it up at `design.guix`, and **refuse any document declaring a version it does not implement** |
+| `0.3` | enumerate the `.guix` files at the package root, treat `library.guix` as declarations rather than a screen, accept one document or many, resolve unresolved names against the library — and implement `0.2` as well |
+
+This is the browser model, and it puts the burden where it belongs. A 0.2-only renderer meeting a 0.3 file is not a format problem to be engineered around; it is a renderer that needs updating, and the version number is how it finds that out. The corollary is that the burden is real: a renderer that wants to read 0.3 packages has to do the enumeration, and a producer cannot assume an old renderer will cope.
+
+A full conformance model — what a renderer must implement to claim a version, how partial support is declared, what a validator checks — is larger than this RFC and belongs in its own. What is settled here is the minimum above.
 
 ### Timing: it has to land pre-1.0
 
@@ -302,11 +334,13 @@ It has to be defeated on one specific point, and only one: **it has no unit smal
 
 It is also honest about what it costs: the layout tree is made to say that ten screens are one screen containing ten things. Nothing breaks, but the structure stops describing what the file actually is, and any consumer wanting one screen has to infer which subtree is a screen and which is a component of one.
 
-**A `documents/` subdirectory** — Rejected. Grouping documents under a directory is tidier to list but adds a path segment to every address (`onboarding.gui` → `documents/02-signup.guix`) and introduces a hierarchy where none is needed. Screens are the package's primary content and belong at its root, the way `design.guix` already does. The cost of flatness is two reserved filenames, which is cheaper than a directory convention plus the temptation to nest inside it.
+**A `documents/` subdirectory** — Rejected. Grouping documents under a directory is tidier to list but adds a path segment to every address (`onboarding.gui` → `documents/02-signup.guix`) and introduces a hierarchy where none is needed. Screens are the package's primary content and belong at its root, the way the single document already does. The cost of flatness is one reserved filename, which is cheaper than a directory convention plus the temptation to nest inside it.
 
 **A manifest file (EPUB's OPF model)** — Rejected. A manifest would carry order, names, and relationships explicitly, but introduces a second file format to specify, parse, validate, and keep from drifting. [P10](../PRINCIPLES.md) says a convention should cover the overwhelming majority so the configuration never has to be written. Lexical filename order is deterministic ([P14](../PRINCIPLES.md)), self-evident when the ZIP is listed, and impossible to desynchronize from the files it describes. Note that `README.md` currently describes `.gui` as "a zip with a manifest" while the spec defines none; this RFC settles that as *no manifest*, and the README should be corrected.
 
-**A version flag to signal multi-document** — Rejected as redundant. The absence of `design.guix` is itself the signal, and it produces a loud failure in old readers at no cost. A flag would be a second source of truth about the same fact.
+**A version flag to signal multi-document** — Rejected as redundant. The document count is the signal and the format version already states the contract. A flag would be a third source of truth about the same fact.
+
+**Forbidding `design.guix` in a multi-document package** — Rejected. The case for it is not renderers, which have a version to check, but the consumers that never parse at all: tooling that fetches a known path directly — gui.farm serves any screen's raw markup at `<url>/design.guix` — would silently retrieve one screen of twelve and have no way to know the rest existed. The rule would make that fetch miss loudly instead. It was rejected because it buys that protection at the price of the only carve-out in an otherwise exceptionless rule, and it protects the wrong layer: a path-fetching tool reading a 0.3 package is a tool that has not been updated, exactly like a 0.2 renderer, and the answer for both is the same. Tools that address a document by a fixed name should address it by enumeration instead. Noted as a drawback rather than legislated away.
 
 **Per-document metadata only; no `library.guix`** — Rejected. This deduplicates assets but not declarations, and forfeits the single-source guarantee that prevents twelve screens from disagreeing on a palette. The experiment shows the byte saving was never the point; the consistency is.
 
@@ -332,6 +366,10 @@ It is also honest about what it costs: the layout tree is made to say that ten s
 
 - **Ecosystem assumes one file, one screen.** The gui.farm catalog accepts one screen per contribution; the Figma plugin exports one selection to one package. Both need work, and downstream tools that hardcode `design.guix` break by design.
 
+- **Name-fetching tools can be silently wrong, and this RFC chooses to let them.** Because `design.guix` is no longer forbidden among many, a consumer that fetches that path without enumerating or parsing — gui.farm's `<url>/design.guix` is a live example — may retrieve one screen of twelve and present it as the package. This is the cost of refusing the carve-out (*Alternatives Considered*), and it is the one place where the "fail loudly" guarantee rests on tooling being updated rather than on the format's own structure.
+
+- **Free names cost single-document packages their old-reader compatibility.** A single-document package named `checkout.guix` is entirely readable by a 0.2 renderer in every way that matters, but that renderer looks up `design.guix` and finds nothing. It fails safe, but it fails a file it could have drawn. The mitigation is convention rather than rule: `design.guix` remains the recommended name for single-document packages precisely so this does not happen by accident.
+
 - **A lone `.guix` becomes less portable.** Pulled out of its package, it may no longer resolve its tokens. The counter is that RFC-0004's thesis is already that *the package* is the unit you hand someone.
 
 ## Unresolved Questions
@@ -342,6 +380,7 @@ These are what stand between Draft and Proposed. The direction is considered sou
 - **A flow has not been tested, only a deck.** A presentation is the friendliest possible input — uniform canvas size, one author, one visual system. A genuine product flow with mixed platforms and screen sizes may behave differently.
 - **Where is the crossover?** The library is 39% of a twelve-document package. At what document count does multi-document stop being overhead and start paying — three, five, ten? This should be a documented guideline, not folklore.
 - **Should the relationship between documents be typed?** Ordering alone leaves "three variants of one screen" and "three steps of a flow" indistinguishable, which sits uneasily with [P4](../PRINCIPLES.md).
+- **The renderer conformance model needs its own RFC.** This RFC states the minimum (*Reasoning*): support is versioned, cumulative, and a renderer must refuse a version it does not implement. It does not define how a renderer *declares* what it supports, whether partial support is expressible, or what a validator checks. Freeing document names moved weight onto the version number, so the thing now carrying the guarantee is the thing least specified.
 - **Is a package with one invalid document an invalid package?** Scoped failure is one of the reasons to want many documents (*Reasoning*), but the contract has to be written down: does a consumer reject the whole package, or read the valid documents and report the broken one by name? [P15](../PRINCIPLES.md) forbids silent degradation under either answer — the open question is whether a loud, scoped failure counts as the package failing. Current lean: the package is readable, the document is not, and a consumer must say so explicitly rather than quietly presenting eleven of twelve as if that were the set.
 - **Per-document previews.** Sibling files (`02-signup.webp` beside `02-signup.guix`) would keep each screen's face intact, at the cost of a second convention and larger packages.
 - **Is there an upper bound on document count?** A 200-slide deck in one package is technically valid and practically hostile to every consumer. A soft limit with a linter warning may be warranted.
