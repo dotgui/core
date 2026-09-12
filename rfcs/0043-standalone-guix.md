@@ -1,7 +1,7 @@
 ---
 rfc: 0043
 title: Standalone `.guix` — the served, readable form
-status: Draft
+status: Proposed
 targets: 0.3
 date: 2026-09-12
 ---

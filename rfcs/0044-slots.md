@@ -1,7 +1,7 @@
 ---
 rfc: 0044
 title: Slots — components that take content
-status: Draft
+status: Proposed
 targets: 0.3
 date: 2026-09-12
 ---

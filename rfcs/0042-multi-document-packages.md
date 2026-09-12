@@ -1,7 +1,7 @@
 ---
 rfc: 0042
 title: Multi-document packages — many .guix in one .gui
-status: Draft
+status: Proposed
 targets: 0.3
 date: 2026-08-22
 ---
@@ -442,9 +442,15 @@ It is also honest about what it costs: the layout tree is made to say that ten s
 
 ## Unresolved Questions
 
-These are what stand between Draft and Proposed. The direction is considered sound; none of the below is settled.
+The direction is settled; these are refinements, not forks in the road.
 
-- **The edit case has not been tested.** Everything measured so far is authoring and reading. The case this RFC exists for is an agent *modifying* one screen out of many and writing it back. That test has not been run, and it is the one that either confirms the design or kills it.
+**On the edit case, which an earlier draft named as the blocker.** That draft held that nothing would be decided until an agent had modified one screen out of many and written it back. The question it was really asking was narrower: *does changing one screen force you to change `library.guix` too?* — because if it did, "edit one small file" would quietly become "edit two files and understand how they relate," and the granularity argument would be weaker than claimed.
+
+The rules already answer it. A document may declare **new** names freely; the strict rule bans only *redeclaring* a name the library holds (*Resolution is implicit*). So a screen-specific addition stays local and touches nothing else. Changing a *shared* value does require editing the library — and that is the library working correctly rather than a flaw, since one definition in one place is the entire reason it exists. The edit stays local exactly when it should and reaches the library exactly when it should.
+
+What remains is implementation quality, not format risk: whether a collision error tells an author to go and edit the library. That surfaces the moment anyone builds it and does not need to sit in front of a decision. The test is therefore not run, deliberately, and this RFC proceeds without it.
+
+The two experiments already did what experiments are for. The first killed this RFC's original justification — deduplication — outright. The second confirmed the pattern on a real product flow and dissolved the crossover question. Nothing remaining is a claim a test could falsify.
 - **A flow with mixed platforms and canvas sizes has still not been tested.** The second experiment covered a real product flow, but a uniform one — four iPhone screens by one author. A set mixing platforms ([RFC-0036](0036-gui-meta-block.md)) and screen sizes remains untested, and is the case most likely to produce genuine conflicts.
 - **Where exactly is the crossover ratio?** *Conclusions 8* establishes that the threshold is library-size over screen-size rather than a document count, which makes the guideline expressible — but not yet expressed. Somewhere between 4.1% and 39% the library stops paying for itself, and nothing has located the point.
 - **Should the relationship between documents be typed?** Ordering alone leaves "three variants of one screen" and "three steps of a flow" indistinguishable, which sits uneasily with [P4](../PRINCIPLES.md).

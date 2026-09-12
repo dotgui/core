@@ -138,14 +138,14 @@ Each RFC has frontmatter followed by these sections:
 | [0034](0034-component-prop-types.md) | Component prop types — data-typed vocab and override inference | Draft |
 | [0035](0035-detached-from.md) | `detached-from` — origin traceability for heavily-overridden instances | Draft |
 | [0036](0036-gui-meta-block.md) | `platform` on `<gui>` and `<meta>` block for provenance | Draft |
-| [0044](0044-slots.md) | Slots — components that take content | Draft |
+| [0044](0044-slots.md) | Slots — components that take content | Proposed |
 
 ### 0.3 — Package Model
 
 | RFC | Title | Status |
 |---|---|---|
-| [0042](0042-multi-document-packages.md) | Multi-document packages — many `.guix` in one `.gui` | Draft |
-| [0043](0043-standalone-guix.md) | Standalone `.guix` — the served, readable form | Draft |
+| [0042](0042-multi-document-packages.md) | Multi-document packages — many `.guix` in one `.gui` | Proposed |
+| [0043](0043-standalone-guix.md) | Standalone `.guix` — the served, readable form | Proposed |
 
 ### 1.0 — Token System Completion (visual-layer freeze)
 
