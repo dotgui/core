@@ -147,6 +147,25 @@ Each RFC has frontmatter followed by these sections:
 | [0042](0042-multi-document-packages.md) | Multi-document packages — many `.guix` in one `.gui` | Proposed |
 | [0043](0043-standalone-guix.md) | Standalone `.guix` — the served, readable form | Proposed |
 
+### 0.3 — Identity
+
+| RFC | Title | Status |
+|---|---|---|
+| [0046](0046-identity-and-source-ids.md) | Identity and source ids — addressing nodes, tracing them to their source | Draft |
+| [0047](0047-rejected-declared-variant-axes.md) | REJECTED: Declared variant axes and component states | Rejected |
+
+### 0.4 — Describe, Don't Run: Motion and Connections
+
+| RFC | Title | Status |
+|---|---|---|
+| [0045](0045-describe-dont-run.md) | Describe, don't run — what .gui is for, and where it stops (amends P3, P5; adds P16) | Draft |
+| [0048](0048-motion.md) | Motion — how a design moves, as a spec | Draft |
+| [0049](0049-connections.md) | Connections — which element leads where | Draft |
+| [0050](0050-screen-and-scroll.md) | Screen and scroll — screen size, scrolling regions, pinned edges | Draft |
+| [0051](0051-images-with-a-source.md) | Images with a source — carrying what .gui cannot describe | Draft |
+| [0052](0052-variant-overrides.md) | Variant overrides — a variant as the set's body with different values | Draft |
+| [0053](0053-literal-dollar.md) | Literal $ — prices in text, token references that fail loudly | Draft |
+
 ### 1.0 — Token System Completion (visual-layer freeze)
 
 | RFC | Title | Status |
