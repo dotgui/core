@@ -4,6 +4,7 @@ title: Component prop types — data-typed prop vocabulary and override inferenc
 status: Draft
 introduced-in: 0.3
 date: 2026-05-29
+updated: 2026-10-18
 supersedes: 0008
 ---
 
@@ -69,7 +70,7 @@ Replace `text` and `visible` with a vocabulary of data types aligned with common
 | `color` | no | `fill` | `fill`, `stroke` |
 | `image` | no | `src` | — |
 | `component` | no | `component` | — |
-| `number` | **yes** | — | `radius`, `opacity`, `gap`, `font-size`, `stroke-width`, `font-weight`, `letter-spacing`, `line-height`, `padding`, `pt`, `pr`, `pb`, `pl` |
+| `number` | **yes** | — | `radius`, `opacity`, `gap`, `font-size`, `stroke-width`, `font-weight`, `letter-spacing`, `line-height`, `padding`, `pt`, `pr`, `pb`, `pl`, `w`, `h`, `x`, `y` |
 | `style` | **yes** | — | `text-style`, `fill-style`, `effect-style`, `stroke-style` |
 
 **Rule:** `bind` is optional when the type has one obvious default target attribute. `bind` is required when the type is inherently ambiguous — `number` (which numeric property?) and `style` (which style slot?). `color` and `string` require `bind` only when targeting a non-default attribute.
@@ -90,6 +91,8 @@ This gives complete Figma instance override coverage:
 | Fill style swapped | `style` | `fill-style` |
 | Effect style swapped | `style` | `effect-style` |
 | Stroke style swapped | `style` | `stroke-style` |
+
+> **Amended 2026-10-18:** `number` may also bind `w`, `h`, `x` and `y`. A component often varies a size or position per instance — a progress bar's filled width, a selection pill's position — and without these binds the only option was a full copy per value. Found building the Sable app (`motion-lab/examples/8-demo/sable-clean`), where a goal card's progress is `progress="241"` bound to the fill's `w`; required by [RFC-0052](0052-variant-overrides.md).
 
 ### 3. `target` is a binding, not part of the type
 
