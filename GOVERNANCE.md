@@ -245,7 +245,13 @@ The format is versioned (`0.1` → `0.2` → `1.0`; see [`rfcs/README.md`](rfcs/
 
 A consumer upgrades on purpose, by bumping that version — so docs and tooling ship *in step with a release*, never changing out from under users mid-flight. Pre-1.0, breaking changes are free; post-1.0, semver applies (MAJOR = breaking, MINOR = additive, PATCH = clarification).
 
-**Pre-1.0, each RFC is its own point release.** `0.3.1` is one RFC, `0.3.2` the next, so what a file can contain traces to a single decision. Accepted and Proposed RFCs take the lowest numbers; Draft slots are tentative. The current assignment is in the [RFC index](rfcs/README.md#index).
+**Pre-1.0, the spec moves in chapters.**
+
+- **A chapter is the middle number** (`0.3`, `0.4`, `0.5`): a themed group of RFCs, planned up front. 0.3 is components and packages; 0.4 is motion and interaction.
+- **Each RFC in it is one point release.** `0.3.1` is one RFC, `0.3.2` the next, so what a file can contain traces to a single decision. Accepted and Proposed RFCs take the lowest numbers; Draft slots are tentative. The current assignment is in the [RFC index](rfcs/README.md#index).
+- **A chapter closes when its list is empty** — every RFC shipped, rejected, or moved on. The next release is then `x.y.0` of the next chapter. Once a chapter is underway, new ideas go to a later one, and a chapter that runs well past two or three months closes anyway, pushing what is unfinished forward.
+
+**Tools share the chapter, not the patch.** Every tool's version keeps the spec's `MAJOR.MINOR` — renderer `0.3.x` reads 0.3 documents — but counts its own `PATCH`, because it needs somewhere to put fixes and four-part versions (`0.3.4.1`) are not valid on npm or crates.io. Each tool **declares the exact spec point it reads** (`supports spec 0.3.4`) and refuses documents newer than that. So spec `0.3.4` may be read by renderer `0.3.7`. The renderer's [VERSIONING.md](https://github.com/dotgui/render/blob/main/VERSIONING.md) spells out the same rule.
 
 ---
 
@@ -272,10 +278,9 @@ This document describes the governance model. Where it stands:
 - 🚧 **Conformance test suite** — the behavioral safety net — is still to be built.
 - 🚧 **Parser split.** The kit has a TypeScript parser and the renderer has its own Rust parser, untested against each other. Moving both into `dotgui/parser` with shared tests is planned.
 - 🚧 **Renderer handover.** The kit's HTML renderer is the one in use; the Rust renderer is taking over drawing, with kit depending on its wasm build.
-- 🚧 **No version gate.** No tool yet refuses a file newer than it understands; the validator still checks for a hard-coded `1.0`.
+- 🚧 **Version gate.** The renderer refuses newer chapters but not yet newer points inside one; the kit refuses nothing, and its validator still checks for a hard-coded `1.0`.
 
 ### Open decisions
 
-- **Tool versions vs. spec versions.** `render/VERSIONING.md` says documents are versioned `MAJOR.MINOR` only and a renderer's patch number never means new vocabulary; per-RFC point releases contradict that. Leaning: each tool keeps its own version and declares the spec version it supports.
 - **`spec-next`.** With one branch per RFC, a shared integration branch mixes features again. Leaning: merge it into `main` and retire it.
 - **Figma sandbox.** Confirm the plugin's main thread cannot load wasm before relying on that as the reason the TypeScript parser must exist.
