@@ -1,9 +1,10 @@
 ---
 rfc: 0042
 title: Multi-document packages — many .guix in one .gui
-status: Proposed
+status: Implemented
 targets: 0.3.2
 date: 2026-08-22
+implemented: 2026-10-27
 ---
 
 # Multi-Document Packages — Many `.guix` in One `.gui`
@@ -440,9 +441,30 @@ It is also honest about what it costs: the layout tree is made to say that ten s
 
 - **A lone `.guix` becomes less portable.** Pulled out of its package, a document that leans on `library.guix` no longer resolves its tokens, and hosting one standalone — a common shape where assets are URLs — requires flattening it first (*A document travels alone only if it is self-contained*). Two counters: RFC-0004's thesis is already that *the package* is the unit you hand someone, and a document that declares everything it uses is unaffected. The cost falls entirely on documents that chose to share.
 
+## Implementation Notes
+
+Shipped in 0.3.2, in both implementations, with matching behaviour:
+
+- **Native renderer** (`dotgui/render`, `package.rs`): enumerates root `.guix` documents in filename order, keeps `library.guix` apart, renders the library's own page when it has a layout root, and merges its declarations into each document's.
+- **Kit** (`@dotgui/kit/package`): `unpack` reads every document and the library, `pack` writes them all back, `listDocuments` / `getDocument` address one by filename. `flatten(pkg, name)` is the build step from *A document travels alone only if it is self-contained* — it inlines the library into a document, so the existing single-document renderer and validator work unchanged. It inlines the whole library part; pruning to the names a document uses is left to tooling.
+- **Rules enforced by both:** every document in a package with a library or several documents declares 0.3 or higher; redeclaring a library name is an error naming the kind and the name (`token '$primary' is already declared by library.guix`); a name that resolves in neither place is an error; a `.guix` inside a directory is not a document.
+
+## Test Cases
+
+The same cases are tested in both implementations:
+
+- A single `design.guix` package round-trips unchanged; a lone document under any other name is still single-document.
+- `01-welcome.guix`, `02-done.guix` and `library.guix` list as two documents in that order; packing keeps all three files.
+- A document using `$primary`, the `Title` text style, and `comp-button` from the library resolves without declaring them; the library's own page stays local to it.
+- A document redeclaring `$primary` or `comp-button` fails, naming each.
+- `$missing` and text style `Nope` fail as unresolved; a price in text (`$4.99`) is not a token.
+- In a two-document package, the document declaring `0.2` fails and the `0.3` one passes; a lone `0.2` document keeps working.
+
 ## Unresolved Questions
 
 The direction is settled; these are refinements, not forks in the road.
+
+**Settled by implementation — one invalid document does not invalidate the package.** Both implementations read the valid documents and report the broken one by name: the package is readable, the document is not. A consumer must say so rather than present the remaining documents as if they were the whole set ([P15](../PRINCIPLES.md)).
 
 **On the edit case, which an earlier draft named as the blocker.** That draft held that nothing would be decided until an agent had modified one screen out of many and written it back. The question it was really asking was narrower: *does changing one screen force you to change `library.guix` too?* — because if it did, "edit one small file" would quietly become "edit two files and understand how they relate," and the granularity argument would be weaker than claimed.
 
