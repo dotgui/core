@@ -2,7 +2,7 @@
 rfc: 0036
 title: gui root attrs and meta block — platform and provenance
 status: Draft
-targets: 0.3
+targets: 0.3.6
 date: 2026-05-31
 ---
 

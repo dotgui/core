@@ -2,7 +2,7 @@
 rfc: 0022
 title: fill and border — unified color and outline properties
 status: Draft
-introduced-in: 0.3
+targets: 0.3.10
 date: 2026-05-21
 ---
 

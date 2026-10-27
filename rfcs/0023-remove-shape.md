@@ -2,7 +2,7 @@
 rfc: 0023
 title: Remove <shape> — rect, ellipse, line as helper tags; paths as assets
 status: Implemented
-introduced-in: 0.3
+introduced-in: 0.3.0
 date: 2026-05-21
 updated: 2026-05-23
 supersedes: 0020

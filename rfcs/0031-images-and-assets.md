@@ -2,7 +2,7 @@
 rfc: 0031
 title: Images and assets as self-contained visual dependencies
 status: Implemented
-introduced-in: 0.3
+introduced-in: 0.3.0
 date: 2026-05-22
 updated: 2026-05-23
 related: 0004

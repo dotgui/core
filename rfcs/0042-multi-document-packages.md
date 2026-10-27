@@ -2,7 +2,7 @@
 rfc: 0042
 title: Multi-document packages — many .guix in one .gui
 status: Proposed
-targets: 0.3
+targets: 0.3.2
 date: 2026-08-22
 ---
 

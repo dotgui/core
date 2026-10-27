@@ -2,7 +2,7 @@
 rfc: 0024
 title: Complete paint model for visual export fidelity
 status: Accepted
-introduced-in: 0.3
+targets: 0.3.1
 date: 2026-05-22
 ---
 

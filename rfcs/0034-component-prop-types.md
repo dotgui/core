@@ -2,7 +2,7 @@
 rfc: 0034
 title: Component prop types — data-typed prop vocabulary and override inference
 status: Draft
-introduced-in: 0.3
+targets: 0.3.5
 date: 2026-05-29
 updated: 2026-10-18
 supersedes: 0008

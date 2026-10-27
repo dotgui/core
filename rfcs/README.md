@@ -26,6 +26,8 @@ Every RFC is judged against the format's constitution: [**../PRINCIPLES.md**](..
 
 **What a version is for: telling a consumer what it can handle.** A version number is a compatibility contract, not a changelog. A renderer that speaks `0.2` meeting a `0.3` file needs to know, immediately and without guessing, that the file may use vocabulary and structure it was never built for — multi-document packages, say — so it can refuse honestly instead of rendering something wrong. That is the whole job of the number: it tells a consumer whether to proceed or to update.
 
+**Point releases carry one RFC each.** Within a minor version, each RFC that lands gets its own point release — `0.3.1`, `0.3.2`, … — so what a file can contain is traceable to a single decision. A file declares the full point version (`version="0.3.4"`), because a renderer that speaks `0.3.2` cannot read slots from `0.3.4`. Accepted and Proposed RFCs take the lowest numbers, since they are ready to implement one by one; Drafts follow, and their slots are tentative — a Draft that is promoted can move ahead of the queue.
+
 Pre-1.0: no stability guarantees. Breaking changes are free.
 Post-1.0: semver applies. MAJOR = breaking, MINOR = additive, PATCH = clarification only.
 
@@ -106,52 +108,88 @@ Each RFC has frontmatter followed by these sections:
 |---|---|---|
 | [0021](0021-root-canvas-model.md) | Root canvas model — drop `viewport`, `<col>` over `<frame>` | Draft |
 
-### 0.3 — Vocabulary & Primitives
+### 0.3.0 — Baseline — already implemented
 
 | RFC | Title | Status |
 |---|---|---|
-| [0022](0022-fill-and-border.md) | fill and border — unified color and outline properties | Draft |
 | [0023](0023-remove-shape.md) | Remove `<shape>` — geometry as frames, paths as assets | Implemented |
+| [0025](0025-complete-stroke-border-model.md) | Complete stroke and border model for UI outlines | Implemented |
+| [0026](0026-text-rendering-fidelity.md) | Text rendering fidelity | Implemented |
+| [0027](0027-effects-stack.md) | Ordered effects stack | Implemented |
+| [0031](0031-images-and-assets.md) | Images and assets as self-contained visual dependencies | Implemented |
+| [0032](0032-grid-system.md) | Grid system — track grid and unit grid | Implemented |
 
-### 0.3 — Visual Export Fidelity
+### 0.3.1 — Paint Model
 
 | RFC | Title | Status |
 |---|---|---|
 | [0024](0024-complete-paint-model.md) | Complete paint model for visual export fidelity | Accepted |
-| [0025](0025-complete-stroke-border-model.md) | Complete stroke and border model for UI outlines | Implemented |
-| [0026](0026-text-rendering-fidelity.md) | Text rendering fidelity | Implemented |
-| [0027](0027-effects-stack.md) | Ordered effects stack | Implemented |
-| [0028](0028-clipping-and-masks.md) | Clipping and masks for visual export | Draft |
-| [0030](0030-vector-and-shape-fidelity.md) | Vector and shape fidelity | Superseded by 0023 |
-| [0031](0031-images-and-assets.md) | Images and assets as self-contained visual dependencies | Implemented |
 
-### 0.3 — Grid System
-
-| RFC | Title | Status |
-|---|---|---|
-| [0032](0032-grid-system.md) | Grid system — track grid and unit grid | Implemented |
-
-### 0.3 — Component System
-
-| RFC | Title | Status |
-|---|---|---|
-| [0034](0034-component-prop-types.md) | Component prop types — data-typed vocab and override inference | Draft |
-| [0035](0035-detached-from.md) | `detached-from` — origin traceability for heavily-overridden instances | Draft |
-| [0036](0036-gui-meta-block.md) | `platform` on `<gui>` and `<meta>` block for provenance | Draft |
-| [0044](0044-slots.md) | Slots — components that take content | Proposed |
-
-### 0.3 — Package Model
+### 0.3.2 — Multi-Document Packages
 
 | RFC | Title | Status |
 |---|---|---|
 | [0042](0042-multi-document-packages.md) | Multi-document packages — many `.guix` in one `.gui` | Proposed |
-| [0043](0043-standalone-guix.md) | Standalone `.guix` — the served, readable form | Proposed |
 
-### 0.3 — Identity
+### 0.3.3 — Standalone `.guix`
+
+| RFC | Title | Status |
+|---|---|---|
+| [0043](0043-standalone-guix.md) | Standalone `.guix` — the served, readable form (needs 0042) | Proposed |
+
+### 0.3.4 — Slots
+
+| RFC | Title | Status |
+|---|---|---|
+| [0044](0044-slots.md) | Slots — components that take content | Proposed |
+
+### 0.3.5 — Prop Types
+
+| RFC | Title | Status |
+|---|---|---|
+| [0034](0034-component-prop-types.md) | Component prop types — data-typed vocab and override inference | Draft |
+
+### 0.3.6 — Platform & Meta
+
+| RFC | Title | Status |
+|---|---|---|
+| [0036](0036-gui-meta-block.md) | `platform` on `<gui>` and `<meta>` block for provenance | Draft |
+
+### 0.3.7 — Identity
 
 | RFC | Title | Status |
 |---|---|---|
 | [0046](0046-identity-and-source-ids.md) | Identity and source ids — addressing nodes, tracing them to their source | Draft |
+
+### 0.3.8 — Detached Instances
+
+| RFC | Title | Status |
+|---|---|---|
+| [0035](0035-detached-from.md) | `detached-from` — origin traceability for heavily-overridden instances (needs 0046) | Draft |
+
+### 0.3.9 — Color & Units
+
+| RFC | Title | Status |
+|---|---|---|
+| [0033](0033-color-and-dimension-units.md) | Color formats and dimension units | Draft |
+
+### 0.3.10 — Fill & Border
+
+| RFC | Title | Status |
+|---|---|---|
+| [0022](0022-fill-and-border.md) | fill and border — unified color and outline properties (check overlap with 0025 first) | Draft |
+
+### 0.3.11 — Clipping & Masks
+
+| RFC | Title | Status |
+|---|---|---|
+| [0028](0028-clipping-and-masks.md) | Clipping and masks for visual export | Draft |
+
+### 0.3 — Decided Against
+
+| RFC | Title | Status |
+|---|---|---|
+| [0030](0030-vector-and-shape-fidelity.md) | Vector and shape fidelity | Superseded by 0023 |
 | [0047](0047-rejected-declared-variant-axes.md) | REJECTED: Declared variant axes and component states | Rejected |
 
 ### 0.4 — Describe, Don't Run: Motion and Connections

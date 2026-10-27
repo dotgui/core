@@ -2,7 +2,7 @@
 rfc: 0046
 title: Identity and source ids — addressing nodes in a file, and tracing them to their source
 status: Draft
-targets: 0.3
+targets: 0.3.7
 date: 2026-10-16
 updated: 2026-10-17
 ---

@@ -2,7 +2,7 @@
 rfc: 0026
 title: Text rendering fidelity
 status: Implemented
-introduced-in: 0.3
+introduced-in: 0.3.0
 date: 2026-05-22
 implemented: 2026-05-23
 ---

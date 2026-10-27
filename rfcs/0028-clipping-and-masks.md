@@ -2,7 +2,7 @@
 rfc: 0028
 title: Clipping and masks for visual export
 status: Draft
-introduced-in: 0.3
+targets: 0.3.11
 date: 2026-05-22
 ---
 

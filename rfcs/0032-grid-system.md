@@ -2,7 +2,7 @@
 rfc: 0032
 title: Grid system — track grid and unit grid
 status: Implemented
-introduced-in: 0.3
+introduced-in: 0.3.0
 date: 2026-05-23
 ---
 

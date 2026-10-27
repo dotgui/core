@@ -2,7 +2,7 @@
 rfc: 0035
 title: detached-from — origin traceability for heavily-overridden instances
 status: Draft
-targets: 0.3
+targets: 0.3.8
 date: 2026-05-31
 ---
 

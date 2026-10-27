@@ -2,7 +2,7 @@
 rfc: 0033
 title: Color formats and dimension units
 status: Draft
-targets: 0.3
+targets: 0.3.9
 date: 2026-05-25
 ---
 
