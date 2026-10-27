@@ -1,9 +1,10 @@
 ---
 rfc: 0044
 title: Slots — components that take content
-status: Proposed
+status: Implemented
 targets: 0.3.4
 date: 2026-09-12
+implemented: 2026-10-28
 ---
 
 # Slots — Components That Take Content
@@ -364,6 +365,29 @@ That makes slots the correct mechanism for the scaffold case and `type="componen
 **A variant per content shape** — Rejected. Combinatorial and false.
 
 **Do nothing; keep detaching** — The honest status quo. Rejected because it discards component identity where it is worth most, because [RFC-0042](0042-multi-document-packages.md) makes the cost worse by giving libraries something they cannot hold, and because the concept is now standard across every system in *Prior Art* — including the format's primary extractor, which means the export path is no longer merely limited but lossy against what designers actually produce.
+
+## Implementation Notes
+
+Shipped in 0.3.4, with matching rules and messages in both implementations:
+
+- **Native renderer** (`dotgui/render`, `components.rs`): fills slots during component expansion, after props; content is expanded where it was written, so a document can fill a library component's slot with its own components.
+- **Kit**: the HTML renderer fills slots the same way, keeps the fallback of an unfilled slot, and removes a slot that ends up empty. The validator enforces rules 1–7 and 11; `slot-min` / `slot-max` are warnings.
+- **Gating:** every rule is an error in a document declaring 0.3 or higher and a warning in one written before it.
+
+**Not yet in the machine-readable schema.** `schema/types.ts` and `spec/spec.json` carry no component system yet — no `<component>`, `<instance>` or `<props>` — so there is nothing to attach `slot`, `slot-accept`, `slot-min`, `slot-max` or `<slot>` to. The whole component system, slots included, enters the schema once, with [RFC-0034](0034-component-prop-types.md) in 0.3.5.
+
+## Test Cases
+
+Tested in both implementations:
+
+- A filled slot replaces its fallback and takes the slot container's layout; local components inside the content expand.
+- An unfilled slot keeps its fallback; an empty slot leaves no box, padding or gap behind.
+- Filling an undeclared slot, the same slot twice, or a slot without a name fails; an instance holding anything but `<slot>`, and a `<slot>` anywhere but directly in an instance, fail.
+- `slot-accept="compset-item comp-tab"` takes every variant of the set and the named component, and rejects a `<text>` and an instance of anything else.
+- `slot-min` / `slot-max` violations warn and never fail.
+- A slot as the component's root, a slot inside a slot, a slot on a `<text>`, and a duplicate slot name fail where declared.
+- A component inside its own slot content fails.
+- In a `0.2` document the same mistakes only warn.
 
 ## Unresolved Questions
 
