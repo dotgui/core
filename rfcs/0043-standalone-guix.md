@@ -1,9 +1,10 @@
 ---
 rfc: 0043
 title: Standalone `.guix` — the served, readable form
-status: Proposed
+status: Implemented
 targets: 0.3.3
 date: 2026-09-12
+implemented: 2026-10-27
 ---
 
 # Standalone `.guix` — The Served, Readable Form
@@ -178,6 +179,24 @@ That argument is about the future and is offered as a direction, not a justifica
 **Require a `standalone` attribute** — Rejected. It would be a second source of truth about a fact already evident from the content, and it would mean a flattened document is not interchangeable with an authored one.
 
 **Restrict the standalone form to reading only** — Considered, rejected. Tempting, because it would sidestep the round-trip asymmetry by declaring the form read-only. But nothing enforces it, agents will edit what they can read, and a rule that cannot be checked is worse than a stated cost.
+
+## Implementation Notes
+
+Shipped in 0.3.3, with matching behaviour in both implementations:
+
+- **Native renderer** (`dotgui/render`): `parse_standalone_xml` reads bare markup as a standalone document; the WASM entry point treats markup handed over on its own the same way.
+- **Kit**: bare markup unpacks with `pkg.standalone`; `validate(xml, { standalone: true })` applies the form's rule directly. `addAsset` and a second document promote it to a package — the two triggers above.
+- **Rules:** a `data:` URI in any asset reference — `src`, `mask-src`, a `url(…)` value, or a token resolving to one — is `DATA_URI`; a local path in a standalone document is `LOCAL_ASSET_IN_STANDALONE`. Both are errors in a document declaring 0.3 or higher and warnings in one written before them, so bare 0.2 markup keeps working as it always did.
+
+The *standalone document declares 0.3* rule is carried by that gating: a 0.2 document is not held to the standalone rules, and so cannot claim the form's guarantees.
+
+## Test Cases
+
+- `<img src="data:…">` and a token holding `url(data:…)` fail in a `0.3` document and only warn in a `0.2` one.
+- `<img src="assets/hero.webp">` fails standalone and passes inside a package; `https://` sources and `mask-src` pass standalone.
+- A token resolving to a local path counts as a local path.
+- Bare `0.2` markup with a local path still validates.
+- Adding a local asset or a second screen to a standalone document makes it a package, which then accepts the local path.
 
 ## Unresolved Questions
 

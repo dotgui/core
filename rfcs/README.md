@@ -135,7 +135,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0043](0043-standalone-guix.md) | Standalone `.guix` — the served, readable form (needs 0042) | Proposed |
+| [0043](0043-standalone-guix.md) | Standalone `.guix` — the served, readable form | Implemented |
 
 ### 0.3.4 — Slots
 
