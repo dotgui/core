@@ -141,7 +141,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0044](0044-slots.md) | Slots — components that take content | Proposed |
+| [0044](0044-slots.md) | Slots — components that take content | Implemented |
 
 ### 0.3.5 — Prop Types
 
