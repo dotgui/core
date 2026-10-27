@@ -1,9 +1,10 @@
 ---
 rfc: 0024
 title: Complete paint model for visual export fidelity
-status: Accepted
+status: Implemented
 targets: 0.3.1
 date: 2026-05-22
+implemented: 2026-10-27
 ---
 
 # Complete paint model for visual export fidelity
@@ -53,7 +54,7 @@ Paints are ordered back-to-front in document order. Later fills render above ear
 | `visible` | Optional boolean, emitted only when preserving hidden paints is required |
 | `x` / `y` | Crop offset |
 | `w` / `h` | Crop size |
-| `transform` | Optional compact transform matrix for exact image/gradient mapping |
+| `transform` | *Deferred.* Reserved for exact image/gradient mapping; not rendered in 0.3.1 (see Unresolved Questions) |
 
 ## Reasoning
 
@@ -81,7 +82,7 @@ This keeps dotgui from becoming a design-editor save file while still making it 
 
 1. Keep `fill` as shorthand for a single visible paint.
 2. Emit `<appearance>` when there is more than one visible fill or when the fill is image/crop/transform-sensitive.
-3. Add paint-level `blend`, `visible`, and `transform` support.
+3. Add paint-level `blend` and `visible` support. (`transform` is deferred; see below.)
 4. Update renderer paint order to match design-tool stacking.
 5. Update optimizer rules so they do not collapse paint stacks unless the visual result is provably identical.
 
@@ -98,8 +99,24 @@ This keeps dotgui from becoming a design-editor save file while still making it 
 </frame>
 ```
 
+### What shipped in 0.3.1
+
+Both renderers — kit's HTML renderer and the native renderer — paint the following, and agree on them:
+
+- The stack in document order, later fills above earlier ones; `visible="false"` paints skipped.
+- Per-paint `opacity` and `blend`, each paint composited onto the stack once.
+- Image fills: `fit` of `cover` (the default when `fit` is absent), `contain`, `fill`, `none`, `tile` (repeated at the image's own size from the node's corner), and `crop` with an `x y w h` box (the whole image drawn into that box, cut to the node's outline). `crop` without all four of `x`, `y`, `w`, `h` falls back to `cover`.
+- Image adjustments `filter-exposure`, `filter-contrast`, `filter-saturation`, painted as CSS `brightness(1 + v)`, `contrast(1 + v)`, `saturate(1 + v)`.
+
+Not painted by either renderer: `transform`, and the `filter-temperature` / `filter-tint` / `filter-highlights` / `filter-shadows` adjustments, which have no CSS equivalent. A document may still carry them; they are kept, not drawn.
+
 ## Unresolved Questions
 
+Deferred out of 0.3.1, to a later RFC:
+
 - Should `transform` be a six-value matrix string or named numeric attrs?
-- Should hidden paints be emitted by default or only in debug/lossless export mode?
 - Should gradient handles get first-class attrs instead of a generic transform?
+
+Settled:
+
+- Hidden paints are emitted only when an exporter needs to preserve them (`visible="false"`); renderers skip them.
