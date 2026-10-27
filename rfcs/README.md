@@ -129,7 +129,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0042](0042-multi-document-packages.md) | Multi-document packages — many `.guix` in one `.gui` | Proposed |
+| [0042](0042-multi-document-packages.md) | Multi-document packages — many `.guix` in one `.gui` | Implemented |
 
 ### 0.3.3 — Standalone `.guix`
 
