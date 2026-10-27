@@ -123,7 +123,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0024](0024-complete-paint-model.md) | Complete paint model for visual export fidelity | Accepted |
+| [0024](0024-complete-paint-model.md) | Complete paint model for visual export fidelity | Implemented |
 
 ### 0.3.2 — Multi-Document Packages
 
