@@ -251,7 +251,7 @@ A consumer upgrades on purpose, by bumping that version — so docs and tooling 
 - **Each RFC in it is one point release.** `0.3.1` is one RFC, `0.3.2` the next, so what a file can contain traces to a single decision. Accepted and Proposed RFCs take the lowest numbers; Draft slots are tentative. The current assignment is in the [RFC index](rfcs/README.md#index).
 - **A chapter closes when its list is empty** — every RFC shipped, rejected, or moved on. The next release is then `x.y.0` of the next chapter. Once a chapter is underway, new ideas go to a later one, and a chapter that runs well past two or three months closes anyway, pushing what is unfinished forward.
 
-**Tools share the chapter, not the patch.** Every tool's version keeps the spec's `MAJOR.MINOR` — renderer `0.3.x` reads 0.3 documents — but counts its own `PATCH`, because it needs somewhere to put fixes and four-part versions (`0.3.4.1`) are not valid on npm or crates.io. Each tool **declares the exact spec point it reads** (`supports spec 0.3.4`) and refuses documents newer than that. So spec `0.3.4` may be read by renderer `0.3.7`. The renderer's [VERSIONING.md](https://github.com/dotgui/render/blob/main/VERSIONING.md) still describes the older chapter-only rule and is to be brought in line.
+**Tools share the chapter, not the patch.** Every tool's version keeps the spec's `MAJOR.MINOR` — renderer `0.3.x` reads 0.3 documents — but counts its own `PATCH`, because it needs somewhere to put fixes and four-part versions (`0.3.4.1`) are not valid on npm or crates.io. Each tool **declares the exact spec point it reads** (`supports spec 0.3.4`) and refuses documents newer than that. So spec `0.3.4` may be read by renderer `0.3.7`. The renderer's [VERSIONING.md](https://github.com/dotgui/render/blob/main/VERSIONING.md) spells out the same rule (pending [dotgui/render#95](https://github.com/dotgui/render/pull/95)).
 
 ---
 
@@ -278,7 +278,7 @@ This document describes the governance model. Where it stands:
 - 🚧 **Conformance test suite** — the behavioral safety net — is still to be built.
 - 🚧 **Parser split.** The kit has a TypeScript parser and the renderer has its own Rust parser, untested against each other. Moving both into `dotgui/parser` with shared tests is planned.
 - 🚧 **Renderer handover.** The kit's HTML renderer is the one in use; the Rust renderer is taking over drawing, with kit depending on its wasm build.
-- 🚧 **Version gate.** The renderer refuses newer chapters but not yet newer points inside one; the kit refuses nothing, and its validator still checks for a hard-coded `1.0`.
+- 🚧 **Version gate.** The native renderer refuses any document past the spec point it declares (`0.3.4`, pending [dotgui/render#95](https://github.com/dotgui/render/pull/95)). The kit refuses nothing yet, and its validator still checks for a hard-coded `1.0`.
 
 ### Open decisions
 
