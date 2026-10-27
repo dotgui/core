@@ -278,7 +278,7 @@ This document describes the governance model. Where it stands:
 - 🚧 **Conformance test suite** — the behavioral safety net — is still to be built.
 - 🚧 **Parser split.** The kit has a TypeScript parser and the renderer has its own Rust parser, untested against each other. Moving both into `dotgui/parser` with shared tests is planned.
 - 🚧 **Renderer handover.** The kit's HTML renderer is the one in use; the Rust renderer is taking over drawing, with kit depending on its wasm build.
-- 🚧 **Version gate.** Both the native renderer and the kit validator read documents up to spec `0.3.4` and refuse any later point or chapter, pending [dotgui/render#95](https://github.com/dotgui/render/pull/95) and [dotgui/kit#15](https://github.com/dotgui/kit/pull/15). The Figma plugin still writes `version="1.0"`, which both now refuse.
+- 🚧 **Version gate.** Both the native renderer and the kit validator read documents up to spec `0.3.5` and refuse any later point or chapter (pending dotgui/render#95, #96 and dotgui/kit#15, #16). `spec.json`'s `formatVersion` now comes from core (`specFormatVersion` in `schema/spec.content.ts`). The Figma plugin still writes `version="1.0"`, which both refuse.
 
 ### Open decisions
 

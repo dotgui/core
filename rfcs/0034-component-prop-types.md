@@ -1,10 +1,11 @@
 ---
 rfc: 0034
 title: Component prop types — data-typed prop vocabulary and override inference
-status: Draft
+status: Implemented
 targets: 0.3.5
 date: 2026-05-29
-updated: 2026-10-18
+updated: 2026-10-28
+implemented: 2026-10-28
 supersedes: 0008
 ---
 
@@ -214,6 +215,27 @@ The renderer treats this as a plain layout node. The `component` attr is informa
 - `type="color"` and `type="string"` have optional `bind` — authors must know the default to know when to omit it.
 - Inference from actual usage requires the plugin to scan all instances before generating the component block. This changes the plugin's traversal order — components must be registered after a full pass.
 - The 75% detach threshold is heuristic. Minimum 4-layer floor mitigates aggressive detaching of small components.
+
+## Implementation Notes
+
+Shipped in 0.3.5 for §1–4, with matching rules and messages in kit and the native renderer:
+
+- All seven data types, `bind` with its defaults, and space-separated `target` lists. The 0.1 names (`text`, `visible`, `fill`, `src`) still render and are reported as legacy.
+- **Implicit target:** a `string` prop whose name is the id of exactly one `<text>` in the body applies to it without `target`.
+- **Rules, checked where the component is declared:** an unknown type, a `number` or `style` prop without `bind`, a `style` bind that names no style slot, and a `target` that is missing and cannot be implicit. Errors in a document declaring 0.3 or higher, warnings before.
+- **Schema:** the component system enters `schema/types.ts` and `spec/spec.json` here — `PropDef`, `ComponentDef`, `ComponentSetDef`, `VariantDef`, `InstanceNode`, and RFC-0044's `SlotFill` and slot attributes — with `<prop>`, `<instance>` and `<slot>` reference entries.
+
+**Deferred: §5 (inference from actual usage) and §6 (the detach threshold).** Both are Figma exporter behaviour, not format vocabulary, and move with the Figma plugin work. Nothing in the format depends on them.
+
+## Test Cases
+
+Tested in both implementations:
+
+- Every data type with its `bind`, and a two-layer `target` list, validates and renders.
+- `type="number"` and `type="style"` without `bind` fail; `type="style" bind="radius"` fails.
+- `<prop name="label" type="string" />` applies to `<text id="label">` without `target`; with no matching id, or a non-string type, a missing `target` fails.
+- `type="enum"` fails; `type="text"` renders and is reported as legacy.
+- In a `0.2` document the same mistakes only warn.
 
 ## Unresolved Questions
 

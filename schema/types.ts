@@ -713,9 +713,25 @@ export interface GridNode extends Omit<StackNode, 'tag' | 'direction' | 'gap' | 
   'row-gap'?: number | string
 }
 
-export type GUIChild = FrameNode | StackNode | RowNode | ColNode | GridNode | GroupNode | TextNode | ImgNode | RectNode | EllipseNode | LineNode | SvgNode | ShapeNode
+export type GUIChild = FrameNode | StackNode | RowNode | ColNode | GridNode | GroupNode | TextNode | ImgNode | RectNode | EllipseNode | LineNode | SvgNode | ShapeNode | InstanceNode
 
-export interface FrameNode extends VisualAttrs {
+/**
+ * Makes a layout container a slot of the component it sits in (RFC-0044): an
+ * instance fills it by name. The container's own layout applies to whatever
+ * is inserted; its children are the fallback.
+ */
+export interface SlotAttrs {
+  /** Declares this container a slot, by name. Not on a component's root; not inside another slot. */
+  slot?: string
+  /** Space-separated component or component-set ids. Present = the slot takes only instances of these, flat. */
+  'slot-accept'?: string
+  /** Advisory minimum item count. A quality finding, never an error. */
+  'slot-min'?: number
+  /** Advisory maximum item count. A quality finding, never an error. */
+  'slot-max'?: number
+}
+
+export interface FrameNode extends VisualAttrs, SlotAttrs {
   tag: 'frame'
   name?: string
   x?: number
@@ -746,7 +762,7 @@ export interface FrameNode extends VisualAttrs {
   children: GUIChild[]
 }
 
-export interface StackNode extends VisualAttrs {
+export interface StackNode extends VisualAttrs, SlotAttrs {
   tag: 'stack'
   name?: string
   direction: LayoutDirection
@@ -853,6 +869,90 @@ export interface GUIDocument {
   styles?: Styles
   fonts: FontDeclaration[]
   assets: Asset[]
+  /** Reusable components (RFC-0008, RFC-0034, RFC-0044) */
+  components?: (ComponentDef | ComponentSetDef)[]
   /** The root layout node */
   root: FrameNode | StackNode | GroupNode
+}
+
+// ---------------------------------------------------------------------------
+// Components (RFC-0008, RFC-0034, RFC-0044)
+// ---------------------------------------------------------------------------
+
+/** Prop types are data types (RFC-0034). */
+export type PropType = 'string' | 'boolean' | 'number' | 'color' | 'image' | 'component' | 'style'
+
+/** The style slot a `style` prop swaps. */
+export type StyleBind = 'text-style' | 'fill-style' | 'effect-style' | 'stroke-style'
+
+/** One entry of a component's public API, inside <props>. */
+export interface PropDef {
+  tag: 'prop'
+  /** The attribute an instance passes the value as. */
+  name: string
+  /** string, boolean, number, color, image, component, or style. */
+  type: PropType
+  /**
+   * Layer id(s) the value applies to, space-separated. Optional for a string
+   * prop whose name is the id of exactly one <text> in the body.
+   */
+  target?: string
+  /**
+   * The attribute overridden on the target. Required for number and style;
+   * defaults to value (string), visible (boolean), fill (color, or stroke),
+   * src (image) and component (component).
+   */
+  bind?: string
+}
+
+/** A reusable component: an optional <props> block and one layout body. */
+export interface ComponentDef {
+  tag: 'component'
+  /** Referenced by <instance component>. */
+  id: string
+  /** Design-tool name, e.g. "Card/Product". */
+  name?: string
+  props?: PropDef[]
+  /** The component's layout root. May declare slots; may not be one. */
+  body: FrameNode | StackNode | RowNode | ColNode | GridNode | GroupNode
+}
+
+/** One member of a component set; an instance references it by its own id. */
+export interface VariantDef extends Omit<ComponentDef, 'tag'> {
+  tag: 'variant'
+}
+
+/** Related variants. In slot-accept, the set's id means every variant. */
+export interface ComponentSetDef {
+  tag: 'component-set'
+  id: string
+  name?: string
+  variants: VariantDef[]
+}
+
+/**
+ * A placement of a component. Every other attribute is a prop value or an
+ * override, passed flat; children are only <slot> fills.
+ */
+export interface InstanceNode {
+  tag: 'instance'
+  /** Component or variant id. */
+  component: string
+  x?: number
+  y?: number
+  /** Absent = the component's own width; scales the body when set. */
+  w?: number | 'fill'
+  /** Absent = the component's own height; scales the body when set. */
+  h?: number | 'fill'
+  /** Fills for the component's slots, by name. */
+  children?: SlotFill[]
+}
+
+/** Content for one named slot, written directly inside an <instance> (RFC-0044). */
+export interface SlotFill {
+  tag: 'slot'
+  /** The slot this fills. The component must declare it; each slot is filled once. */
+  name: string
+  /** Inserted as-is; it cannot read the component's props. */
+  children: GUIChild[]
 }

@@ -55,6 +55,12 @@ export interface ContentEntry {
   hubHidden?: boolean
 }
 
+/**
+ * The spec point this content describes: the chapter and the last RFC landed
+ * in it (see rfcs/README.md, Format Versions). Written into spec.json.
+ */
+export const specFormatVersion = '0.3.5'
+
 export const specCategoryOrder = ['Format', 'Metadata', 'Layout', 'Content', 'Geometry', 'Appearance']
 
 export const specContent: ContentEntry[] = [
@@ -87,7 +93,7 @@ export const specContent: ContentEntry[] = [
     slug: 'gui', tag: 'gui', name: '<gui>', kind: 'tag', category: 'Format', summary: 'document root',
     source: 'content',
     attributes: [
-      { name: 'version', type: 'string', required: true, description: 'Spec version. Current: 0.2.' },
+      { name: 'version', type: 'string', required: true, description: 'Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: ' + specFormatVersion + '.' },
       { name: 'name', type: 'string', description: 'Screen or layer name from the source design.' }
     ],
     description: [
@@ -229,29 +235,92 @@ export const specContent: ContentEntry[] = [
   {
     slug: 'components', tag: 'components', name: '<components>', kind: 'tag', category: 'Metadata', summary: 'component system',
     source: 'content',
-    attributes: [
-      { name: 'text', type: 'prop type', description: 'Overrides value attr of the target layer.' },
-      { name: 'visible', type: 'prop type', description: 'Hides target when set to "false".' }
-    ],
+    attributes: [],
     description: [
-      'A <components> block at the top of the document holds all component definitions. Instances reference a component by id and pass prop overrides as attributes.',
-      '<component> defines a single reusable component. <component-set> groups related variants. Each <variant> is a member of the set.',
-      'Declared props use a <props> block with <prop> entries. Ad-hoc overrides skip the props block and match by sanitized layer name.'
+      'A <components> block above the layout root holds every component definition. An <instance> places one by id and passes prop values as flat attributes.',
+      '<component id> defines one reusable component: an optional <props> block, then one layout body. <component-set id> groups <variant id> members; an instance references a variant by its own id.',
+      'A component may declare slots — layout containers carrying slot="name" — that an instance fills with content (RFC-0044).',
+      'In a multi-document package, components declared in library.guix are shared with every document (RFC-0042).'
     ],
     exampleLabel: 'Component + instance',
     example: `<components>
   <component name="Card/Product" id="comp-card">
     <props>
-      <prop name="title" type="text" target="title" />
+      <prop name="title" type="string" target="title" />
+      <prop name="accent" type="color" target="badge" />
     </props>
     <col w="320" radius="12" fill="#fff" p="16" gap="8">
       <text id="title" value="Product Name" font-size="16" font-weight="600" />
+      <rect id="badge" w="24" h="4" fill="#0A84FF" />
+      <col slot="details" gap="4" />
     </col>
   </component>
 </components>
 
-<instance component="comp-card" title="Nike Air Max 90" x="24" y="120" />`,
-    related: ['gui', 'col', 'text']
+<instance component="comp-card" title="Nike Air Max 90" accent="#FF3B30" />`,
+    related: ['prop', 'instance', 'slot']
+  },
+  {
+    slug: 'prop', tag: 'prop', name: '<prop>', kind: 'tag', category: 'Metadata', summary: 'typed component prop',
+    source: 'content',
+    attributes: [
+      { name: 'name', type: 'string', required: true, description: 'The attribute an instance passes the value as.' },
+      { name: 'type', type: 'string | boolean | number | color | image | component | style', required: true, description: 'A data type (RFC-0034).' },
+      { name: 'target', type: 'string', description: 'Layer id(s) the value applies to, space-separated. Optional for a string prop whose name is the id of exactly one <text> in the body.' },
+      { name: 'bind', type: 'string', description: 'The attribute overridden on the target. Required for number and style. Defaults: string → value, boolean → visible, color → fill (or stroke), image → src, component → component.' }
+    ],
+    description: [
+      'A <prop> inside a component\'s <props> block declares one value an instance may pass. Prop types are data types — string, boolean, number, color, image, component, style — and bind names which attribute of the target changes.',
+      'number and style always need bind, because each could mean several attributes. A list in target applies one value to several layers at once.'
+    ],
+    exampleLabel: 'Typed props',
+    example: `<props>
+  <prop name="label"       type="string"  target="label" />
+  <prop name="disabled"    type="boolean" target="button" />
+  <prop name="bg"          type="color"   target="surface" />
+  <prop name="radius"      type="number"  target="surface" bind="radius" />
+  <prop name="label-style" type="style"   target="label"   bind="text-style" />
+  <prop name="accent"      type="color"   target="icon label indicator" />
+</props>`,
+    related: ['components', 'instance']
+  },
+  {
+    slug: 'instance', tag: 'instance', name: '<instance>', kind: 'tag', category: 'Content', summary: 'component placement',
+    source: 'interface:InstanceNode',
+    mapsToFigma: 'Instance',
+    description: [
+      'Places a component by id. Prop values and overrides are flat attributes, whatever their type; tokens and assets use the usual $name form.',
+      'Its only children are <slot> fills. Setting w or h scales the component body to fit.'
+    ],
+    exampleLabel: 'Instance with props and a slot',
+    example: `<instance component="comp-screen" title="Audio Settings">
+  <slot name="body">
+    <instance component="comp-toggle" label="Lossless" />
+    <instance component="comp-toggle" label="Spatial" />
+  </slot>
+</instance>`,
+    related: ['components', 'prop', 'slot']
+  },
+  {
+    slug: 'slot', tag: 'slot', name: '<slot>', kind: 'tag', category: 'Content', summary: 'content for a component slot',
+    source: 'content',
+    attributes: [
+      { name: 'name', type: 'string', required: true, description: 'The slot this fills. The component must declare it; each slot is filled once.' }
+    ],
+    description: [
+      'A component declares a slot by putting slot="name" on one of its layout containers; that container\'s layout applies to whatever is inserted, and its own children are the fallback. slot-accept limits it to instances of listed components or component sets; slot-min and slot-max advise a count.',
+      'An instance fills a slot with a <slot name> child. <slot> is valid only directly inside an <instance>, and its content cannot read the component\'s props. An unfilled slot keeps its fallback; one left empty renders nothing — no box, padding, or gap.'
+    ],
+    exampleLabel: 'Declare and fill',
+    example: `<!-- in the component -->
+<row slot="tabs" slot-accept="compset-tab-item" slot-max="5" w="fill" gap="8" />
+
+<!-- in the instance -->
+<slot name="tabs">
+  <instance component="tab-library" />
+  <instance component="tab-settings" />
+</slot>`,
+    related: ['components', 'instance']
   },
 
   // ════════════════ LAYOUT ════════════════
