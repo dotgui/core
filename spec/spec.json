@@ -1,6 +1,6 @@
 {
   "$generated": "DO NOT EDIT — run `bun run gen:spec` in the kit. Source: core/schema/types.ts + spec.content.ts",
-  "formatVersion": "0.2",
+  "formatVersion": "0.3.5",
   "categoryOrder": [
     "Format",
     "Metadata",
@@ -248,7 +248,7 @@
           "name": "version",
           "type": "string",
           "required": true,
-          "description": "Spec version. Current: 0.2."
+          "description": "Spec version the document is written for: a chapter (\"0.3\") or a point in it (\"0.3.4\"). Consumers refuse a version newer than they read. Current: 0.3.5."
         },
         {
           "name": "name",
@@ -514,32 +514,157 @@
       "category": "Metadata",
       "summary": "component system",
       "description": [
-        "A <components> block at the top of the document holds all component definitions. Instances reference a component by id and pass prop overrides as attributes.",
-        "<component> defines a single reusable component. <component-set> groups related variants. Each <variant> is a member of the set.",
-        "Declared props use a <props> block with <prop> entries. Ad-hoc overrides skip the props block and match by sanitized layer name."
+        "A <components> block above the layout root holds every component definition. An <instance> places one by id and passes prop values as flat attributes.",
+        "<component id> defines one reusable component: an optional <props> block, then one layout body. <component-set id> groups <variant id> members; an instance references a variant by its own id.",
+        "A component may declare slots — layout containers carrying slot=\"name\" — that an instance fills with content (RFC-0044).",
+        "In a multi-document package, components declared in library.guix are shared with every document (RFC-0042)."
       ],
-      "attributes": [
-        {
-          "name": "text",
-          "type": "prop type",
-          "required": false,
-          "description": "Overrides value attr of the target layer."
-        },
-        {
-          "name": "visible",
-          "type": "prop type",
-          "required": false,
-          "description": "Hides target when set to \"false\"."
-        }
-      ],
+      "attributes": [],
       "sharedAttrs": false,
-      "example": "<components>\n  <component name=\"Card/Product\" id=\"comp-card\">\n    <props>\n      <prop name=\"title\" type=\"text\" target=\"title\" />\n    </props>\n    <col w=\"320\" radius=\"12\" fill=\"#fff\" p=\"16\" gap=\"8\">\n      <text id=\"title\" value=\"Product Name\" font-size=\"16\" font-weight=\"600\" />\n    </col>\n  </component>\n</components>\n\n<instance component=\"comp-card\" title=\"Nike Air Max 90\" x=\"24\" y=\"120\" />",
+      "example": "<components>\n  <component name=\"Card/Product\" id=\"comp-card\">\n    <props>\n      <prop name=\"title\" type=\"string\" target=\"title\" />\n      <prop name=\"accent\" type=\"color\" target=\"badge\" />\n    </props>\n    <col w=\"320\" radius=\"12\" fill=\"#fff\" p=\"16\" gap=\"8\">\n      <text id=\"title\" value=\"Product Name\" font-size=\"16\" font-weight=\"600\" />\n      <rect id=\"badge\" w=\"24\" h=\"4\" fill=\"#0A84FF\" />\n      <col slot=\"details\" gap=\"4\" />\n    </col>\n  </component>\n</components>\n\n<instance component=\"comp-card\" title=\"Nike Air Max 90\" accent=\"#FF3B30\" />",
       "exampleLabel": "Component + instance",
       "exampleMode": "hl",
       "related": [
-        "gui",
-        "col",
-        "text"
+        "prop",
+        "instance",
+        "slot"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "prop",
+      "tag": "prop",
+      "name": "<prop>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Metadata",
+      "summary": "typed component prop",
+      "description": [
+        "A <prop> inside a component's <props> block declares one value an instance may pass. Prop types are data types — string, boolean, number, color, image, component, style — and bind names which attribute of the target changes.",
+        "number and style always need bind, because each could mean several attributes. A list in target applies one value to several layers at once."
+      ],
+      "attributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "The attribute an instance passes the value as."
+        },
+        {
+          "name": "type",
+          "type": "string | boolean | number | color | image | component | style",
+          "required": true,
+          "description": "A data type (RFC-0034)."
+        },
+        {
+          "name": "target",
+          "type": "string",
+          "required": false,
+          "description": "Layer id(s) the value applies to, space-separated. Optional for a string prop whose name is the id of exactly one <text> in the body."
+        },
+        {
+          "name": "bind",
+          "type": "string",
+          "required": false,
+          "description": "The attribute overridden on the target. Required for number and style. Defaults: string → value, boolean → visible, color → fill (or stroke), image → src, component → component."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "<props>\n  <prop name=\"label\"       type=\"string\"  target=\"label\" />\n  <prop name=\"disabled\"    type=\"boolean\" target=\"button\" />\n  <prop name=\"bg\"          type=\"color\"   target=\"surface\" />\n  <prop name=\"radius\"      type=\"number\"  target=\"surface\" bind=\"radius\" />\n  <prop name=\"label-style\" type=\"style\"   target=\"label\"   bind=\"text-style\" />\n  <prop name=\"accent\"      type=\"color\"   target=\"icon label indicator\" />\n</props>",
+      "exampleLabel": "Typed props",
+      "exampleMode": "hl",
+      "related": [
+        "components",
+        "instance"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "instance",
+      "tag": "instance",
+      "name": "<instance>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Content",
+      "summary": "component placement",
+      "description": [
+        "Places a component by id. Prop values and overrides are flat attributes, whatever their type; tokens and assets use the usual $name form.",
+        "Its only children are <slot> fills. Setting w or h scales the component body to fit."
+      ],
+      "mapsToFigma": "Instance",
+      "attributes": [
+        {
+          "name": "component",
+          "type": "string",
+          "required": true,
+          "description": "Component or variant id."
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "w",
+          "type": "number | 'fill'",
+          "required": false,
+          "description": "Absent = the component's own width; scales the body when set."
+        },
+        {
+          "name": "h",
+          "type": "number | 'fill'",
+          "required": false,
+          "description": "Absent = the component's own height; scales the body when set."
+        }
+      ],
+      "sharedAttrs": true,
+      "example": "<instance component=\"comp-screen\" title=\"Audio Settings\">\n  <slot name=\"body\">\n    <instance component=\"comp-toggle\" label=\"Lossless\" />\n    <instance component=\"comp-toggle\" label=\"Spatial\" />\n  </slot>\n</instance>",
+      "exampleLabel": "Instance with props and a slot",
+      "exampleMode": "hl",
+      "related": [
+        "components",
+        "prop",
+        "slot"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "slot",
+      "tag": "slot",
+      "name": "<slot>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Content",
+      "summary": "content for a component slot",
+      "description": [
+        "A component declares a slot by putting slot=\"name\" on one of its layout containers; that container's layout applies to whatever is inserted, and its own children are the fallback. slot-accept limits it to instances of listed components or component sets; slot-min and slot-max advise a count.",
+        "An instance fills a slot with a <slot name> child. <slot> is valid only directly inside an <instance>, and its content cannot read the component's props. An unfilled slot keeps its fallback; one left empty renders nothing — no box, padding, or gap."
+      ],
+      "attributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "The slot this fills. The component must declare it; each slot is filled once."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "<!-- in the component -->\n<row slot=\"tabs\" slot-accept=\"compset-tab-item\" slot-max=\"5\" w=\"fill\" gap=\"8\" />\n\n<!-- in the instance -->\n<slot name=\"tabs\">\n  <instance component=\"tab-library\" />\n  <instance component=\"tab-settings\" />\n</slot>",
+      "exampleLabel": "Declare and fill",
+      "exampleMode": "hl",
+      "related": [
+        "components",
+        "instance"
       ],
       "faq": [],
       "hubHidden": false
@@ -717,6 +842,30 @@
           "type": "number",
           "required": false,
           "description": ""
+        },
+        {
+          "name": "slot",
+          "type": "string",
+          "required": false,
+          "description": "Declares this container a slot, by name. Not on a component's root; not inside another slot."
+        },
+        {
+          "name": "slot-accept",
+          "type": "string",
+          "required": false,
+          "description": "Space-separated component or component-set ids. Present = the slot takes only instances of these, flat."
+        },
+        {
+          "name": "slot-min",
+          "type": "number",
+          "required": false,
+          "description": "Advisory minimum item count. A quality finding, never an error."
+        },
+        {
+          "name": "slot-max",
+          "type": "number",
+          "required": false,
+          "description": "Advisory maximum item count. A quality finding, never an error."
         }
       ],
       "sharedAttrs": true,
@@ -1011,6 +1160,30 @@
           "type": "number",
           "required": false,
           "description": ""
+        },
+        {
+          "name": "slot",
+          "type": "string",
+          "required": false,
+          "description": "Declares this container a slot, by name. Not on a component's root; not inside another slot."
+        },
+        {
+          "name": "slot-accept",
+          "type": "string",
+          "required": false,
+          "description": "Space-separated component or component-set ids. Present = the slot takes only instances of these, flat."
+        },
+        {
+          "name": "slot-min",
+          "type": "number",
+          "required": false,
+          "description": "Advisory minimum item count. A quality finding, never an error."
+        },
+        {
+          "name": "slot-max",
+          "type": "number",
+          "required": false,
+          "description": "Advisory maximum item count. A quality finding, never an error."
         }
       ],
       "sharedAttrs": true,
@@ -1265,6 +1438,30 @@
           "type": "number",
           "required": false,
           "description": ""
+        },
+        {
+          "name": "slot",
+          "type": "string",
+          "required": false,
+          "description": "Declares this container a slot, by name. Not on a component's root; not inside another slot."
+        },
+        {
+          "name": "slot-accept",
+          "type": "string",
+          "required": false,
+          "description": "Space-separated component or component-set ids. Present = the slot takes only instances of these, flat."
+        },
+        {
+          "name": "slot-min",
+          "type": "number",
+          "required": false,
+          "description": "Advisory minimum item count. A quality finding, never an error."
+        },
+        {
+          "name": "slot-max",
+          "type": "number",
+          "required": false,
+          "description": "Advisory maximum item count. A quality finding, never an error."
         }
       ],
       "sharedAttrs": true,
@@ -1519,6 +1716,30 @@
           "type": "number",
           "required": false,
           "description": ""
+        },
+        {
+          "name": "slot",
+          "type": "string",
+          "required": false,
+          "description": "Declares this container a slot, by name. Not on a component's root; not inside another slot."
+        },
+        {
+          "name": "slot-accept",
+          "type": "string",
+          "required": false,
+          "description": "Space-separated component or component-set ids. Present = the slot takes only instances of these, flat."
+        },
+        {
+          "name": "slot-min",
+          "type": "number",
+          "required": false,
+          "description": "Advisory minimum item count. A quality finding, never an error."
+        },
+        {
+          "name": "slot-max",
+          "type": "number",
+          "required": false,
+          "description": "Advisory maximum item count. A quality finding, never an error."
         }
       ],
       "sharedAttrs": true,
@@ -1759,6 +1980,30 @@
           "type": "number",
           "required": false,
           "description": ""
+        },
+        {
+          "name": "slot",
+          "type": "string",
+          "required": false,
+          "description": "Declares this container a slot, by name. Not on a component's root; not inside another slot."
+        },
+        {
+          "name": "slot-accept",
+          "type": "string",
+          "required": false,
+          "description": "Space-separated component or component-set ids. Present = the slot takes only instances of these, flat."
+        },
+        {
+          "name": "slot-min",
+          "type": "number",
+          "required": false,
+          "description": "Advisory minimum item count. A quality finding, never an error."
+        },
+        {
+          "name": "slot-max",
+          "type": "number",
+          "required": false,
+          "description": "Advisory maximum item count. A quality finding, never an error."
         }
       ],
       "sharedAttrs": true,

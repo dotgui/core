@@ -2,14 +2,14 @@
 
 # .gui Element Reference
 
-Format version `0.2`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
+Format version `0.3.5`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
 
 ## Contents
 
 - **Format** — [.gui package](#package), [gui](#gui), [Root Canvas](#root-canvas)
-- **Metadata** — [tokens](#tokens), [styles](#styles), [fonts](#fonts), [Assets](#assets), [components](#components)
+- **Metadata** — [tokens](#tokens), [styles](#styles), [fonts](#fonts), [Assets](#assets), [components](#components), [prop](#prop)
 - **Layout** — [frame](#frame), [stack](#stack), [row](#row), [col](#col), [grid](#grid), [group](#group)
-- **Content** — [text](#text), [img](#img)
+- **Content** — [instance](#instance), [slot](#slot), [text](#text), [img](#img)
 - **Geometry** — [rect](#rect), [ellipse](#ellipse), [line](#line)
 - **Appearance** — [appearance](#appearance), [Fill Values](#fill-values), [Shared Attrs](#shared-attrs)
 
@@ -85,7 +85,7 @@ The root element is a document envelope — never rendered. Direct children are 
 
 | Attribute | Type | Description |
 |---|---|---|
-| `version` **(required)** | `string` | Spec version. Current: 0.2. |
+| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.3.5. |
 | `name` | `string` | Screen or layer name from the source design. |
 
 **Example**
@@ -263,16 +263,13 @@ All raster images are converted to WebP at 0.85 quality by the Figma plugin. Ext
 
 *component system*
 
-A <components> block at the top of the document holds all component definitions. Instances reference a component by id and pass prop overrides as attributes.
+A <components> block above the layout root holds every component definition. An <instance> places one by id and passes prop values as flat attributes.
 
-<component> defines a single reusable component. <component-set> groups related variants. Each <variant> is a member of the set.
+<component id> defines one reusable component: an optional <props> block, then one layout body. <component-set id> groups <variant id> members; an instance references a variant by its own id.
 
-Declared props use a <props> block with <prop> entries. Ad-hoc overrides skip the props block and match by sanitized layer name.
+A component may declare slots — layout containers carrying slot="name" — that an instance fills with content (RFC-0044).
 
-| Attribute | Type | Description |
-|---|---|---|
-| `text` | `prop type` | Overrides value attr of the target layer. |
-| `visible` | `prop type` | Hides target when set to "false". |
+In a multi-document package, components declared in library.guix are shared with every document (RFC-0042).
 
 **Component + instance**
 
@@ -280,18 +277,52 @@ Declared props use a <props> block with <prop> entries. Ad-hoc overrides skip th
 <components>
   <component name="Card/Product" id="comp-card">
     <props>
-      <prop name="title" type="text" target="title" />
+      <prop name="title" type="string" target="title" />
+      <prop name="accent" type="color" target="badge" />
     </props>
     <col w="320" radius="12" fill="#fff" p="16" gap="8">
       <text id="title" value="Product Name" font-size="16" font-weight="600" />
+      <rect id="badge" w="24" h="4" fill="#0A84FF" />
+      <col slot="details" gap="4" />
     </col>
   </component>
 </components>
 
-<instance component="comp-card" title="Nike Air Max 90" x="24" y="120" />
+<instance component="comp-card" title="Nike Air Max 90" accent="#FF3B30" />
 ```
 
-*Related: [gui](#gui), [col](#col), [text](#text)*
+*Related: [prop](#prop), [instance](#instance), [slot](#slot)*
+
+<a id="prop"></a>
+### prop <sup>tag</sup>
+
+*typed component prop*
+
+A <prop> inside a component's <props> block declares one value an instance may pass. Prop types are data types — string, boolean, number, color, image, component, style — and bind names which attribute of the target changes.
+
+number and style always need bind, because each could mean several attributes. A list in target applies one value to several layers at once.
+
+| Attribute | Type | Description |
+|---|---|---|
+| `name` **(required)** | `string` | The attribute an instance passes the value as. |
+| `type` **(required)** | `string | boolean | number | color | image | component | style` | A data type (RFC-0034). |
+| `target` | `string` | Layer id(s) the value applies to, space-separated. Optional for a string prop whose name is the id of exactly one <text> in the body. |
+| `bind` | `string` | The attribute overridden on the target. Required for number and style. Defaults: string → value, boolean → visible, color → fill (or stroke), image → src, component → component. |
+
+**Typed props**
+
+```xml
+<props>
+  <prop name="label"       type="string"  target="label" />
+  <prop name="disabled"    type="boolean" target="button" />
+  <prop name="bg"          type="color"   target="surface" />
+  <prop name="radius"      type="number"  target="surface" bind="radius" />
+  <prop name="label-style" type="style"   target="label"   bind="text-style" />
+  <prop name="accent"      type="color"   target="icon label indicator" />
+</props>
+```
+
+*Related: [components](#components), [instance](#instance)*
 
 ## Layout
 
@@ -331,6 +362,10 @@ w and h are required. clip (boolean presence) clips content to bounds.
 | `border-image` | `string` |  |
 | `outline` | `string` |  |
 | `outline-offset` | `number` |  |
+| `slot` | `string` | Declares this container a slot, by name. Not on a component's root; not inside another slot. |
+| `slot-accept` | `string` | Space-separated component or component-set ids. Present = the slot takes only instances of these, flat. |
+| `slot-min` | `number` | Advisory minimum item count. A quality finding, never an error. |
+| `slot-max` | `number` | Advisory maximum item count. A quality finding, never an error. |
 
 Also accepts all [shared attributes](#shared-attributes).
 
@@ -400,6 +435,10 @@ w / h absent = hug content; "fill" = fill parent; number = fixed px. p accepts C
 | `border-image` | `string` |  |
 | `outline` | `string` |  |
 | `outline-offset` | `number` |  |
+| `slot` | `string` | Declares this container a slot, by name. Not on a component's root; not inside another slot. |
+| `slot-accept` | `string` | Space-separated component or component-set ids. Present = the slot takes only instances of these, flat. |
+| `slot-min` | `number` | Advisory minimum item count. A quality finding, never an error. |
+| `slot-max` | `number` | Advisory maximum item count. A quality finding, never an error. |
 
 Also accepts all [shared attributes](#shared-attributes).
 
@@ -463,6 +502,10 @@ w / h absent = hug content; "fill" = fill parent; number = fixed px. gap="auto" 
 | `border-image` | `string` |  |
 | `outline` | `string` |  |
 | `outline-offset` | `number` |  |
+| `slot` | `string` | Declares this container a slot, by name. Not on a component's root; not inside another slot. |
+| `slot-accept` | `string` | Space-separated component or component-set ids. Present = the slot takes only instances of these, flat. |
+| `slot-min` | `number` | Advisory minimum item count. A quality finding, never an error. |
+| `slot-max` | `number` | Advisory maximum item count. A quality finding, never an error. |
 
 Also accepts all [shared attributes](#shared-attributes).
 
@@ -522,6 +565,10 @@ w / h absent = hug content; "fill" = fill parent; number = fixed px. gap="auto" 
 | `border-image` | `string` |  |
 | `outline` | `string` |  |
 | `outline-offset` | `number` |  |
+| `slot` | `string` | Declares this container a slot, by name. Not on a component's root; not inside another slot. |
+| `slot-accept` | `string` | Space-separated component or component-set ids. Present = the slot takes only instances of these, flat. |
+| `slot-min` | `number` | Advisory minimum item count. A quality finding, never an error. |
+| `slot-max` | `number` | Advisory maximum item count. A quality finding, never an error. |
 
 Also accepts all [shared attributes](#shared-attributes).
 
@@ -579,6 +626,10 @@ A grid range fills the spanned tracks (no w/h needed). A single value hugs conte
 | `border-image` | `string` |  |
 | `outline` | `string` |  |
 | `outline-offset` | `number` |  |
+| `slot` | `string` | Declares this container a slot, by name. Not on a component's root; not inside another slot. |
+| `slot-accept` | `string` | Space-separated component or component-set ids. Present = the slot takes only instances of these, flat. |
+| `slot-min` | `number` | Advisory minimum item count. A quality finding, never an error. |
+| `slot-max` | `number` | Advisory maximum item count. A quality finding, never an error. |
 
 Also accepts all [shared attributes](#shared-attributes).
 
@@ -637,6 +688,68 @@ Also accepts all [shared attributes](#shared-attributes).
 *Related: [frame](#frame), [img](#img), [appearance](#appearance)*
 
 ## Content
+
+<a id="instance"></a>
+### instance <sup>tag</sup>
+
+*component placement*
+
+Places a component by id. Prop values and overrides are flat attributes, whatever their type; tokens and assets use the usual $name form.
+
+Its only children are <slot> fills. Setting w or h scales the component body to fit.
+
+**Maps to Figma:** Instance
+
+| Attribute | Type | Description |
+|---|---|---|
+| `component` **(required)** | `string` | Component or variant id. |
+| `x` | `number` |  |
+| `y` | `number` |  |
+| `w` | `number | 'fill'` | Absent = the component's own width; scales the body when set. |
+| `h` | `number | 'fill'` | Absent = the component's own height; scales the body when set. |
+
+Also accepts all [shared attributes](#shared-attributes).
+
+**Instance with props and a slot**
+
+```xml
+<instance component="comp-screen" title="Audio Settings">
+  <slot name="body">
+    <instance component="comp-toggle" label="Lossless" />
+    <instance component="comp-toggle" label="Spatial" />
+  </slot>
+</instance>
+```
+
+*Related: [components](#components), [prop](#prop), [slot](#slot)*
+
+<a id="slot"></a>
+### slot <sup>tag</sup>
+
+*content for a component slot*
+
+A component declares a slot by putting slot="name" on one of its layout containers; that container's layout applies to whatever is inserted, and its own children are the fallback. slot-accept limits it to instances of listed components or component sets; slot-min and slot-max advise a count.
+
+An instance fills a slot with a <slot name> child. <slot> is valid only directly inside an <instance>, and its content cannot read the component's props. An unfilled slot keeps its fallback; one left empty renders nothing — no box, padding, or gap.
+
+| Attribute | Type | Description |
+|---|---|---|
+| `name` **(required)** | `string` | The slot this fills. The component must declare it; each slot is filled once. |
+
+**Declare and fill**
+
+```xml
+<!-- in the component -->
+<row slot="tabs" slot-accept="compset-tab-item" slot-max="5" w="fill" gap="8" />
+
+<!-- in the instance -->
+<slot name="tabs">
+  <instance component="tab-library" />
+  <instance component="tab-settings" />
+</slot>
+```
+
+*Related: [components](#components), [instance](#instance)*
 
 <a id="text"></a>
 ### text <sup>tag</sup>
