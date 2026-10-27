@@ -15,7 +15,7 @@ Each layer is the authority for the one below it. Nothing skips a level.
 | **Constitution** | [`PRINCIPLES.md`](PRINCIPLES.md) | What the format *must always* be | Amending a principle (rare, explicit) |
 | **Decisions** | [`rfcs/`](rfcs/) | *Why* the format is the way it is | Opening an RFC |
 | **Specification** | `schema/types.ts` + `schema/spec.content.ts` → `spec/spec.json` | *What* the format is, right now | An **accepted** RFC, never by hand |
-| **Implementations** | `@dotgui/kit` (parser, validator, renderer), the website, the docs | How tools read/write it | Regenerating / re-importing from the spec |
+| **Implementations** | the parser (TypeScript + Rust), the renderer, `@dotgui/kit`, the website, the docs | How tools read/write it | Regenerating / re-importing from the spec |
 
 The single rule that makes this work: **you change a lower layer only through the layer above it.** You don't edit the spec to add an attribute — you get an RFC accepted, and the spec follows. You don't redefine the format in the kit — the kit imports it from here.
 
@@ -41,25 +41,151 @@ The spec is **downstream of the RFCs.** It is the sum of every accepted RFC, cry
   RFC opened ──────────────► judged against PRINCIPLES.md + prior RFCs
    │                          (the dotgui-rfc skill runs this pre-check)
    ▼
-  Draft → Proposed → Accepted          ← the gate. nothing moves until here.
+  Draft → Proposed
    │
    ▼
-  spec/spec.json updated               ← the change is RATIFIED into the spec
-   │                                      (carried by the accepted RFC, not edited freely)
+  prototype + real designs            ← PROVE it before deciding (see below)
+   │                                     branch rfc/NNNN-name in core + the repo that draws it
    ▼
-  generate
-   ├──► spec/DOTGUI.md      regenerated   (human-readable reference)
-   ├──► @dotgui/kit         types + validator regenerated / conformance-checked
-   └──► website             /spec/* pages regenerated
+  Accepted                            ← the gate. nothing downstream moves until here.
    │
    ▼
-  conformance tests pass               ← proves every tool obeys the new spec
+  spec/spec.json updated              ← the change is RATIFIED into the spec
+   │                                     (carried by the accepted RFC, not edited freely)
+   ▼
+  parser → renderer → kit             ← implemented for real, tests from the real designs
    │
    ▼
-  released as a new format version     ← downstream pulls it deliberately
+  conformance tests pass              ← proves every tool obeys the new spec
+   │
+   ▼
+  core + parser + renderer + kit merge together, tagged with the same point release
+   │
+   ▼
+  downstream pulls it deliberately    ← embed, cli, app, figma-plugin, farm, website, web-app
 ```
 
-Adding an attribute, after this is in place, is: **open an RFC → get it accepted → its `spec.json` change lands → run generate.** Every doc, type, and page updates itself.
+Adding an attribute, after this is in place, is: **open an RFC → prove it on real designs → get it accepted → its `spec.json` change lands → implement → release.**
+
+### The same thing, as steps
+
+Using slots ([RFC-0044](rfcs/0044-slots.md)) as the example:
+
+1. **Propose.** The RFC lands as Proposed on branch `rfc/0044-slots` in core.
+2. **Prototype.** A rough version is built on a branch of the same name in the repo that draws it. It only needs to work well enough to judge — a quick HTML sketch or a polyfill that rewrites the new syntax into today's tags is fine.
+3. **Try it.** Render 2–3 real designs that use it. Write down what breaks and what feels wrong; revise the RFC. Repeat.
+4. **Accept.** Approval means *it has been seen working, its limits are known, and it is still wanted.* Nothing downstream touches the feature before this.
+5. **Specify.** The schema change is made in core; `spec.json` and `REFERENCE.md` regenerate.
+6. **Implement.** Parser (both languages), then renderer, then kit's validator / lint / score. The real designs from step 3 become the tests.
+7. **Release.** All branches merge to `main` together and get the same tag (`v0.3.4`). The RFC moves to Implemented.
+8. **Propagate.** Each downstream repo picks up the release in dependency order (see *The repositories*).
+
+A proposal that fails step 3 is rejected: the prototype is deleted, the spec change is discarded, and only the RFC text merges to `main`, marked Rejected, so the reasoning is kept.
+
+---
+
+## Proving a proposal before it is accepted
+
+A proposal is an idea on paper until something renders it. Every mature standards process builds a rough version before saying yes:
+
+- **JavaScript (TC39)** — proposals advance through stages; before the last one they need a polyfill or transpiler plugin, tests, and two shipping implementations.
+- **Browsers (WHATWG / W3C)** — an *explainer* first, then the feature ships behind a flag or as an origin trial; it is standardized only after real use.
+- **Swift / Rust** — Swift will not review a proposal without a working toolchain; Rust ships new features on nightly, behind a feature gate, before stabilizing.
+
+The common shape is **explainer → rough prototype → real usage → tests → accept.** For `.gui`, cheapest first:
+
+1. **Explainer** — the new syntax beside what you have to write today, and the picture it should produce.
+2. **Polyfill** — a small transform that rewrites the new syntax into today's tags, so the existing renderer draws it unchanged. Slots, variant overrides, and multi-document packages can all be tested this way.
+3. **Flagged prototype** — for what cannot be rewritten, a rough implementation in the renderer, off by default.
+4. **Real designs** — 2–3 actual screens that use it. They become the RFC's test cases.
+
+**The rule:** a Proposed RFC comes with an explainer and a polyfill or prototype that renders at least one real design. Acceptance follows from what that showed, not from how good the idea sounded.
+
+---
+
+## Branches and merging
+
+- **`main` is what is released.** Core `main` only ever holds a spec every tool must support. Each merge is one point release, tagged (`v0.3.1`, `v0.3.2`, …).
+- **One branch per RFC, named for the RFC, not the version** — `rfc/0044-slots`, the same name in every repo it touches. The RFC number never changes; its point release can (if slots are accepted before multi-document packages, slots take the earlier number).
+- **The branches merge together.** Core, parser, renderer and kit merge to `main` on the same day under the same tag, so the spec never says something the tools cannot do, and the tools never do something the spec does not define.
+- **Keep feature branches fresh.** Rebase them on `main` regularly; a prototype that falls behind proves nothing.
+- **Releases go in order.** `0.3.2` does not merge before `0.3.1`. If something ahead is stuck, renumber — pre-1.0 that is free.
+- **RFC text is not gated.** A Draft RFC is only a document and may land on `main` with its status saying Draft. Only the *spec change* waits on its branch.
+
+---
+
+## The repositories
+
+Eleven repositories under [github.com/dotgui](https://github.com/dotgui), plus local-only working folders.
+
+```
+                         core  (RFCs + spec)
+                           │
+                           ▼
+                  parser  (TypeScript + Rust, shared tests)
+                     │                  │
+                     ▼                  ▼
+          kit  (TypeScript)        render  (Rust → native + wasm)
+          lint · score · autofix   drawing
+          packaging                    │
+             │   ◄──── render-wasm ────┘
+             │
+     ┌── npm ─────────────────────────┬─────── local link ──────┐
+     ▼                                ▼                         ▼
+   embed ──► farm, website          cli ──► installs        app, figma-plugin
+                                            gui-skills
+   web-app (pwa)
+```
+
+| Repo | Role | Gets changes from | How |
+|---|---|---|---|
+| **core** | RFCs, principles, spec | — | The source |
+| **parser** | Reads `.gui` into a structured model — TypeScript and Rust | core | Implements the spec; both languages pass the same tests |
+| **render** | Draws `.gui` — native and wasm | parser | Depends on the Rust parser |
+| **kit** | Lint, score, autofix, packaging; today also the HTML renderer and TS parser | core, parser, render | Reads core's schema; generates `spec.json` back into core |
+| **embed** | Renders `.gui` in any web page | kit | npm |
+| **cli** | `gui` toolchain; installs the agent skill | kit | npm |
+| **farm** | gui.farm example library | kit, embed | npm |
+| **website** | dotgui.org | kit, embed, core | npm, plus `sync:spec` copies `spec.json` |
+| **web-app** | Browser app | kit | npm, pinned exactly |
+| **app** | Desktop app | kit | Local link to `../kit` |
+| **figma-plugin** | Figma export / import | kit | Local link to `../kit` |
+
+**Two ways downstream gets a change.** npm consumers (embed, cli, farm, website, web-app) only see a feature after kit is published and their version is bumped. Local-link consumers (app, figma-plugin) see whatever is in the `kit` folder *right now* — handy for testing, risky if built while kit is on an RFC branch. Build them from `main` only.
+
+**Release order for a feature:** core + parser + render + kit merge → parser and kit publish → embed publishes → farm, website, cli and web-app bump → app and figma-plugin rebuild → gui-skills learns to write it.
+
+---
+
+## One parser, two languages
+
+Parsing is useful far beyond drawing. Things that read `.gui` without rendering it:
+
+- **Agents** — read a file as structured data to understand or edit it (`gui read` / `gui write`).
+- **Lint and score** — structure only, no pixels.
+- **Code generation** — `.gui` → React, SwiftUI, Flutter, HTML.
+- **Figma import** — building layers inside the plugin sandbox.
+- **Diff** — what changed between two versions of a screen, node by node.
+- **Search and indexing** — gui.farm finding every screen with a tab bar, or every file using `$primary`.
+- **Editors** — autocomplete, error underlines, outline view.
+- **JSON / token / component extraction** — for any app that only wants the data.
+- **Server-side validation** — checking uploads before accepting them.
+
+Most of those live in JavaScript; the native renderer needs Rust. So the parser is **one repository with two implementations**:
+
+```
+dotgui/parser
+ ├── ts/      → npm:   @dotgui/parser
+ ├── rust/    → crate: dotgui-parser
+ └── tests/   → shared .gui files + expected parse results
+```
+
+- **Both run the same tests in the same CI run.** A new feature is one pull request that adds it to both; they cannot silently disagree. (tree-sitter and protobuf are kept the same way.)
+- **The renderer only draws.** It depends on `dotgui-parser` instead of carrying its own.
+- **kit stops owning parsing.** It depends on `@dotgui/parser` and keeps lint, score, autofix and packaging.
+- **Both return the same shape.** The parsed model — node names and fields — is defined once, in core beside `spec.json`, so neither implementation invents its own.
+
+The TypeScript implementation is not a fallback. The Figma plugin's main thread runs in a sandbox that cannot load wasm, and every JavaScript consumer is lighter without it.
 
 ---
 
@@ -119,6 +245,8 @@ The format is versioned (`0.1` → `0.2` → `1.0`; see [`rfcs/README.md`](rfcs/
 
 A consumer upgrades on purpose, by bumping that version — so docs and tooling ship *in step with a release*, never changing out from under users mid-flight. Pre-1.0, breaking changes are free; post-1.0, semver applies (MAJOR = breaking, MINOR = additive, PATCH = clarification).
 
+**Pre-1.0, each RFC is its own point release.** `0.3.1` is one RFC, `0.3.2` the next, so what a file can contain traces to a single decision. Accepted and Proposed RFCs take the lowest numbers; Draft slots are tentative. The current assignment is in the [RFC index](rfcs/README.md#index).
+
 ---
 
 ## Conformance — the anti-drift guarantee
@@ -142,3 +270,12 @@ This document describes the governance model. Where it stands:
 - 🚧 **Versioned publishing.** Consumers currently sync from a sibling checkout of core; publishing core as a package (so consumers pin a version) is the next step.
 - 🚧 **Data-driven validator.** `validate.ts` is still hand-maintained and can drift from the types; pointing it at `spec.json` would close that gap.
 - 🚧 **Conformance test suite** — the behavioral safety net — is still to be built.
+- 🚧 **Parser split.** The kit has a TypeScript parser and the renderer has its own Rust parser, untested against each other. Moving both into `dotgui/parser` with shared tests is planned.
+- 🚧 **Renderer handover.** The kit's HTML renderer is the one in use; the Rust renderer is taking over drawing, with kit depending on its wasm build.
+- 🚧 **No version gate.** No tool yet refuses a file newer than it understands; the validator still checks for a hard-coded `1.0`.
+
+### Open decisions
+
+- **Tool versions vs. spec versions.** `render/VERSIONING.md` says documents are versioned `MAJOR.MINOR` only and a renderer's patch number never means new vocabulary; per-RFC point releases contradict that. Leaning: each tool keeps its own version and declares the spec version it supports.
+- **`spec-next`.** With one branch per RFC, a shared integration branch mixes features again. Leaning: merge it into `main` and retire it.
+- **Figma sandbox.** Confirm the plugin's main thread cannot load wasm before relying on that as the reason the TypeScript parser must exist.
