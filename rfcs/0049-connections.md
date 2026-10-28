@@ -2,7 +2,7 @@
 rfc: 0049
 title: Connections — which element leads where
 status: Draft
-targets: 0.4
+targets: 0.5
 date: 2026-10-17
 updated: 2026-10-18
 depends-on: 0042, 0045, 0046, 0048

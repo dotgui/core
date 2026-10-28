@@ -247,7 +247,7 @@ A consumer upgrades on purpose, by bumping that version — so docs and tooling 
 
 **Pre-1.0, the spec moves in chapters.**
 
-- **A chapter is the middle number** (`0.3`, `0.4`, `0.5`): a themed group of RFCs, planned up front. 0.3 is components and packages; 0.4 is motion and interaction.
+- **A chapter is the middle number** (`0.3`, `0.4`, `0.5`): a themed group of RFCs, planned up front. 0.3 is components and packages; 0.4 is libraries; 0.5 is motion and interaction.
 - **Each RFC in it is one point release.** `0.3.1` is one RFC, `0.3.2` the next, so what a file can contain traces to a single decision. Accepted and Proposed RFCs take the lowest numbers; Draft slots are tentative. The current assignment is in the [RFC index](rfcs/README.md#index).
 - **A chapter closes when its list is empty** — every RFC shipped, rejected, or moved on. The next release is then `x.y.0` of the next chapter. Once a chapter is underway, new ideas go to a later one, and a chapter that runs well past two or three months closes anyway, pushing what is unfinished forward.
 
@@ -278,7 +278,7 @@ This document describes the governance model. Where it stands:
 - 🚧 **Conformance test suite** — the behavioral safety net — is still to be built.
 - 🚧 **Parser split.** The kit has a TypeScript parser and the renderer has its own Rust parser, untested against each other. Moving both into `dotgui/parser` with shared tests is planned.
 - 🚧 **Renderer handover.** The kit's HTML renderer is the one in use; the Rust renderer is taking over drawing, with kit depending on its wasm build.
-- 🚧 **Version gate.** Both the native renderer and the kit validator read documents up to spec `0.3.11` and refuse any later point or chapter (0.3.11 pending dotgui/render#103 and dotgui/kit#22). `spec.json`'s `formatVersion` comes from core (`specFormatVersion` in `schema/spec.content.ts`). The Figma plugin still writes `version="1.0"` and a `<meta>` block; both tools refuse the first and report the second as obsolete.
+- 🚧 **Version gate.** Both the native renderer and the kit validator read documents up to spec `0.4.1` and refuse any later point or chapter (0.4.1 pending dotgui/render#104 and dotgui/kit#23). `spec.json`'s `formatVersion` comes from core (`specFormatVersion` in `schema/spec.content.ts`). The Figma plugin still writes `version="1.0"` and a `<meta>` block; both tools refuse the first and report the second as obsolete.
 
 ### Open decisions
 
