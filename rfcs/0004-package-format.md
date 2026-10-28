@@ -16,7 +16,7 @@ A UI file references external assets — images, vector artwork, fonts. These ne
 
 ## Decision
 
-> **Amended.** [RFC-0042](0042-multi-document-packages.md) replaced the single `design.guix` with any number of root documents plus an optional `library.guix`. [RFC-0043](0043-standalone-guix.md) made bare `.guix` markup a served form. [RFC-0054](0054-folder-form-packages.md) (Draft) proposes that a folder named `*.gui` is a package too. The ZIP described below remains the transfer form.
+> **Amended.** [RFC-0042](0042-multi-document-packages.md) replaced the single `design.guix` with any number of root documents plus an optional `library.guix`. [RFC-0043](0043-standalone-guix.md) made bare `.guix` markup a served form. [RFC-0054](0054-folder-form-packages.md) made a directory named `*.gui` a package too — the form a package is worked on in. The ZIP described below remains the transfer form.
 
 `.gui` is always a ZIP package. There is no standalone markup format. The markup lives inside the package as `design.guix`. Binary assets live in `assets/`. A preview thumbnail lives at `preview.webp`.
 

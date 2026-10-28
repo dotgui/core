@@ -199,7 +199,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0054](0054-folder-form-packages.md) | Folder-form packages — a folder named `*.gui` is a package (amends 0004) | Draft |
+| [0054](0054-folder-form-packages.md) | Folder-form packages — a folder named `*.gui` is a package (amends 0004) | Implemented |
 
 ### 0.4.2 — The Library Directory
 
