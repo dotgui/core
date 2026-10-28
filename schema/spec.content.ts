@@ -59,7 +59,7 @@ export interface ContentEntry {
  * The spec point this content describes: the chapter and the last RFC landed
  * in it (see rfcs/README.md, Format Versions). Written into spec.json.
  */
-export const specFormatVersion = '0.3.7'
+export const specFormatVersion = '0.3.8'
 
 export const specCategoryOrder = ['Format', 'Metadata', 'Layout', 'Content', 'Geometry', 'Appearance']
 
@@ -561,6 +561,7 @@ export const specContent: ContentEntry[] = [
       'Visual attributes available on all layout, content, and geometry nodes.',
       'id names a node so something can point at it: a prop target, a path segment through an instance (target="tab-1/label"). Lowercase kebab-case, written only where something points, unique within its scope — the screen tree of a document, or one component or variant body. A reference that does not resolve is an error (RFC-0046).',
       'source-id is the source tool\'s own handle for a node, read against source on the <gui> root. It is optional, written by exporters only when the user asks for an export that can go back, and opaque: the format never parses it. A document with any source-id must declare source. What each tool writes is in spec/SOURCES.md (RFC-0046).',
+      'detached-from names the component a layout container was detached from, when an exporter could not keep a heavily-overridden instance as an <instance>. It holds a component or variant id declared in the document or its library, and must resolve; it changes nothing on screen. Only <instance> carries component (RFC-0035).',
       'Boolean presence convention: bare attributes without a value are treated as true. <frame clip> = <frame clip="true">. Applies to: clip, mask, wrap, abs, truncate, reverse-z.'
     ],
     exampleLabel: 'Shared attrs in use',

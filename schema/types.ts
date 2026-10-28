@@ -745,6 +745,12 @@ export interface SlotAttrs {
 export interface FrameNode extends VisualAttrs, SlotAttrs {
   tag: 'frame'
   name?: string
+  /**
+   * The component this container was detached from: a component or variant
+   * id declared in the document or its library. Exporters only; changes
+   * nothing on screen (RFC-0035).
+   */
+  'detached-from'?: string
   x?: number
   y?: number
   /** Required on frame */
@@ -776,6 +782,12 @@ export interface FrameNode extends VisualAttrs, SlotAttrs {
 export interface StackNode extends VisualAttrs, SlotAttrs {
   tag: 'stack'
   name?: string
+  /**
+   * The component this container was detached from: a component or variant
+   * id declared in the document or its library. Exporters only; changes
+   * nothing on screen (RFC-0035).
+   */
+  'detached-from'?: string
   direction: LayoutDirection
   x?: number
   y?: number
@@ -845,6 +857,12 @@ export interface StackNode extends VisualAttrs, SlotAttrs {
 export interface GroupNode extends VisualAttrs {
   tag: 'group'
   name?: string
+  /**
+   * The component this container was detached from: a component or variant
+   * id declared in the document or its library. Exporters only; changes
+   * nothing on screen (RFC-0035).
+   */
+  'detached-from'?: string
   x?: number
   y?: number
   /** Required on group — no content to derive size from */
