@@ -165,7 +165,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0035](0035-detached-from.md) | `detached-from` — origin traceability for heavily-overridden instances | Accepted |
+| [0035](0035-detached-from.md) | `detached-from` — origin traceability for heavily-overridden instances | Implemented |
 
 ### 0.3.9 — Color & Units
 

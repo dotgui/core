@@ -1,10 +1,11 @@
 ---
 rfc: 0035
 title: detached-from — origin traceability for heavily-overridden instances
-status: Accepted
+status: Implemented
 targets: 0.3.8
 date: 2026-05-31
 updated: 2026-10-28
+implemented: 2026-10-28
 ---
 
 # `detached-from` — Origin Traceability for Heavily-Overridden Instances
@@ -114,7 +115,12 @@ Rules 3 and 6 are 0.3.8 rules: errors in a document declaring 0.3.8 or higher, w
 - **Optimizer:** keeps `detached-from` by default; an opt-in pass strips it.
 - **On acceptance:** [RFC-0044](0044-slots.md)'s open question on detached instances is settled by rule 7, and [RFC-0042](0042-multi-document-packages.md)'s cross-document origin question by rule 3.
 
+Shipped in 0.3.8: the schema, kit's validator, and the native renderer. Both read documents up to 0.3.8. The Figma exporter rule (write `detached-from` only for a declared component) waits with the rest of the Figma plugin work.
+
 ## Test Cases
+
+Tested in kit and the native renderer:
+
 
 - `<col detached-from="comp-heading">` with `comp-heading` declared in the document, or in `library.guix`, validates and renders exactly as the same `<col>` without it.
 - `detached-from` naming an undeclared id is an error in 0.3.8, a warning in 0.3.7.
