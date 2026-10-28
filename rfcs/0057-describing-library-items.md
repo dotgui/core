@@ -1,10 +1,11 @@
 ---
 rfc: 0057
 title: description and template — what a library item is for
-status: Accepted
+status: Implemented
 targets: 0.4.3
 date: 2026-10-29
 updated: 2026-10-29
+implemented: 2026-10-29
 depends-on: 0005, 0008, 0042
 ---
 
@@ -72,7 +73,7 @@ Rules:
 
 1. **Never rendered.** A renderer ignores it. Adding, changing or removing it has zero visual impact.
 2. **Plain text.** No markdown, no links, no structured fields. The value is one paragraph. XML attribute normalisation turns line breaks into spaces, and that is intended.
-3. **Belongs to the definition.** It lives where the item is declared. An `<instance>` does not carry or override it.
+3. **Belongs to the definition.** It lives where the item is declared. An `<instance>` does not carry or override it: an instance's attributes are prop values, so `<instance description="…">` sets a prop named `description` and is not this property.
 4. **Exporters copy, they don't write.** An exporter writes `description` verbatim when the source item has one, and omits it when the source has none. It never generates one ([RFC-0010](0010-no-ai-in-pipeline.md)). Hand-written and AI-written files may add descriptions freely; that is authoring, not export.
 5. **Preserved by every transform.** An optimizer must not strip it as "no visual impact". `flatten` and any library copy carry it with the item.
 6. **Validation.** `description=""` is a warning, because an empty description says nothing (P4). `description` on any other element is an error in a document declaring 0.4.3 or higher, and a warning before.
@@ -175,14 +176,19 @@ The cost is opt-in, sits only in library files, and is read once per library. Wi
 ## Implementation Notes
 
 - **Schema:** `description` on component, component set, variant, the three token types and the three style types; `template` on `<gui>`.
-- **Kit validator:** `DESCRIPTION_EMPTY` (warning) and `DESCRIPTION_MISPLACED` (error from 0.4.3, warning before); `TEMPLATE_IN_LIBRARY` for `template` on `library.guix` or a `library/` file. `info()` lists the documents that are templates.
+- **Kit validator:** `DESCRIPTION_EMPTY` (warning) and `DESCRIPTION_MISPLACED` (error from 0.4.3, warning before); `TEMPLATE_IN_LIBRARY` for `template` on `library.guix` or a `library/` file. `info()` lists the documents that are templates. `template` joins the presence attributes, so a bare `<gui template>` parses.
 - **Native renderer:** the same rules; both attributes are ignored when drawing.
 - **Figma exporter:** copies component, set, variant, variable and style descriptions verbatim. Deferred with the rest of the Figma plugin work.
 
+Shipped in 0.4.3: the schema and spec text, kit's validator and package checks, and the native renderer. Both read documents up to 0.4.3.
+
 ## Test Cases
 
+Tested in kit and the native renderer:
+
+
 - `description` on each of the nine elements validates and changes nothing on screen.
-- `description` on a `<col>` or an `<instance>` is an error in 0.4.3 and a warning in 0.4.2.
+- `description` on a `<col>` or on `<gui>` is an error in 0.4.3 and a warning in 0.4.2; on an `<instance>` it is a prop value and is left alone.
 - `description=""` warns.
 - `<gui template>` on a document validates and renders as without it; on `library.guix` or `library/x.guix` it is an error.
 
