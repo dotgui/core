@@ -1,10 +1,11 @@
 ---
 rfc: 0046
 title: Identity and source ids — addressing nodes in a file, and tracing them to their source
-status: Accepted
+status: Implemented
 targets: 0.3.7
 date: 2026-10-16
 updated: 2026-10-28
+implemented: 2026-10-28
 ---
 
 # Identity and Source Ids — Addressing Nodes in a File, and Tracing Them to Their Source
@@ -366,10 +367,37 @@ That cost is paid only by exports the user asked to round-trip, which are the fi
 
 **Synthesise a `source-id` from a DOM selector for HTML captures** — Rejected under [P15](../PRINCIPLES.md). A selector is a position, and would claim a stability the capture does not have.
 
+## Drawbacks
+
+- **Existing component ids may not be kebab-case.** A 0.3.6 document with `id="saveButton"` only warns; declaring 0.3.7 makes it an error, and the id has to be renamed along with every reference to it.
+- **Blanket ids are no longer written, but old files still carry them.** They stay valid — an id nothing points at is noise, not an error — and fade out as files are re-exported.
+- **The native renderer resolves paths but does not report one that misses.** A path that does not reach an instance changes nothing on screen; kit's validator is what names it. A renderer-side check can follow once the parser is shared.
+- **Figma ids need the file.** A Figma `source-id` cannot be resolved without the consumer knowing which file it came from. That is deliberate (*Why the source file is not recorded*), and it means a round trip is always an explicit act.
+
+## Implementation Notes
+
+- **Schema:** `id` and `source-id` on every node (`VisualAttrs`), on `<instance>`, `<component>`, `<component-set>`, and `source-id` on `<gui>`. `target` on `<prop>` describes paths. `spec/DOTGUI.md` *Id generation* is replaced by *Ids, paths and source ids*.
+- **Guidelines:** [`spec/SOURCES.md`](../spec/SOURCES.md) — what Figma, Penpot, Sketch, HTML capture and code generators write.
+- **Kit validator:** `INVALID_ID`, `DUPLICATE_ID` (per scope; slot content in the scope that wrote it), `DUPLICATE_COMPONENT_ID` (in a document, and across documents in `validateDocument`), `UNRESOLVED_TARGET` (ids and paths), `SOURCE_ID_NO_SOURCE`. Errors from 0.3.7, warnings in a document declaring an earlier point.
+- **Kit HTML renderer and native renderer:** a path target hands its value to the nested instance, applied after that instance's own props, so the enclosing component wins. `id` and `source-id` on an instance are never read as overrides and are not copied onto the expanded body. The native renderer refuses `source-id` without `source` from 0.3.7.
+- **Figma exporter:** writes `source-id` per [`spec/SOURCES.md`](../spec/SOURCES.md) only for round-trip exports, and `id` only on nodes something points at. Deferred with the rest of the Figma plugin work.
+
+Shipped in 0.3.7: the schema, the guidelines, kit's validator and renderer, and the native renderer. Both read documents up to 0.3.7.
+
+## Test Cases
+
+Tested in kit and the native renderer:
+
+- `<prop target="tab-1/label">` and `target="tab-1/label tab-2/label"` set the labels inside each nested tab.
+- A value handed down a path wins over the nested instance's own value for the same prop.
+- `target="missing"`, `"tab-1/missing"`, `"bar/label"` (not an instance) and `"tab-9/label"` are `UNRESOLVED_TARGET` errors in 0.3.7 and warnings in 0.3.6.
+- `id="saveButton"` is `INVALID_ID`; two `id="title"` in one scope are `DUPLICATE_ID`; the same id in the screen and in two component bodies is fine; an id in slot content collides with the screen's.
+- Two components with one id, in a document or in two documents of a package, are `DUPLICATE_COMPONENT_ID`.
+- `source-id` with `source="figma"` on the root validates; without `source` it is an error from 0.3.7 and advice before; a document with no `source-id` needs no `source`.
+- `id` and `source-id` on an instance stay off the body it expands to.
+
 ## Unresolved Questions
 
-- **Strict kebab-case for `id`, or any XML name?** Leaning strict. It is what generation already produces, and it guarantees `/` never appears in an id. Hand-written files that want `saveButton` would have to write `save-button`.
-- **Must a re-export preserve ids?** Matching by `source-id` to keep previous ids is permitted here, not required. A rule that needs the previous file makes export depend on history, which sits uneasily with [P14](../PRINCIPLES.md). Leaning: keep it permitted.
-- **Does `detached-from` fold into this?** `detached-from="comp-x"` ([RFC-0035](0035-detached-from.md)) records which *component* a frame came from — a reference inside the package, where `source-id` points outside it. It is a reference, so it uses this RFC's ids. Leaning: keep it as its own point release (0.3.8), built on this one.
+- **Must a re-export preserve ids?** Permitted, not required. A rule that needs the previous file makes export depend on history, which sits uneasily with [P14](../PRINCIPLES.md). Revisit if consumers come to depend on it.
+- **`detached-from`** ([RFC-0035](0035-detached-from.md), 0.3.8) records which component a frame came from — a reference inside the package, written with this RFC's ids.
 - **Cross-variant identity.** Settled in [RFC-0048](0048-motion.md): corresponding nodes in different variants carry the same `id`, so `smart` transitions can match them.
-- **Spec and RFC updates on acceptance.** `spec/DOTGUI.md` *Id generation* is rewritten; `spec/SOURCES.md` is added with the Figma, Penpot, Sketch and HTML guidelines; [RFC-0044](0044-slots.md)'s open question on package-wide component ids is marked settled here.
