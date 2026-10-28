@@ -504,11 +504,27 @@ When an instance overrides more than 75% of the component body's layers (minimum
 
 ---
 
-#### Id generation
+#### Ids, paths and source ids
 
-Every node inside a component body gets `id` = its layer name sanitized to lowercase kebab-case (`"Button Label"` → `id="button-label"`). Duplicates are suffixed: first `"Icon"` → `id="icon"`, second → `id="icon-2"`, and so on.
+Any node may carry `id`, and a node something points at must ([RFC-0046](../rfcs/0046-identity-and-source-ids.md)). A node nothing points at should not carry one.
 
-`target` on a `<prop>` is a direct id reference — find the layer with that id in the component body and apply the prop value to it.
+- **Format:** lowercase kebab-case beginning with a letter — `[a-z][a-z0-9-]*`. An exporter generates it from the layer name (`"Button Label"` → `id="button-label"`), suffixing `-2`, `-3` on collision, and only on nodes that need one.
+- **Scopes:** the screen tree of each document is one scope; each component and variant body is its own. Ids are unique within a scope. Slot content belongs to the scope that wrote it. Component and component-set ids are unique across the whole package.
+- **`target`** on a `<prop>` names an id in the component body, or a **path** through instances in it: `tab-1/label` is the node `label` inside the instance `tab-1`. Every segment but the last must be an `<instance>` id; the next segment is read in that instance's component body. A target that does not resolve is an error.
+
+```xml
+<component id="comp-tabbar">
+  <props>
+    <prop name="first-label" type="string" target="tab-1/label" />
+  </props>
+  <row gap="8">
+    <instance id="tab-1" component="comp-tab-item" />
+    <instance id="tab-2" component="comp-tab-item" />
+  </row>
+</component>
+```
+
+`source-id` is the source tool's own handle for a node, read against `source` on the `<gui>` root. It is optional and written by exporters only, for exports meant to round-trip; the format never parses it, and a document with any `source-id` must declare `source`. What each tool writes is in [SOURCES.md](SOURCES.md).
 
 ### Layout Tags
 
