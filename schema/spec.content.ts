@@ -59,7 +59,7 @@ export interface ContentEntry {
  * The spec point this content describes: the chapter and the last RFC landed
  * in it (see rfcs/README.md, Format Versions). Written into spec.json.
  */
-export const specFormatVersion = '0.3.5'
+export const specFormatVersion = '0.3.6'
 
 export const specCategoryOrder = ['Format', 'Metadata', 'Layout', 'Content', 'Geometry', 'Appearance']
 
@@ -94,13 +94,16 @@ export const specContent: ContentEntry[] = [
     source: 'content',
     attributes: [
       { name: 'version', type: 'string', required: true, description: 'Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: ' + specFormatVersion + '.' },
-      { name: 'name', type: 'string', description: 'Screen or layer name from the source design.' }
+      { name: 'name', type: 'string', description: 'Screen or layer name from the source design.' },
+      { name: 'platform', type: 'string', description: 'The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036).' },
+      { name: 'source', type: 'string', description: 'The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036).' }
     ],
     description: [
-      'The root element is a document envelope — never rendered. Direct children are metadata blocks or exactly one root layout node. Metadata always precedes the layout root.'
+      'The root element is a document envelope — never rendered. Direct children are metadata blocks or exactly one root layout node. Metadata always precedes the layout root.',
+      'platform and source describe the document itself and belong to it alone: in a multi-document package each document, library.guix included, carries its own. There is no <meta> block; files written before 0.3.6 that carry one keep working.'
     ],
     exampleLabel: 'Example',
-    example: `<gui version="0.2" name="Checkout">
+    example: `<gui version="0.3" name="Checkout" platform="ios">
   <tokens>
     <color name="primary" value="#007AFF" />
   </tokens>
