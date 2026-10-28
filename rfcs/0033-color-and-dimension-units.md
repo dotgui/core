@@ -1,10 +1,11 @@
 ---
 rfc: 0033
 title: Color formats and dimension units
-status: Accepted
+status: Implemented
 targets: 0.3.9
 date: 2026-05-25
 updated: 2026-10-28
+implemented: 2026-10-28
 ---
 
 # Color Formats and Dimension Units
@@ -137,7 +138,11 @@ Both are 0.3.9 rules: a document declaring 0.3.9 or higher that uses a dropped f
 - **Figma exporter:** write opaque gradient stops as hex. Deferred with the rest of the Figma plugin work.
 - **Optimizer:** its color rules are its own; it must not convert `rgba()` or `oklch()`.
 
+Shipped in 0.3.9: the schema and reference, kit's validator, and the native renderer — which now draws `rgba()`, `rgb()` and `oklch()` everywhere, including exported gradients, and keeps a border color with spaces in one piece. Both read documents up to 0.3.9. The Figma exporter change waits with the rest of the Figma plugin work.
+
 ## Test Cases
+
+Tested in kit and the native renderer:
 
 **Colors**
 - `#FF0000`, `#FF000080`, `rgba(255, 0, 0, 0.5)`, `oklch(0.6 0.2 250)`, `oklch(0.6 0.2 250 / 0.5)`, `oklch(60% 0.2 250)` — valid, and drawn by the native renderer.

@@ -171,7 +171,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0033](0033-color-and-dimension-units.md) | Color formats and dimension units | Accepted |
+| [0033](0033-color-and-dimension-units.md) | Color formats and dimension units | Implemented |
 
 ### 0.3.10 — Fill & Border
 
