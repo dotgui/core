@@ -1,10 +1,11 @@
 ---
 rfc: 0028
 title: Clipping and masks for visual export
-status: Accepted
+status: Implemented
 targets: 0.3.11
 date: 2026-05-22
-updated: 2026-10-28
+updated: 2026-10-29
+implemented: 2026-10-29
 ---
 
 # Clipping and Masks for Visual Export
@@ -125,12 +126,17 @@ These are 0.3.11 rules: errors in a document declaring 0.3.11 or higher, warning
 ## Implementation Notes
 
 - **Schema:** `mask-src`, `mask-x`, `mask-y`, `mask-width`, `mask-height`, `mask-mode` and `mask-invert` on layout containers; `clip-path` documented as the four shapes; `mask` and `mask-composite` removed.
-- **Kit validator:** `INVALID_CLIP_PATH` for anything but the four shapes; `MASK_WITHOUT_SRC` for a mask attribute without `mask-src`; `INVALID_MASK_MODE`; `OBSOLETE_MASK` for the `mask` flag and for `mask-composite`. Errors from 0.3.11, warnings before.
+- **Kit validator:** `INVALID_CLIP_PATH` for anything but the four shapes; `MASK_WITHOUT_SRC` for a mask attribute without `mask-src`; `MASK_MISPLACED` for `mask-src` off a layout container; `INVALID_MASK_MODE`; `OBSOLETE_MASK` for the `mask` flag and for `mask-composite`. Errors from 0.3.11, warnings before.
 - **Kit HTML renderer and native renderer:** draw `mask-invert` as a cut-out. `mask-composite` keeps drawing in older documents.
 - **Native renderer:** the same rules; `path()` keeps drawing before 0.3.11.
 - **Figma exporter:** already writes `mask-src`. It should stop writing the `mask` flag. Deferred with the rest of the Figma plugin work.
 
+Shipped in 0.3.11: the schema and reference, kit's validator and HTML renderer, and the native renderer. Two kit fixes came with it: the validator's parser kept bare presence attributes (it dropped them), and an absolute-URL `mask-src` now applies in a standalone document. Both tools read documents up to 0.3.11.
+
 ## Test Cases
+
+Tested in kit and the native renderer:
+
 
 - `<frame clip radius="48">` clips its children to the rounded box.
 - `clip-path` with `inset(10%)`, `circle(50% at 50% 50%)`, `ellipse(40% 30% at 50% 50%)` and `polygon(0% 0%, 100% 0%, 50% 100%)` validates and draws; `path('M0 0 L10 10')` and `url(#m)` are errors in 0.3.11.
