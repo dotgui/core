@@ -59,7 +59,7 @@ export interface ContentEntry {
  * The spec point this content describes: the chapter and the last RFC landed
  * in it (see rfcs/README.md, Format Versions). Written into spec.json.
  */
-export const specFormatVersion = '0.3.9'
+export const specFormatVersion = '0.3.10'
 
 export const specCategoryOrder = ['Format', 'Metadata', 'Layout', 'Content', 'Geometry', 'Appearance']
 
@@ -271,7 +271,7 @@ export const specContent: ContentEntry[] = [
       { name: 'name', type: 'string', required: true, description: 'The attribute an instance passes the value as.' },
       { name: 'type', type: 'string | boolean | number | color | image | component | style', required: true, description: 'A data type (RFC-0034).' },
       { name: 'target', type: 'string', description: 'Layer id(s) the value applies to, space-separated. Each is an id in the body, or a path through instances in it — tab-1/label sets label inside the instance tab-1 (RFC-0046). Optional for a string prop whose name is the id of exactly one <text> in the body.' },
-      { name: 'bind', type: 'string', description: 'The attribute overridden on the target. Required for number and style. Defaults: string → value, boolean → visible, color → fill (or stroke), image → src, component → component.' }
+      { name: 'bind', type: 'string', description: 'The attribute overridden on the target. Required for number and style. Defaults: string → value, boolean → visible, color → fill (or border-color; stroke is its old name), image → src, component → component.' }
     ],
     description: [
       'A <prop> inside a component\'s <props> block declares one value an instance may pass. Prop types are data types — string, boolean, number, color, image, component, style — and bind names which attribute of the target changes.',
@@ -438,7 +438,8 @@ export const specContent: ContentEntry[] = [
     mapsToFigma: 'Text',
     description: [
       'Single-style text is self-closing with a value attribute. Mixed-style text has <segment> children — each segment overrides font attrs for its run.',
-      'text-style references a named style; individual font attrs are omitted when a style is referenced. Variable fonts use font-variation; OpenType features use font-feature.'
+      'text-style references a named style; individual font attrs are omitted when a style is referenced. Variable fonts use font-variation; OpenType features use font-feature.',
+      'fill colors the glyphs, on <text> and on each <segment> — the same attribute that colors a frame. There is no color attribute on text (RFC-0022).'
     ],
     exampleLabel: 'Single, mixed, decorated',
     example: `<text value="Welcome back"
@@ -521,7 +522,8 @@ export const specContent: ContentEntry[] = [
     ],
     description: [
       "A non-layout child that describes the parent's complete paint and effect stack. Used when a node has multiple fills, complex borders, or multiple effects.",
-      'All three stacks — fills, borders, effects — are ordered in document order. When <appearance> contains at least one <border>, the border shorthand on the parent is ignored.'
+      'All three stacks — fills, borders, effects — are ordered in document order. When <appearance> contains at least one <border>, the border shorthand on the parent is ignored.',
+      'Outlines are border — the shorthand, its longhands, or <border> entries here. <border> belongs inside <appearance>, never directly in a node, and there is no stroke attribute or <stroke> entry (RFC-0022).'
     ],
     exampleLabel: 'Multi-fill + shadow',
     example: `<frame w="320" h="180" radius="16">

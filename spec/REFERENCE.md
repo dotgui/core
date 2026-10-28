@@ -2,7 +2,7 @@
 
 # .gui Element Reference
 
-Format version `0.3.9`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
+Format version `0.3.10`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
 
 ## Contents
 
@@ -89,7 +89,7 @@ platform and source describe the document itself and belong to it alone: in a mu
 
 | Attribute | Type | Description |
 |---|---|---|
-| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.3.9. |
+| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.3.10. |
 | `name` | `string` | Screen or layer name from the source design. |
 | `platform` | `string` | The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036). |
 | `source` | `string` | The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036). |
@@ -316,7 +316,7 @@ A path reaches a node inside a nested instance, so a component can expose it as 
 | `name` **(required)** | `string` | The attribute an instance passes the value as. |
 | `type` **(required)** | `string | boolean | number | color | image | component | style` | A data type (RFC-0034). |
 | `target` | `string` | Layer id(s) the value applies to, space-separated. Each is an id in the body, or a path through instances in it — tab-1/label sets label inside the instance tab-1 (RFC-0046). Optional for a string prop whose name is the id of exactly one <text> in the body. |
-| `bind` | `string` | The attribute overridden on the target. Required for number and style. Defaults: string → value, boolean → visible, color → fill (or stroke), image → src, component → component. |
+| `bind` | `string` | The attribute overridden on the target. Required for number and style. Defaults: string → value, boolean → visible, color → fill (or border-color; stroke is its old name), image → src, component → component. |
 
 **Typed props**
 
@@ -777,6 +777,8 @@ Single-style text is self-closing with a value attribute. Mixed-style text has <
 
 text-style references a named style; individual font attrs are omitted when a style is referenced. Variable fonts use font-variation; OpenType features use font-feature.
 
+fill colors the glyphs, on <text> and on each <segment> — the same attribute that colors a frame. There is no color attribute on text (RFC-0022).
+
 **Maps to Figma:** Text
 
 | Attribute | Type | Description |
@@ -1022,6 +1024,8 @@ Also accepts all [shared attributes](#shared-attributes).
 A non-layout child that describes the parent's complete paint and effect stack. Used when a node has multiple fills, complex borders, or multiple effects.
 
 All three stacks — fills, borders, effects — are ordered in document order. When <appearance> contains at least one <border>, the border shorthand on the parent is ignored.
+
+Outlines are border — the shorthand, its longhands, or <border> entries here. <border> belongs inside <appearance>, never directly in a node, and there is no stroke attribute or <stroke> entry (RFC-0022).
 
 | Attribute | Type | Description |
 |---|---|---|

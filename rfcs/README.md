@@ -177,7 +177,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0022](0022-fill-and-border.md) | fill and border — unified color and outline properties (check overlap with 0025 first) | Draft |
+| [0022](0022-fill-and-border.md) | fill and border — one way to color and outline a node | Implemented |
 
 ### 0.3.11 — Clipping & Masks
 

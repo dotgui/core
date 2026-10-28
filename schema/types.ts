@@ -926,7 +926,8 @@ export interface PropDef {
   target?: string
   /**
    * The attribute overridden on the target. Required for number and style;
-   * defaults to value (string), visible (boolean), fill (color, or stroke),
+   * defaults to value (string), visible (boolean), fill (color, or
+   * border-color — `stroke` is its old name, RFC-0022),
    * src (image) and component (component).
    */
   bind?: string
