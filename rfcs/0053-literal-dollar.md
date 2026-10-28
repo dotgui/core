@@ -2,7 +2,7 @@
 rfc: 0053
 title: Literal $ — prices in text, and token references that fail loudly
 status: Draft
-targets: 0.4
+targets: 0.5
 date: 2026-10-18
 amends: 0005
 ---

@@ -2,6 +2,7 @@
 rfc: 0043
 title: Standalone `.guix` — the served, readable form
 status: Implemented
+amended-by: 0056
 targets: 0.3.3
 date: 2026-09-12
 implemented: 2026-10-27
@@ -115,6 +116,8 @@ A standalone document is ordinary markup. There is no flag, no attribute, and no
 This matters more than it looks. It means no producer has to opt in, no parser has to branch, and a document flattened out of a package is indistinguishable from one authored directly — which is the property that makes the form free.
 
 ### Non-goals
+
+> **Amended (Draft).** [RFC-0056](0056-linked-libraries.md) proposes that a standalone document may carry `<library>` blocks: a cached copy of linked declarations, inline, plus a `src` that only tools follow. The rule that a standalone document resolves with nothing else is unchanged.
 
 - **No new syntax.** Not a tag, not an attribute, not a value form. [P11](../PRINCIPLES.md) is untouched.
 - **No standalone flag.** See above.

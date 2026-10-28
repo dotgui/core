@@ -2,7 +2,7 @@
 rfc: 0051
 title: Images with a source — carrying what .gui cannot describe
 status: Draft
-targets: 0.4
+targets: 0.5
 date: 2026-10-18
 depends-on: 0023, 0031, 0045, 0048
 ---

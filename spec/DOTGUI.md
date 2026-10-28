@@ -84,6 +84,10 @@ Each stage has a single, well-defined responsibility. The extractor doesn't opti
 
 Internally, a `.gui` file is a ZIP package. The markup lives inside as `design.guix` — but that is an implementation detail, never surfaced to the outside. A program that needs to distinguish a package from a raw markup string uses magic bytes: ZIP starts with `PK`, markup starts with `<`.
 
+A package may also be a **directory whose name ends in `.gui`**, holding exactly the same entries ([RFC-0054](../rfcs/0054-folder-form-packages.md)). The ZIP is the form a package is sent in; the directory is the form it is worked on, by an editor, an agent or version control. Converting between them changes no byte. A package is its documents, `library.guix`, `preview.webp` and `assets/` — anything else, and any name starting with `.`, is ignored and reported. Symbolic links, paths that leave the package, and two paths differing only in case or Unicode normalization are errors.
+
+The package library may be one file, `library.guix`, or a directory, `library/`, whose `.guix` files together form the one library — never both ([RFC-0055](../rfcs/0055-library-directory.md)). Subfolders are organisation only, a name declared in two library files is an error naming both, and every file in a package with `library/` declares 0.4.2 or higher. The recommended layout is `library/tokens.guix`, `library/styles.guix` and one `library/components/<name>.guix` per component.
+
 ### Package Structure
 
 ```
@@ -255,6 +259,16 @@ appearances side by side in one pass.
 **To make a value themeable, it must be a token.** Per-mode values live only on
 token definitions in `<tokens>`; an inline literal is static across modes — the
 same rule as Figma, where only variable-bound properties change between modes.
+
+### Descriptions and templates
+
+A library item may say what it is for: `description` on a component, component set, variant, token or style — plain text, one or two sentences, never rendered ([RFC-0057](../rfcs/0057-describing-library-items.md)). An exporter copies the source tool's description verbatim and never writes one of its own.
+
+```xml
+<color name="primary" value="#3B5BFD" description="Brand colour for the single main action on a screen. Not for links." />
+```
+
+`template` on a document's `<gui>` marks it as a starting point to copy rather than a screen to ship. It changes nothing on screen, and `library.guix` or a `library/` file cannot be one.
 
 ### Styles
 

@@ -59,7 +59,7 @@ export interface ContentEntry {
  * The spec point this content describes: the chapter and the last RFC landed
  * in it (see rfcs/README.md, Format Versions). Written into spec.json.
  */
-export const specFormatVersion = '0.3.11'
+export const specFormatVersion = '0.4.3'
 
 export const specCategoryOrder = ['Format', 'Metadata', 'Layout', 'Content', 'Geometry', 'Appearance']
 
@@ -75,6 +75,8 @@ export const specContent: ContentEntry[] = [
     ],
     description: [
       'A .gui file is a ZIP package. The markup, design tokens, font declarations, binary assets, and a preview thumbnail all live in one self-contained file.',
+      'A directory named *.gui holding the same entries is the same package: the ZIP is for sending, the directory for working on. Conversion changes no byte; dotfiles and anything outside the package\'s entries are ignored and reported (RFC-0054).',
+      'The package library is library.guix or a library/ directory whose .guix files together form it — never both. Subfolders carry no meaning; a name declared in two library files is an error (RFC-0055).',
       'Internally, the markup lives as design.guix — an implementation detail never surfaced to the outside. A program distinguishing a package from a raw markup string uses magic bytes: ZIP starts with PK, markup starts with <.'
     ],
     exampleLabel: 'Package structure', exampleMode: 'plain',
@@ -97,6 +99,7 @@ export const specContent: ContentEntry[] = [
       { name: 'name', type: 'string', description: 'Screen or layer name from the source design.' },
       { name: 'platform', type: 'string', description: 'The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036).' },
       { name: 'source', type: 'string', description: 'The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036).' },
+      { name: 'template', type: 'boolean', description: 'Presence: this document is a starting point to copy, not a screen to ship. Renders exactly as without it; never on library.guix or a library/ file (RFC-0057).' },
       { name: 'source-id', type: 'string', description: 'The exported frame\'s handle in the source tool, read against source. Exporters only, and only for an export meant to round-trip. See spec/SOURCES.md (RFC-0046).' }
     ],
     description: [
@@ -564,6 +567,7 @@ export const specContent: ContentEntry[] = [
     source: 'interface:VisualAttrs',
     description: [
       'Visual attributes available on all layout, content, and geometry nodes.',
+      'description says what a library item is for and when to use it — on components, component sets, variants, tokens and styles only. Plain text, one or two sentences, never rendered; exporters copy it from the source, never write one (RFC-0057).',
       'id names a node so something can point at it: a prop target, a path segment through an instance (target="tab-1/label"). Lowercase kebab-case, written only where something points, unique within its scope — the screen tree of a document, or one component or variant body. A reference that does not resolve is an error (RFC-0046).',
       'source-id is the source tool\'s own handle for a node, read against source on the <gui> root. It is optional, written by exporters only when the user asks for an export that can go back, and opaque: the format never parses it. A document with any source-id must declare source. What each tool writes is in spec/SOURCES.md (RFC-0046).',
       'detached-from names the component a layout container was detached from, when an exporter could not keep a heavily-overridden instance as an <instance>. It holds a component or variant id declared in the document or its library, and must resolve; it changes nothing on screen. Only <instance> carries component (RFC-0035).',
