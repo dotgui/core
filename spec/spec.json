@@ -1,6 +1,6 @@
 {
   "$generated": "DO NOT EDIT — run `bun run gen:spec` in the kit. Source: core/schema/types.ts + spec.content.ts",
-  "formatVersion": "0.3.11",
+  "formatVersion": "0.4.1",
   "categoryOrder": [
     "Format",
     "Metadata",
@@ -199,6 +199,7 @@
       "summary": "file format",
       "description": [
         "A .gui file is a ZIP package. The markup, design tokens, font declarations, binary assets, and a preview thumbnail all live in one self-contained file.",
+        "A directory named *.gui holding the same entries is the same package: the ZIP is for sending, the directory for working on. Conversion changes no byte; dotfiles and anything outside the package's entries are ignored and reported (RFC-0054).",
         "Internally, the markup lives as design.guix — an implementation detail never surfaced to the outside. A program distinguishing a package from a raw markup string uses magic bytes: ZIP starts with PK, markup starts with <."
       ],
       "attributes": [
@@ -255,7 +256,7 @@
           "name": "version",
           "type": "string",
           "required": true,
-          "description": "Spec version the document is written for: a chapter (\"0.3\") or a point in it (\"0.3.4\"). Consumers refuse a version newer than they read. Current: 0.3.11."
+          "description": "Spec version the document is written for: a chapter (\"0.3\") or a point in it (\"0.3.4\"). Consumers refuse a version newer than they read. Current: 0.4.1."
         },
         {
           "name": "name",

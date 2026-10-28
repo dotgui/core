@@ -1,9 +1,10 @@
 ---
 rfc: 0054
 title: Folder-form packages — a .gui can be a directory
-status: Draft
+status: Accepted
 targets: 0.4.1
 date: 2026-10-29
+updated: 2026-10-29
 depends-on: 0004, 0042, 0043
 amends: 0004
 ---
@@ -82,13 +83,19 @@ The ZIP never had to say this, because a producer only wrote the entries it mean
 - **Readers ignore everything else.** `.DS_Store`, `Thumbs.db`, `.git/`, editor swap files, a stray `notes.txt` — none of them mean anything to the format, and none change how the package renders. This is how readers already treat a ZIP; the kit reads root `.guix` files, `preview.webp` and `assets/` and nothing more.
 - **Any entry whose name starts with `.` is ignored, at any depth**, including inside `assets/`. Hidden files are where tools keep their own state; a dotfile is never an asset.
 - **Producers never write what they ignored.** Zipping a directory packs only package entries. The litter stays behind, so it cannot travel into someone else's hands.
-- **Validators list what they ignored.** Ignoring is not hiding ([P15](../PRINCIPLES.md)): a validator reports the ignored entries as information, so an asset left outside `assets/` is visible as "not part of the package" rather than silently missing.
+- **Validators list what they ignored.** Ignoring is not hiding ([P15](../PRINCIPLES.md)): a validator reports each ignored entry as a warning (`IGNORED_ENTRY`), so an asset left outside `assets/` is visible as "not part of the package" rather than silently missing. A warning never fails the package.
 
 ### What is an error
 
 - **A symbolic link, anywhere in the package, is an error.** A ZIP cannot hold one faithfully, so a directory containing one cannot be converted losslessly; and a link is the one way a path inside the package can resolve to a file outside it, which RFC-0042's closed resolution forbids. Readers must not follow links.
 - **A path that resolves outside the package is an error**, in either form — `../`, an absolute path, a ZIP entry named `../x`. This was always true of the ZIP in spirit; it is now stated.
-- **Two entries whose paths differ only in letter case are an error**, in either form. A ZIP can hold `Logo.svg` and `logo.svg`; most desktop file systems cannot, so the package could not survive being unpacked. A rule that holds in both forms is the only way conversion stays lossless.
+- **Two entries whose paths differ only in letter case, or only in Unicode normalization, are an error**, in either form. A ZIP can hold `Logo.svg` and `logo.svg`; most desktop file systems cannot, so the package could not survive being unpacked. Paths are compared after Unicode NFC normalization and case folding, so `café.svg` written composed and decomposed is the same path. A rule that holds in both forms is the only way conversion stays lossless.
+
+### Names, previews and hosts
+
+- **Producers write entry names in NFC.** Some file systems store names decomposed (NFD), and a name can change bytes on the round trip. Writing NFC, and comparing after NFC (above), makes the round trip stable.
+- **`preview.webp` is copied, never regenerated, by conversion.** Zipping a working copy packs whatever preview it holds, stale or not. Regenerating a preview is a separate, explicit step a tool may offer; conversion that silently changed the face of the package would not be lossless.
+- **Hosts take the ZIP.** Uploading is transfer, and the ZIP is the transfer form. A host may accept a directory and zip it, by the rules above.
 
 ### No version requirement of its own
 
@@ -148,14 +155,29 @@ P12 is the one to watch. Two forms would fail it if a design could be expressed 
 
 **Allow symlinks that stay inside the package** — Rejected. Even an internal link becomes a duplicate file in the ZIP, so the round trip back to a directory is not the directory you started with. One rule — no links — is simpler than a rule about where links may point.
 
-## Unresolved Questions
+## Drawbacks
 
-- **Source trees and the build step.** A repository that keeps `Button.guix` beside `Button.tsx` wants those files assembled into a package. That assembly is a tool's job (a build step in the CLI), and how it handles local asset paths in scattered `.guix` files — invalid outside a package under RFC-0043 — is unresolved. It may need its own RFC or only a convention.
-- **Showing a directory as one file.** macOS can present a `.gui` directory as a single document (a package type in the app's declared types); Windows and Linux have no equivalent and will show a folder. Whether the spec says anything here, or leaves it entirely to tools, is open.
-- **`preview.webp` in a working copy.** A directory being edited makes the preview stale after every change. The rules are the same as the ZIP's — it is optional and is the face of the package — but whether producers should drop or regenerate it when zipping a working copy is not settled.
-- **Hosts.** Whether a host such as gui.farm accepts a directory upload or requires the ZIP. The likely answer is the ZIP, since uploading is transfer.
-- **Filename normalization.** Some file systems store Unicode filenames decomposed (NFD) and ZIP tools usually write composed (NFC); a filename can change bytes on the round trip. Whether entry names must be NFC is open.
+- **Two forms of one structure.** Every reader of packages must accept both from 0.4.1. The conversion is mechanical, and a shared step in each implementation applies the same rules, but it is a second code path.
+- **A new error for some existing ZIPs.** A ZIP holding two entries that differ only by case or normalization, or an entry path that escapes the package, was never sensible and is now refused.
+- **The folder is not one file on every platform.** macOS can show a `.gui` directory as a document; Windows and Linux show a folder. That is a tool and operating-system matter, not the format's.
 
 ## Implementation Notes
 
-The kit's package module is byte-based and file-system-free by design ("file-system glue is the caller's concern"). It keeps that shape: it gains a way to build a `GuiPackage` from a map of relative paths to bytes and to emit one, and callers walk the directory. Applying the ignore and error rules in that shared step means every tool treats litter, links and case collisions the same way.
+- **Kit:** the package module stays byte-based and file-system-free. It gains `fromEntries(entries)` — a map of relative paths to bytes, from a ZIP or a walked directory — and `toEntries(pkg)`, in lexical path order. `unpack` and `pack` are those two plus ZIP encoding, so a ZIP and a directory pass through one step that applies every rule here: dotfiles and non-package entries ignored and listed (`pkg.ignored`, reported as `IGNORED_ENTRY` by `validateDocument`), escaping paths and case or NFC collisions refused. Symbolic links are the caller's to detect, since only the caller touches the file system.
+- **Native renderer:** reads a `.gui` directory as well as a ZIP, through the same entry step and rules, refusing symbolic links. The wasm build takes entries from its host.
+- **CLI:** `gui pack` and `gui unpack` move onto kit's entry step once a kit release carrying it is published.
+- **Spec:** `spec/DOTGUI.md` *The .gui package* describes both forms.
+
+## Test Cases
+
+- A ZIP and the directory it unzips to read as the same package: the same documents, library, preview and assets, byte for byte.
+- `toEntries` of a package, zipped and read back, is unchanged; two zips of one directory are identical.
+- `.DS_Store`, `.git/config`, `assets/.hidden.png` and `notes.txt` are ignored and listed; none appear when the package is packed.
+- `../outside.svg`, `/abs.svg` and `assets/../../x` are refused; `Logo.svg` beside `logo.svg`, and `café.svg` composed beside decomposed, are refused.
+- A symbolic link in a directory package is refused by the native renderer.
+- A directory not ending in `.gui` is not a package.
+
+## Not Covered
+
+- **Source trees and the build step.** A repository keeping `Button.guix` beside `Button.tsx` wants those files assembled into a package. That assembly is a tool's job, and how it treats local asset paths in scattered `.guix` files may need its own RFC.
+- **Showing a directory as one file** — a platform and tool matter.
