@@ -117,7 +117,7 @@ This matters more than it looks. It means no producer has to opt in, no parser h
 
 ### Non-goals
 
-> **Amended (Draft).** [RFC-0056](0056-linked-libraries.md) proposes that a standalone document may carry `<library>` blocks: a cached copy of linked declarations, inline, plus a `src` that only tools follow. The rule that a standalone document resolves with nothing else is unchanged.
+> **Amended.** [RFC-0056](0056-linked-libraries.md): a standalone document may carry `<library>` blocks: a cached copy of linked declarations, inline, plus a `src` that only tools follow. The rule that a standalone document resolves with nothing else is unchanged.
 
 - **No new syntax.** Not a tag, not an attribute, not a value form. [P11](../PRINCIPLES.md) is untouched.
 - **No standalone flag.** See above.

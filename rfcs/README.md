@@ -217,7 +217,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0056](0056-linked-libraries.md) | Linked libraries — `<library>` with a cached copy; tools follow `src`, renderers never do (amends 0042, 0043, 0046) | Draft |
+| [0056](0056-linked-libraries.md) | Linked libraries — `<library>` with a cached copy; tools follow `src`, renderers never do (amends 0042, 0043, 0046, 0055) | Accepted |
 
 ### 0.5 — Describe, Don't Run: Motion and Connections
 

@@ -59,7 +59,7 @@ export interface ContentEntry {
  * The spec point this content describes: the chapter and the last RFC landed
  * in it (see rfcs/README.md, Format Versions). Written into spec.json.
  */
-export const specFormatVersion = '0.4.3'
+export const specFormatVersion = '0.4.4'
 
 export const specCategoryOrder = ['Format', 'Metadata', 'Layout', 'Content', 'Geometry', 'Appearance']
 
@@ -99,6 +99,8 @@ export const specContent: ContentEntry[] = [
       { name: 'name', type: 'string', description: 'Screen or layer name from the source design.' },
       { name: 'platform', type: 'string', description: 'The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036).' },
       { name: 'source', type: 'string', description: 'The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036).' },
+      { name: 'uid', type: 'string', description: 'A library package\'s own identity, minted once and never changed — on the root of the file holding its library part. Only a package used as a library writes it (RFC-0056).' },
+      { name: 'release', type: 'string', description: 'A library package\'s current release, beside uid. Opaque; semantic versioning recommended (RFC-0056).' },
       { name: 'template', type: 'boolean', description: 'Presence: this document is a starting point to copy, not a screen to ship. Renders exactly as without it; never on library.guix or a library/ file (RFC-0057).' },
       { name: 'source-id', type: 'string', description: 'The exported frame\'s handle in the source tool, read against source. Exporters only, and only for an export meant to round-trip. See spec/SOURCES.md (RFC-0046).' }
     ],
@@ -220,6 +222,30 @@ export const specContent: ContentEntry[] = [
         weights="400 500 600 700" styles="normal italic" />
 </fonts>`,
     related: ['text', 'styles', 'tokens']
+  },
+  {
+    slug: 'library', tag: 'library', name: '<library>', kind: 'tag', category: 'Metadata', summary: 'linked library',
+    source: 'content',
+    attributes: [
+      { name: 'name', type: 'string', required: true, description: 'The library\'s human-readable label. Not an identity and not a namespace.' },
+      { name: 'uid', type: 'string', required: true, description: 'The source library\'s own identity.' },
+      { name: 'release', type: 'string', required: true, description: 'The release the cached declarations were taken from.' },
+      { name: 'src', type: 'string', description: 'Where a tool may find the library: a relative path or URL to a .gui package. Never followed by a renderer; never a source tool\'s file.' },
+      { name: 'source', type: 'string', description: 'The tool the library\'s declarations came from; source-id values inside the block read against it.' }
+    ],
+    description: [
+      'A block of declarations copied from another .gui package, recording where they came from (RFC-0056). Its children are ordinary declaration blocks — mode, tokens, styles, fonts, components — and resolve exactly as if written directly. Renderers never fetch src: the copy is the truth for rendering, and the package renders offline.',
+      'Names stay unique across the package; an identical mode axis may repeat. Blocks do not nest and hold no layout. A document with a <library> block declares 0.4.4 or higher.'
+    ],
+    exampleLabel: 'Example',
+    example: `<library name="acme-ds" uid="7f3e9a1c-2b4d-4e1a-9c3f-5d6e7f8a9b0c" release="1.4.0"
+         src="../libraries/acme-ds.gui" source="figma">
+  <tokens><color name="primary" value="#3B5BFD" /></tokens>
+  <components>
+    <component id="comp-button" source-id="a2b9c4d1e5f6"> … </component>
+  </components>
+</library>`,
+    related: ['tokens', 'components', 'gui']
   },
   {
     slug: 'assets', name: 'Assets', kind: 'concept', category: 'Metadata', summary: 'images & vectors',

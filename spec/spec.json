@@ -1,6 +1,6 @@
 {
   "$generated": "DO NOT EDIT — run `bun run gen:spec` in the kit. Source: core/schema/types.ts + spec.content.ts",
-  "formatVersion": "0.4.3",
+  "formatVersion": "0.4.4",
   "categoryOrder": [
     "Format",
     "Metadata",
@@ -257,7 +257,7 @@
           "name": "version",
           "type": "string",
           "required": true,
-          "description": "Spec version the document is written for: a chapter (\"0.3\") or a point in it (\"0.3.4\"). Consumers refuse a version newer than they read. Current: 0.4.3."
+          "description": "Spec version the document is written for: a chapter (\"0.3\") or a point in it (\"0.3.4\"). Consumers refuse a version newer than they read. Current: 0.4.4."
         },
         {
           "name": "name",
@@ -276,6 +276,18 @@
           "type": "string",
           "required": false,
           "description": "The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036)."
+        },
+        {
+          "name": "uid",
+          "type": "string",
+          "required": false,
+          "description": "A library package's own identity, minted once and never changed — on the root of the file holding its library part. Only a package used as a library writes it (RFC-0056)."
+        },
+        {
+          "name": "release",
+          "type": "string",
+          "required": false,
+          "description": "A library package's current release, beside uid. Opaque; semantic versioning recommended (RFC-0056)."
         },
         {
           "name": "template",
@@ -490,6 +502,62 @@
         "text",
         "styles",
         "tokens"
+      ],
+      "faq": [],
+      "hubHidden": false
+    },
+    {
+      "slug": "library",
+      "tag": "library",
+      "name": "<library>",
+      "navLabel": null,
+      "kind": "tag",
+      "category": "Metadata",
+      "summary": "linked library",
+      "description": [
+        "A block of declarations copied from another .gui package, recording where they came from (RFC-0056). Its children are ordinary declaration blocks — mode, tokens, styles, fonts, components — and resolve exactly as if written directly. Renderers never fetch src: the copy is the truth for rendering, and the package renders offline.",
+        "Names stay unique across the package; an identical mode axis may repeat. Blocks do not nest and hold no layout. A document with a <library> block declares 0.4.4 or higher."
+      ],
+      "attributes": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "The library's human-readable label. Not an identity and not a namespace."
+        },
+        {
+          "name": "uid",
+          "type": "string",
+          "required": true,
+          "description": "The source library's own identity."
+        },
+        {
+          "name": "release",
+          "type": "string",
+          "required": true,
+          "description": "The release the cached declarations were taken from."
+        },
+        {
+          "name": "src",
+          "type": "string",
+          "required": false,
+          "description": "Where a tool may find the library: a relative path or URL to a .gui package. Never followed by a renderer; never a source tool's file."
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "required": false,
+          "description": "The tool the library's declarations came from; source-id values inside the block read against it."
+        }
+      ],
+      "sharedAttrs": false,
+      "example": "<library name=\"acme-ds\" uid=\"7f3e9a1c-2b4d-4e1a-9c3f-5d6e7f8a9b0c\" release=\"1.4.0\"\n         src=\"../libraries/acme-ds.gui\" source=\"figma\">\n  <tokens><color name=\"primary\" value=\"#3B5BFD\" /></tokens>\n  <components>\n    <component id=\"comp-button\" source-id=\"a2b9c4d1e5f6\"> … </component>\n  </components>\n</library>",
+      "exampleLabel": "Example",
+      "exampleMode": "hl",
+      "related": [
+        "tokens",
+        "components",
+        "gui"
       ],
       "faq": [],
       "hubHidden": false

@@ -8,6 +8,7 @@ updated: 2026-10-29
 implemented: 2026-10-29
 depends-on: 0042, 0054
 amends: 0042
+amended-by: 0056
 ---
 
 # The Library Directory — One Library, Split Across Files
@@ -62,7 +63,7 @@ It holds identically for a ZIP package and for a folder-form package ([RFC-0054]
 1. **`library/` is reserved.** Every `.guix` file under it, at any depth, is a **library file**. A library file is never a document and never appears in the package's document list. Anything else under `library/` — a `README.md`, an image, a dotfile — is not part of the package: it is ignored and reported, as [RFC-0054](0054-folder-form-packages.md) treats any entry outside the package.
 2. **One library, two storage forms.** A package has zero or one library. It is stored as `library.guix` *or* as `library/` — **never both**. A package carrying both is an error ([P15](../PRINCIPLES.md)): there is no rule for which wins, and inventing one would be a cascade. **A library is its files:** a `library/` with no `.guix` in it is no library, because a ZIP cannot hold an empty directory and the two forms must convert without loss.
 3. **The library part is the union.** The package library is the library part of every library file, taken together. Each file follows RFC-0042's positional rule unchanged: what is above its layout root is shared; its layout root, if any, is local to that file.
-4. **No order, no merge.** Declaring the same name in two library files is an error naming both files (`token '$primary' is declared by library/tokens.guix and library/brand.guix`). Names are tokens, styles, fonts, components — and mode axes: two files declaring `<mode name="theme">` collide like any other pair. Because a collision can never be resolved, the order files are read in can never matter — the union is the same in any order ([P14](../PRINCIPLES.md)).
+4. **No order, no merge.** Declaring the same name in two library files is an error naming both files (`token '$primary' is declared by library/tokens.guix and library/brand.guix`). Names are tokens, styles, fonts, components — and mode axes: two files declaring `<mode name="theme">` with different values or defaults collide like any other pair. *Amended by [RFC-0056](0056-linked-libraries.md): an identical axis — same name, values and default — is one axis, not a collision.* Because a collision can never be resolved, the order files are read in can never matter — the union is the same in any order ([P14](../PRINCIPLES.md)).
 5. **Library files reference each other freely.** `button.guix` may use `$primary` from `tokens.guix` and `comp-icon-arrow` from `icon-arrow.guix` without declaring them. Within the library there is one scope, exactly as there is within one `library.guix`.
 6. **Subfolders are organisation only.** `components/button.guix` and `button.guix` mean the same thing. A path is not a namespace, carries no meaning, and never appears in a reference. `comp-button` is `comp-button`, wherever it is stored.
 7. **Assets resolve against the package.** `src="assets/arrow.svg"` in `library/components/icon-arrow.guix` means the package's `assets/arrow.svg` — never a path relative to the file. `assets/` stays at the package root and is not repeated inside `library/`.

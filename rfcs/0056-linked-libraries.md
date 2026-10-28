@@ -1,12 +1,13 @@
 ---
 rfc: 0056
 title: Linked libraries — declarations pulled from another package, cached in this one
-status: Draft
+status: Accepted
 targets: 0.4.4
 date: 2026-10-29
+updated: 2026-10-29
 depends-on: 0036, 0042, 0043, 0046
 related: 0054, 0055, 0057
-amends: 0042, 0043, 0046
+amends: 0042, 0043, 0046, 0055
 ---
 
 # Linked Libraries — Declarations Pulled from Another Package, Cached in This One
@@ -38,7 +39,7 @@ What RFC-0042 refused was a document *resolving* names against another file. Wha
 ### `<library>` — a block of declarations that came from another package
 
 ```xml
-<gui version="0.4" name="Checkout">
+<gui version="0.4.4" name="Checkout">
   <library name="acme-ds" uid="7f3e9a1c-…" release="1.4.0"
            src="../libraries/acme-ds.gui" source="figma">
     <mode name="theme" values="light dark" default="light" />
@@ -69,6 +70,8 @@ What RFC-0042 refused was a document *resolving* names against another file. Wha
 5. **Names stay unique across the whole package.** A name declared in a `<library>` block and anywhere else in the package — directly, or in another `<library>` block — is an error, the same error RFC-0042 already reports for redeclaration. There is no namespace, no prefix, no selector: `<instance component="comp-button-primary">` does not say, and does not need to say, which library the component came from.
 6. **Several `<library>` blocks are allowed**, one per source library. **They do not nest.** A declaration that a source library itself holds in a `<library>` block (Acme built on a base kit) is pulled into its own top-level block, carrying the original library's attributes — provenance is kept by hoisting, not by nesting.
 7. **Only declarations are linked.** A `<library>` block contains declaration blocks and nothing else; a layout root inside one is an error. A screen from another file is never brought in this way — see *Non-goals*.
+8. **A document with a `<library>` block declares 0.4.4 or higher.** A reader that predates the block would not know its contents are declarations.
+9. **Mode axes may repeat when they are identical.** A `<mode>` declared again with the same name, the same values and the same default — by a `<library>` block, another block, a library file ([RFC-0055](0055-library-directory.md)) or the document — is the same axis, not a collision. Two libraries that both offer `theme="light dark"` can be linked into one package. An axis declared again with different values or a different default is an error. This relaxes RFC-0055's rule 4 for mode axes only.
 
 ### Its attributes
 
@@ -98,7 +101,7 @@ A package that is used as a library declares its identity on the root of the doc
 
 ```xml
 <!-- acme-ds.gui → library.guix -->
-<gui version="0.4" name="Acme DS" uid="7f3e9a1c-…" release="1.4.0" source="figma">
+<gui version="0.4.4" name="Acme DS" uid="7f3e9a1c-…" release="1.4.0" source="figma">
   <tokens> … </tokens>
   <components> … </components>
   <col w="1200"> … the style guide … </col>
@@ -108,7 +111,18 @@ A package that is used as a library declares its identity on the root of the doc
 - **`uid` is an opaque string, minted once** when a package is first published as a library, and never changed afterwards — not by a rename, a move, a new release, or a change of host. A UUID is recommended. It is the only thing that makes "the library this file was pulled from" checkable once `src` has moved.
 - **Forking a library mints a new `uid`.** Two packages with the same `uid` claim to be the same library at different releases; a fork is a different library and must say so. Minting and keeping the `uid` is the tool's job, like generating `id`s.
 - **`release` on the root** is the library's current release. A package that is never used as a library writes neither attribute.
+- **In a split library** ([RFC-0055](0055-library-directory.md)), exactly one library file declares `uid` and `release` on its root. Two files declaring them is an error: a library has one identity.
+- **Naming.** `uid` sits beside `id` (a node in this file) and `source-id` (a node in the source tool) and is read the same way: the library's own identifier. `library-id` was considered and rejected as longer, and as repeating the tag's name on the tag.
 - A copy's `<library>` block carries the same `uid` and the `release` it was taken from.
+
+### Validation
+
+- `name`, `uid` and `release` are required on `<library>` (`LIBRARY_BLOCK_ATTR`).
+- Only `<mode>`, `<modes>`, `<tokens>`, `<styles>`, `<fonts>` and `<components>` go inside; a layout root or any other element is an error (`LIBRARY_BLOCK_CONTENT`), and a `<library>` inside a `<library>` is an error (`LIBRARY_BLOCK_NESTED`).
+- A `source-id` inside a block with no `source` of its own is an error, as RFC-0046 rule 5 makes it on a root.
+- A `src` on a recognisable source-tool host — `figma.com`, `penpot.app`, and the like — is a warning (`LIBRARY_SRC_SOURCE_TOOL`): `src` points at a `.gui` package, never at a source tool's file.
+- A document declaring a version before 0.4.4 with a `<library>` block is an error.
+- `release` is opaque; semantic versioning is recommended, not required. One `src` per block.
 
 ### Cached content follows the host document's rules
 
@@ -233,12 +247,27 @@ The alternative shape — a reference with no cache, resolved by the renderer �
 - **Renderer work is small but real.** Both implementations must accept the block, merge its contents, reject a layout root inside it, and read `source-id` against the block's `source`.
 - **Copies multiply.** Many packages hold parts of the same library. Bounded by what each uses, but real.
 
-## Unresolved Questions
+## Implementation Notes
 
-- **Where a library declares its `uid`.** Proposed: root attributes on the document that holds the package's library part. Alternatives: a dedicated root-level `<library>` self-declaration in the library itself, which would make the same tag mean "I am this library" and "these came from that library" (rejected for now, [P8](../PRINCIPLES.md)); or a content hash, which changes on every release and so cannot identify a library across releases. With [RFC-0055](0055-library-directory.md)'s split library there is no single `library.guix`; which library file carries `uid` and `release` is for that RFC and this one to settle together.
-- **Naming `uid`.** `uid` sits beside `id` (a node in this file) and `source-id` (a node in the source tool). `library-id` is more explicit but longer, and repeats the tag name on the tag. Open.
-- **Shared mode axes.** Should an identical `<mode>` declaration from two libraries (same name, same values, same default) be allowed, as the one exception to the redeclaration error? Strict now; relaxing later is additive.
-- **`src` and multiple locations.** One `src`, or a list (a relative path and a URL fallback)? One for now, as the simpler rule.
-- **`release` semantics.** Is semantic versioning recommended or required? Recommended; a tool that offers updates needs ordering, but the format does not compare releases.
-- **Transitive libraries.** Hoisting keeps provenance flat, but loses the fact that Acme built its button on the base kit's icon. Whether that relationship needs recording is open; nothing so far needs it.
-- **Validation of cache completeness across releases.** Whether a tool should be able to check that a block's contents match a release (a per-block content hash) is a tooling question for now.
+- **Schema:** `<library>` with `name`, `uid`, `release`, `src` and `source`; `uid` and `release` on `<gui>`.
+- **Kit and the native renderer:** before anything else reads a document, each `<library>` block is unwrapped — its declaration blocks join the document's own, so resolution, redeclaration and flattening are unchanged. The block-level checks under *Validation* run on the markup as written. `source-id`s inside a block read against the block's `source`. Identical mode axes are one axis.
+- **Kit:** `info()` lists the linked libraries — `name`, `uid`, `release`, `src` — so a tool can browse, update or relink.
+- **Figma exporter:** writes a `<library>` block for each published library a screen uses, with component keys as `source-id`. Deferred with the rest of the Figma plugin work.
+
+## Test Cases
+
+Tested in kit and the native renderer:
+
+- A document whose button and `$primary` come from a `<library>` block renders exactly as the same declarations written directly.
+- `src` pointing nowhere changes nothing on screen.
+- A token declared both inside a block and outside it is a redeclaration error.
+- Two blocks both declaring `<mode name="theme" values="light dark" default="light">` are one axis; with different values they are an error.
+- A block without `uid`, with a `<col>` inside, or nested inside another block, is an error.
+- `src="https://www.figma.com/file/…"` warns.
+- A `<library>` block in a document declaring 0.4.3 is an error.
+- In a split library, `uid` on two library files is an error.
+
+## Not Covered
+
+- **Transitive libraries.** Hoisting keeps provenance flat, but loses the fact that Acme built its button on the base kit's icon. Nothing so far needs that relationship recorded.
+- **Cache completeness across releases.** Checking that a block's contents match a release — a per-block content hash — is tooling for now.

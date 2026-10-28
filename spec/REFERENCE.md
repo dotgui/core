@@ -2,12 +2,12 @@
 
 # .gui Element Reference
 
-Format version `0.4.3`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
+Format version `0.4.4`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
 
 ## Contents
 
 - **Format** — [.gui package](#package), [gui](#gui), [Root Canvas](#root-canvas)
-- **Metadata** — [tokens](#tokens), [styles](#styles), [fonts](#fonts), [Assets](#assets), [components](#components), [prop](#prop)
+- **Metadata** — [tokens](#tokens), [styles](#styles), [fonts](#fonts), [library](#library), [Assets](#assets), [components](#components), [prop](#prop)
 - **Layout** — [frame](#frame), [stack](#stack), [row](#row), [col](#col), [grid](#grid), [group](#group)
 - **Content** — [instance](#instance), [slot](#slot), [text](#text), [img](#img)
 - **Geometry** — [rect](#rect), [ellipse](#ellipse), [line](#line)
@@ -92,10 +92,12 @@ platform and source describe the document itself and belong to it alone: in a mu
 
 | Attribute | Type | Description |
 |---|---|---|
-| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.4.3. |
+| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.4.4. |
 | `name` | `string` | Screen or layer name from the source design. |
 | `platform` | `string` | The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036). |
 | `source` | `string` | The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036). |
+| `uid` | `string` | A library package's own identity, minted once and never changed — on the root of the file holding its library part. Only a package used as a library writes it (RFC-0056). |
+| `release` | `string` | A library package's current release, beside uid. Opaque; semantic versioning recommended (RFC-0056). |
 | `template` | `boolean` | Presence: this document is a starting point to copy, not a screen to ship. Renders exactly as without it; never on library.guix or a library/ file (RFC-0057). |
 | `source-id` | `string` | The exported frame's handle in the source tool, read against source. Exporters only, and only for an export meant to round-trip. See spec/SOURCES.md (RFC-0046). |
 
@@ -243,6 +245,37 @@ Font declarations for the renderer to load Google Fonts or fall back gracefully.
 ```
 
 *Related: [text](#text), [styles](#styles), [tokens](#tokens)*
+
+<a id="library"></a>
+### library <sup>tag</sup>
+
+*linked library*
+
+A block of declarations copied from another .gui package, recording where they came from (RFC-0056). Its children are ordinary declaration blocks — mode, tokens, styles, fonts, components — and resolve exactly as if written directly. Renderers never fetch src: the copy is the truth for rendering, and the package renders offline.
+
+Names stay unique across the package; an identical mode axis may repeat. Blocks do not nest and hold no layout. A document with a <library> block declares 0.4.4 or higher.
+
+| Attribute | Type | Description |
+|---|---|---|
+| `name` **(required)** | `string` | The library's human-readable label. Not an identity and not a namespace. |
+| `uid` **(required)** | `string` | The source library's own identity. |
+| `release` **(required)** | `string` | The release the cached declarations were taken from. |
+| `src` | `string` | Where a tool may find the library: a relative path or URL to a .gui package. Never followed by a renderer; never a source tool's file. |
+| `source` | `string` | The tool the library's declarations came from; source-id values inside the block read against it. |
+
+**Example**
+
+```xml
+<library name="acme-ds" uid="7f3e9a1c-2b4d-4e1a-9c3f-5d6e7f8a9b0c" release="1.4.0"
+         src="../libraries/acme-ds.gui" source="figma">
+  <tokens><color name="primary" value="#3B5BFD" /></tokens>
+  <components>
+    <component id="comp-button" source-id="a2b9c4d1e5f6"> … </component>
+  </components>
+</library>
+```
+
+*Related: [tokens](#tokens), [components](#components), [gui](#gui)*
 
 <a id="assets"></a>
 ### Assets <sup>concept</sup>
