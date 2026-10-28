@@ -2,7 +2,7 @@
 
 # .gui Element Reference
 
-Format version `0.4.1`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
+Format version `0.4.2`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
 
 ## Contents
 
@@ -54,6 +54,8 @@ A .gui file is a ZIP package. The markup, design tokens, font declarations, bina
 
 A directory named *.gui holding the same entries is the same package: the ZIP is for sending, the directory for working on. Conversion changes no byte; dotfiles and anything outside the package's entries are ignored and reported (RFC-0054).
 
+The package library is library.guix or a library/ directory whose .guix files together form it — never both. Subfolders carry no meaning; a name declared in two library files is an error (RFC-0055).
+
 Internally, the markup lives as design.guix — an implementation detail never surfaced to the outside. A program distinguishing a package from a raw markup string uses magic bytes: ZIP starts with PK, markup starts with <.
 
 | Attribute | Type | Description |
@@ -90,7 +92,7 @@ platform and source describe the document itself and belong to it alone: in a mu
 
 | Attribute | Type | Description |
 |---|---|---|
-| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.4.1. |
+| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.4.2. |
 | `name` | `string` | Screen or layer name from the source design. |
 | `platform` | `string` | The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036). |
 | `source` | `string` | The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036). |

@@ -1,9 +1,10 @@
 ---
 rfc: 0055
 title: The library directory — one library, split across files
-status: Draft
+status: Accepted
 targets: 0.4.2
 date: 2026-10-29
+updated: 2026-10-29
 depends-on: 0042, 0054
 amends: 0042
 ---
@@ -57,15 +58,17 @@ It holds identically for a ZIP package and for a folder-form package ([RFC-0054]
 
 ### The rules
 
-1. **`library/` is reserved.** Every `.guix` file under it, at any depth, is a **library file**. A library file is never a document and never appears in the package's document list.
-2. **One library, two storage forms.** A package has zero or one library. It is stored as `library.guix` *or* as `library/` — **never both**. A package carrying both is an error ([P15](../PRINCIPLES.md)): there is no rule for which wins, and inventing one would be a cascade.
+1. **`library/` is reserved.** Every `.guix` file under it, at any depth, is a **library file**. A library file is never a document and never appears in the package's document list. Anything else under `library/` — a `README.md`, an image, a dotfile — is not part of the package: it is ignored and reported, as [RFC-0054](0054-folder-form-packages.md) treats any entry outside the package.
+2. **One library, two storage forms.** A package has zero or one library. It is stored as `library.guix` *or* as `library/` — **never both**. A package carrying both is an error ([P15](../PRINCIPLES.md)): there is no rule for which wins, and inventing one would be a cascade. **A library is its files:** a `library/` with no `.guix` in it is no library, because a ZIP cannot hold an empty directory and the two forms must convert without loss.
 3. **The library part is the union.** The package library is the library part of every library file, taken together. Each file follows RFC-0042's positional rule unchanged: what is above its layout root is shared; its layout root, if any, is local to that file.
-4. **No order, no merge.** Declaring the same name in two library files is an error naming both files (`token '$primary' is declared by library/tokens.guix and library/brand.guix`). Because a collision can never be resolved, the order files are read in can never matter — the union is the same in any order ([P14](../PRINCIPLES.md)).
+4. **No order, no merge.** Declaring the same name in two library files is an error naming both files (`token '$primary' is declared by library/tokens.guix and library/brand.guix`). Names are tokens, styles, fonts, components — and mode axes: two files declaring `<mode name="theme">` collide like any other pair. Because a collision can never be resolved, the order files are read in can never matter — the union is the same in any order ([P14](../PRINCIPLES.md)).
 5. **Library files reference each other freely.** `button.guix` may use `$primary` from `tokens.guix` and `comp-icon-arrow` from `icon-arrow.guix` without declaring them. Within the library there is one scope, exactly as there is within one `library.guix`.
 6. **Subfolders are organisation only.** `components/button.guix` and `button.guix` mean the same thing. A path is not a namespace, carries no meaning, and never appears in a reference. `comp-button` is `comp-button`, wherever it is stored.
 7. **Assets resolve against the package.** `src="assets/arrow.svg"` in `library/components/icon-arrow.guix` means the package's `assets/arrow.svg` — never a path relative to the file. `assets/` stays at the package root and is not repeated inside `library/`.
 8. **Each library file is its own envelope.** It has its own `<gui>` root, declares its own `version`, and — under [RFC-0046](0046-identity-and-source-ids.md) — its own `source`, against which its `source-id`s are read.
-9. **Every file in a package with `library/` declares `0.4` or higher**, documents and library files alike, for the reason RFC-0042 gives for 0.3: the version is a contract over structure, and a file sitting in a 0.4-structured package cannot honestly claim less.
+9. **Every file in a package with `library/` declares `0.4.2` or higher**, documents and library files alike, for the reason RFC-0042 gives for 0.3: the version is a contract over structure, and a file sitting in a package structured this way cannot honestly claim less.
+
+**Recommended layout** — a convention, never a rule, since rule 6 means nothing can depend on it: `library/tokens.guix`, `library/styles.guix`, and one `library/components/<name>.guix` per component or component set.
 
 ### Each library file documents itself
 
@@ -73,7 +76,7 @@ RFC-0042's best side effect carries over unchanged and gets better. `library.gui
 
 ```xml
 <!-- library/components/button.guix -->
-<gui version="0.4" name="Button">
+<gui version="0.4.2" name="Button">
   <components>
     <component-set name="Button" id="compset-button">
       <variant id="comp-button-primary" style="primary">
@@ -161,6 +164,18 @@ No principle fails, and none is amended.
 
 **A manifest listing the library files.** Rejected for the reason RFC-0042 rejected one: a second source of truth that can drift from the files it describes. The directory listing is the manifest.
 
+### What partial reads save — measured
+
+The 45 shadcn component packages in the workspace were combined into one design-system library, then split one component per file. Tokens counted with `cl100k`, a proxy for the model's own tokenizer:
+
+| Task | `library.guix` | `library/` | Share |
+|---|---|---|---|
+| Edit one component (Button) | 12,047 | 542 | **4.5%** |
+| Plan a settings screen: the file list plus six components | 12,047 | 2,047 | **17%** |
+| Read the whole library | 12,047 | 13,073 | +8.5%, each file's own `<gui>` envelope |
+
+The library is small — 37 KB, one component set per file — so the shares are the least the split saves; a design system of several hundred kilobytes saves more. No component id collided across the 45 files.
+
 ## Drawbacks
 
 - **Two storage forms for one library.** The P12 cost, mitigated rather than eliminated (*Reasoning*). Tools must read both and should write one consistently.
@@ -168,10 +183,21 @@ No principle fails, and none is amended.
 - **Paths look meaningful and aren't.** Someone will expect `components/` to be a namespace. Rule 6 is the answer, and it has to be taught.
 - **More files to validate.** A validator checks the union for collisions and resolves every library file against it, not one file. Linear in total size, but a new code path in both implementations.
 
+## Implementation Notes
+
+- **Kit:** the package model keeps library files by path (`libraryFiles`) beside the single `library`. `fromEntries` reads `library/**/*.guix` as library files and ignores everything else under `library/`; both forms present is a `PackageEntryError`. The union is built by inlining each file's library part, so `flatten` and `validateDocument` work as before. `validateDocument` names cross-file collisions (`LIBRARY_COLLISION`, mode axes included), enforces 0.4.2 (`VERSION_BELOW_LIBRARY_DIRECTORY`), and validates a library file, by its path, against the union of the others.
+- **Native renderer:** the package keeps library files beside `library.guix`, refuses both together, and parses the union, naming both files in a collision.
+- **Spec:** `spec/DOTGUI.md` describes the directory form and the recommended layout.
+
+## Test Cases
+
+- A package with `library/tokens.guix` and `library/components/button.guix` renders a document using `$primary` and `comp-button`, exactly as the same declarations in one `library.guix`.
+- `library.guix` beside `library/x.guix` is refused; an empty `library/` beside `library.guix` is not a library and is fine.
+- `$primary` in two library files, or `<mode name="theme">` in two, is an error naming both.
+- `library/README.md` is ignored and reported.
+- A document declaring 0.4.1 in a package with `library/` is an error.
+- A library file, validated by its path, resolves names from the other library files.
+
 ## Unresolved Questions
 
-- **Non-`.guix` files under `library/`.** A `README.md` beside the components is natural, and so is a stray `.png`. Lean: ignore non-`.guix` files rather than error, but never resolve assets from there (rule 7).
-- **Should the layout be recommended?** `tokens.guix`, `styles.guix`, `components/<name>.guix` is the obvious convention. Lean: a recommendation in the spec, never a rule — rule 6 means nothing can depend on it.
-- **Does an empty `library/` count as a library?** Lean: yes, an empty one, so it is still an error beside `library.guix`.
-- **What do partial reads actually save?** The argument is granularity, as in RFC-0042, and no number has been measured. Before *Proposed*: split a real design-system library into files and measure the token cost of planning one screen and editing one component, against the single-file form ([P7](../PRINCIPLES.md) asks for the number, not the claim).
 - **How does a linked library sit in a split one?** [RFC-0056](0056-linked-libraries.md)'s `<library>` blocks are declarations and so may live in any library file. Whether one file per linked library should be the recommendation is RFC-0056's to settle.

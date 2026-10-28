@@ -59,7 +59,7 @@ export interface ContentEntry {
  * The spec point this content describes: the chapter and the last RFC landed
  * in it (see rfcs/README.md, Format Versions). Written into spec.json.
  */
-export const specFormatVersion = '0.4.1'
+export const specFormatVersion = '0.4.2'
 
 export const specCategoryOrder = ['Format', 'Metadata', 'Layout', 'Content', 'Geometry', 'Appearance']
 
@@ -76,6 +76,7 @@ export const specContent: ContentEntry[] = [
     description: [
       'A .gui file is a ZIP package. The markup, design tokens, font declarations, binary assets, and a preview thumbnail all live in one self-contained file.',
       'A directory named *.gui holding the same entries is the same package: the ZIP is for sending, the directory for working on. Conversion changes no byte; dotfiles and anything outside the package\'s entries are ignored and reported (RFC-0054).',
+      'The package library is library.guix or a library/ directory whose .guix files together form it — never both. Subfolders carry no meaning; a name declared in two library files is an error (RFC-0055).',
       'Internally, the markup lives as design.guix — an implementation detail never surfaced to the outside. A program distinguishing a package from a raw markup string uses magic bytes: ZIP starts with PK, markup starts with <.'
     ],
     exampleLabel: 'Package structure', exampleMode: 'plain',
