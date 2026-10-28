@@ -14,9 +14,10 @@ Every RFC is judged against the format's constitution: [**../PRINCIPLES.md**](..
 0.1   →  initial format design                              shipped
 0.2   →  layout API overhaul                                in progress
 0.3   →  vocabulary, visual fidelity, grid, components,
-         package model                                      in progress
-0.4   →  whatever the next set of changes turns out to be
-0.5   →  ...                                                as many as it takes
+         package model                                      shipped (0.3.11)
+0.4   →  libraries: folders, split libraries, linking      in progress
+0.5   →  describe, don't run: motion and connections       planned
+0.6   →  ...                                                as many as it takes
 1.0   →  first public stable release                        when the format is solid
 ```
 
@@ -194,7 +195,31 @@ Each RFC has frontmatter followed by these sections:
 | [0030](0030-vector-and-shape-fidelity.md) | Vector and shape fidelity | Superseded by 0023 |
 | [0047](0047-rejected-declared-variant-axes.md) | REJECTED: Declared variant axes and component states | Rejected |
 
-### 0.4 — Describe, Don't Run: Motion and Connections
+### 0.4.1 — Folder-Form Packages
+
+| RFC | Title | Status |
+|---|---|---|
+| [0054](0054-folder-form-packages.md) | Folder-form packages — a folder named `*.gui` is a package (amends 0004) | Draft |
+
+### 0.4.2 — The Library Directory
+
+| RFC | Title | Status |
+|---|---|---|
+| [0055](0055-library-directory.md) | The library directory — a library split across `library/` (amends 0042) | Draft |
+
+### 0.4.3 — Describing Library Items
+
+| RFC | Title | Status |
+|---|---|---|
+| [0057](0057-describing-library-items.md) | Describing library items — `description` on components, tokens and styles | Draft |
+
+### 0.4.4 — Linked Libraries
+
+| RFC | Title | Status |
+|---|---|---|
+| [0056](0056-linked-libraries.md) | Linked libraries — `<library>` with a cached copy; tools follow `src`, renderers never do (amends 0042, 0043, 0046) | Draft |
+
+### 0.5 — Describe, Don't Run: Motion and Connections
 
 | RFC | Title | Status |
 |---|---|---|
@@ -205,15 +230,6 @@ Each RFC has frontmatter followed by these sections:
 | [0051](0051-images-with-a-source.md) | Images with a source — carrying what .gui cannot describe | Draft |
 | [0052](0052-variant-overrides.md) | Variant overrides — a variant as the set's body with different values | Draft |
 | [0053](0053-literal-dollar.md) | Literal $ — prices in text, token references that fail loudly | Draft |
-
-### 0.4 — Libraries: Folders, Split Libraries, Linking
-
-| RFC | Title | Status |
-|---|---|---|
-| [0054](0054-folder-form-packages.md) | Folder-form packages — a folder named `*.gui` is a package (amends 0004) | Draft |
-| [0055](0055-library-directory.md) | The library directory — a library split across `library/` (amends 0042) | Draft |
-| [0056](0056-linked-libraries.md) | Linked libraries — `<library>` with a cached copy; tools follow `src`, renderers never do (amends 0042, 0043, 0046) | Draft |
-| [0057](0057-describing-library-items.md) | Describing library items — `description` on components, tokens and styles | Draft |
 
 ### 1.0 — Token System Completion (visual-layer freeze)
 

@@ -2,7 +2,7 @@
 rfc: 0045
 title: Describe, don't run — what .gui is for, and where it stops
 status: Draft
-considered-for: 0.4
+considered-for: 0.5
 date: 2026-10-17
 updated: 2026-10-18
 amends: P3, P5, roadmap note; adds P16

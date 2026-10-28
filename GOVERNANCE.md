@@ -247,7 +247,7 @@ A consumer upgrades on purpose, by bumping that version — so docs and tooling 
 
 **Pre-1.0, the spec moves in chapters.**
 
-- **A chapter is the middle number** (`0.3`, `0.4`, `0.5`): a themed group of RFCs, planned up front. 0.3 is components and packages; 0.4 is motion and interaction.
+- **A chapter is the middle number** (`0.3`, `0.4`, `0.5`): a themed group of RFCs, planned up front. 0.3 is components and packages; 0.4 is libraries; 0.5 is motion and interaction.
 - **Each RFC in it is one point release.** `0.3.1` is one RFC, `0.3.2` the next, so what a file can contain traces to a single decision. Accepted and Proposed RFCs take the lowest numbers; Draft slots are tentative. The current assignment is in the [RFC index](rfcs/README.md#index).
 - **A chapter closes when its list is empty** — every RFC shipped, rejected, or moved on. The next release is then `x.y.0` of the next chapter. Once a chapter is underway, new ideas go to a later one, and a chapter that runs well past two or three months closes anyway, pushing what is unfinished forward.
 
