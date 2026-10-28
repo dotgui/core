@@ -147,7 +147,7 @@ A color is written in one of three notations, everywhere a color goes — fills,
 | `rgba()` | `rgba(255, 0, 0, 0.5)` | A color with opacity |
 | `oklch()` | `oklch(0.6 0.2 250 / 0.5)` | Wide-gamut color, stored as written |
 
-`rgb()` is drawn for existing exports but is not part of the format; write hex. Named colors, `hsl()` and 3-digit hex are not accepted.
+`rgb()` is drawn for existing exports but is not part of the format; write hex. `fill` colors every node — a frame's background, a text's glyphs — and `border` outlines it; there is no `color` on text and no `stroke` attribute ([RFC-0022](../rfcs/0022-fill-and-border.md)). Named colors, `hsl()` and 3-digit hex are not accepted.
 
 A dimension is a bare number in pixels. Sizes — `w`, `h`, `min-width`, `max-width`, `min-height`, `max-height` — may also be a share of the parent: `w="50%"`. There is no `px` suffix, `rem`, `vw`/`vh` or `calc()`. Grid track lists (`cols`, `rows`) keep their own syntax.
 

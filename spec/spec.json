@@ -1,6 +1,6 @@
 {
   "$generated": "DO NOT EDIT — run `bun run gen:spec` in the kit. Source: core/schema/types.ts + spec.content.ts",
-  "formatVersion": "0.3.9",
+  "formatVersion": "0.3.10",
   "categoryOrder": [
     "Format",
     "Metadata",
@@ -261,7 +261,7 @@
           "name": "version",
           "type": "string",
           "required": true,
-          "description": "Spec version the document is written for: a chapter (\"0.3\") or a point in it (\"0.3.4\"). Consumers refuse a version newer than they read. Current: 0.3.9."
+          "description": "Spec version the document is written for: a chapter (\"0.3\") or a point in it (\"0.3.4\"). Consumers refuse a version newer than they read. Current: 0.3.10."
         },
         {
           "name": "name",
@@ -599,7 +599,7 @@
           "name": "bind",
           "type": "string",
           "required": false,
-          "description": "The attribute overridden on the target. Required for number and style. Defaults: string → value, boolean → visible, color → fill (or stroke), image → src, component → component."
+          "description": "The attribute overridden on the target. Required for number and style. Defaults: string → value, boolean → visible, color → fill (or border-color; stroke is its old name), image → src, component → component."
         }
       ],
       "sharedAttrs": false,
@@ -2217,7 +2217,8 @@
       "summary": "text node",
       "description": [
         "Single-style text is self-closing with a value attribute. Mixed-style text has <segment> children — each segment overrides font attrs for its run.",
-        "text-style references a named style; individual font attrs are omitted when a style is referenced. Variable fonts use font-variation; OpenType features use font-feature."
+        "text-style references a named style; individual font attrs are omitted when a style is referenced. Variable fonts use font-variation; OpenType features use font-feature.",
+        "fill colors the glyphs, on <text> and on each <segment> — the same attribute that colors a frame. There is no color attribute on text (RFC-0022)."
       ],
       "mapsToFigma": "Text",
       "attributes": [
@@ -3155,7 +3156,8 @@
       "summary": "paint & effects stack",
       "description": [
         "A non-layout child that describes the parent's complete paint and effect stack. Used when a node has multiple fills, complex borders, or multiple effects.",
-        "All three stacks — fills, borders, effects — are ordered in document order. When <appearance> contains at least one <border>, the border shorthand on the parent is ignored."
+        "All three stacks — fills, borders, effects — are ordered in document order. When <appearance> contains at least one <border>, the border shorthand on the parent is ignored.",
+        "Outlines are border — the shorthand, its longhands, or <border> entries here. <border> belongs inside <appearance>, never directly in a node, and there is no stroke attribute or <stroke> entry (RFC-0022)."
       ],
       "attributes": [
         {
