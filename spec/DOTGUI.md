@@ -776,7 +776,7 @@ No layout behavior. Children are absolutely positioned relative to the group ori
 </group>
 ```
 
-When the first child of a Figma group is a mask node, the plugin extracts the mask shape as an SVG asset and hoists it onto the `<group>` tag as `mask-src` / `mask-x` / `mask-y` / `mask-width` / `mask-height`. The mask child is excluded from the rendered children.
+A mask is `mask-src` on a layout container — `frame`, `stack`, `row`, `col`, `grid` or `group` — and masks everything the container draws ([RFC-0028](../rfcs/0028-clipping-and-masks.md)). An exporter turns a design tool's mask layer into an SVG or raster asset and writes it there; the mask layer itself is not written.
 
 ```xml
 <group x="0" y="0" w="390" h="200"
@@ -787,9 +787,13 @@ When the first child of a Figma group is a mask node, the plugin extracts the ma
 
 | Attr | Notes |
 |---|---|
-| `mask-src` | Asset path (`assets/...`) for the SVG mask shape |
-| `mask-x` / `mask-y` | Position of the mask relative to the group origin |
-| `mask-width` / `mask-height` | Dimensions of the mask |
+| `mask-src` | The mask: an SVG or raster asset |
+| `mask-x` / `mask-y` | Position of the mask relative to the container; default `0` |
+| `mask-width` / `mask-height` | Size of the mask; default the container's size |
+| `mask-mode` | `alpha` (default) or `luminance` |
+| `mask-invert` | Presence flag: cut the shape out instead of keeping it |
+
+The other attributes mean nothing without `mask-src`. `clip` clips children to the box and its radius; `clip-path` clips to a shape — `inset()`, `circle()`, `ellipse()` or `polygon()`, with `%` of the node's box. There is no `mask` flag on a child, no `mask-composite`, and no `path()` or `url()` in `clip-path`.
 
 ### Content Tags
 
@@ -1005,7 +1009,6 @@ These apply to all layout, content, and geometry nodes:
 | `name` | string | Figma layer name |
 | `opacity` | `0`–`1` | Omitted when `1` |
 | `blend` | `multiply`, `screen`, `overlay`, `darken`, `lighten`, `linear-burn`, `linear-dodge`, ... | Omitted when `normal` or `pass-through` |
-| `mask` | boolean presence | Alpha mask for subsequent siblings |
 | `rotation` | degrees | Omitted when `0` |
 | `constraint-h` | `right`, `center`, `scale`, `stretch` | `left` is default, omitted |
 | `constraint-v` | `bottom`, `center`, `scale`, `stretch` | `top` is default, omitted |
@@ -1035,7 +1038,7 @@ These apply to all layout, content, and geometry nodes:
 
 **Boolean presence convention**
 
-Bare attributes without a value are treated as `true`. `<frame clip>` = `<frame clip="true">`. Applies to: `clip`, `mask`, `wrap`, `abs`, `truncate`, `reverse-z`.
+Bare attributes without a value are treated as `true`. `<frame clip>` = `<frame clip="true">`. Applies to: `clip`, `mask-invert`, `wrap`, `abs`, `truncate`, `reverse-z`.
 
 
 ---

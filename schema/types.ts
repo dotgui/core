@@ -103,7 +103,6 @@ export type FlipValue = 'h' | 'v' | 'both'
 export type FillRule = 'nonzero' | 'evenodd'
 export type StrokeJoin = 'miter' | 'round' | 'bevel'
 export type MaskMode = 'alpha' | 'luminance'
-export type MaskComposite = 'add' | 'subtract' | 'intersect' | 'exclude'
 export type WritingMode = 'horizontal-tb' | 'vertical-rl' | 'vertical-lr'
 export type TextDirection = 'ltr' | 'rtl'
 export type FontSmoothing = 'auto' | 'antialiased' | 'subpixel-antialiased' | 'none'
@@ -171,8 +170,6 @@ export interface VisualAttrs {
   opacity?: number
   /** Blend mode against layers below. Omitted when normal. */
   blend?: BlendMode
-  /** Presence = true. Acts as an alpha mask for subsequent siblings. */
-  mask?: boolean
   /** Rotation in degrees. Omitted when 0. */
   rotation?: number
   /** Horizontal pin/resize behavior. Default left (omitted). */
@@ -729,6 +726,25 @@ export type GUIChild = FrameNode | StackNode | RowNode | ColNode | GridNode | Gr
  * instance fills it by name. The container's own layout applies to whatever
  * is inserted; its children are the fallback.
  */
+/**
+ * A mask on a layout container (RFC-0028): an asset that masks everything
+ * the container draws. The other attributes mean nothing without mask-src.
+ */
+export interface MaskAttrs {
+  /** The mask: an SVG or raster asset. */
+  'mask-src'?: AssetRef
+  /** Where the mask sits, relative to the container. Default 0. */
+  'mask-x'?: number
+  'mask-y'?: number
+  /** The mask's size. Default: the container's size. */
+  'mask-width'?: number
+  'mask-height'?: number
+  /** alpha (the asset's opacity, default) or luminance (its brightness). */
+  'mask-mode'?: MaskMode
+  /** Presence = true. Cut the mask's shape out instead of keeping it. */
+  'mask-invert'?: boolean
+}
+
 export interface SlotAttrs {
   /** Declares this container a slot, by name. Not on a component's root; not inside another slot. */
   slot?: string
@@ -740,7 +756,7 @@ export interface SlotAttrs {
   'slot-max'?: number
 }
 
-export interface FrameNode extends VisualAttrs, SlotAttrs {
+export interface FrameNode extends VisualAttrs, SlotAttrs, MaskAttrs {
   tag: 'frame'
   name?: string
   /**
@@ -768,7 +784,8 @@ export interface FrameNode extends VisualAttrs, SlotAttrs {
   shadow?: string
   clip?: boolean
   appearance?: Appearance
-  'clip-path'?: string              // CSS clip-path value, e.g. "polygon(0 0, 100% 0, 100% 80%, 0 100%)"
+  /** A shape to clip to: inset(), circle(), ellipse() or polygon(); % of the node's box (RFC-0028). */
+  'clip-path'?: string
   'overflow-x'?: OverflowValue
   'overflow-y'?: OverflowValue
   'border-image'?: string           // CSS border-image shorthand
@@ -777,7 +794,7 @@ export interface FrameNode extends VisualAttrs, SlotAttrs {
   children: GUIChild[]
 }
 
-export interface StackNode extends VisualAttrs, SlotAttrs {
+export interface StackNode extends VisualAttrs, SlotAttrs, MaskAttrs {
   tag: 'stack'
   name?: string
   /**
@@ -843,7 +860,8 @@ export interface StackNode extends VisualAttrs, SlotAttrs {
   shadow?: string
   clip?: boolean
   appearance?: Appearance
-  'clip-path'?: string              // CSS clip-path value, e.g. "polygon(0 0, 100% 0, 100% 80%, 0 100%)"
+  /** A shape to clip to: inset(), circle(), ellipse() or polygon(); % of the node's box (RFC-0028). */
+  'clip-path'?: string
   'overflow-x'?: OverflowValue
   'overflow-y'?: OverflowValue
   'border-image'?: string           // CSS border-image shorthand
@@ -852,7 +870,7 @@ export interface StackNode extends VisualAttrs, SlotAttrs {
   children: GUIChild[]
 }
 
-export interface GroupNode extends VisualAttrs {
+export interface GroupNode extends VisualAttrs, MaskAttrs {
   tag: 'group'
   name?: string
   /**
@@ -867,14 +885,6 @@ export interface GroupNode extends VisualAttrs {
   w: number
   /** Required on group — no content to derive size from */
   h: number
-  // Mask passthrough — set when the first child is a mask node
-  'mask-src'?: AssetRef
-  'mask-x'?: number
-  'mask-y'?: number
-  'mask-width'?: number
-  'mask-height'?: number
-  'mask-mode'?: MaskMode            // alpha | luminance
-  'mask-composite'?: MaskComposite  // add | subtract | intersect | exclude
   children: GUIChild[]
 }
 

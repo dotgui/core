@@ -2,7 +2,7 @@
 
 # .gui Element Reference
 
-Format version `0.3.10`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
+Format version `0.3.11`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
 
 ## Contents
 
@@ -23,7 +23,6 @@ Available on all layout, content, and geometry nodes.
 | `source-id` | `string` | The source tool's handle for this node, read against `source` on the root. Opaque, exporters only, written only for round-trip exports (RFC-0046). |
 | `opacity` | `number` | Layer opacity, 0–1. Omitted when 1. |
 | `blend` | `normal` `multiply` `screen` `overlay` `darken` `lighten` `color-dodge` `color-burn` `hard-light` `soft-light` `difference` `exclusion` `hue` `saturation` `color` `luminosity` `linear-burn` `linear-dodge` | Blend mode against layers below. Omitted when normal. |
-| `mask` | `boolean` | Presence = true. Acts as an alpha mask for subsequent siblings. |
 | `rotation` | `number` | Rotation in degrees. Omitted when 0. |
 | `constraint-h` | `left` `right` `center` `scale` `stretch` | Horizontal pin/resize behavior. Default left (omitted). |
 | `constraint-v` | `center` `scale` `stretch` `top` `bottom` | Vertical pin/resize behavior. Default top (omitted). |
@@ -89,7 +88,7 @@ platform and source describe the document itself and belong to it alone: in a mu
 
 | Attribute | Type | Description |
 |---|---|---|
-| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.3.10. |
+| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.3.11. |
 | `name` | `string` | Screen or layer name from the source design. |
 | `platform` | `string` | The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036). |
 | `source` | `string` | The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036). |
@@ -366,7 +365,7 @@ w and h are required. clip (boolean presence) clips content to bounds.
 | `border-align` | `center` `inside` `outside` |  |
 | `shadow` | `string` |  |
 | `clip` | `boolean` |  |
-| `clip-path` | `string` |  |
+| `clip-path` | `string` | A shape to clip to: inset(), circle(), ellipse() or polygon(); % of the node's box (RFC-0028). |
 | `overflow-x` | `hidden` `visible` `scroll` `auto` |  |
 | `overflow-y` | `hidden` `visible` `scroll` `auto` |  |
 | `border-image` | `string` |  |
@@ -376,6 +375,13 @@ w and h are required. clip (boolean presence) clips content to bounds.
 | `slot-accept` | `string` | Space-separated component or component-set ids. Present = the slot takes only instances of these, flat. |
 | `slot-min` | `number` | Advisory minimum item count. A quality finding, never an error. |
 | `slot-max` | `number` | Advisory maximum item count. A quality finding, never an error. |
+| `mask-src` | `asset` | The mask: an SVG or raster asset. |
+| `mask-x` | `number` | Where the mask sits, relative to the container. Default 0. |
+| `mask-y` | `number` |  |
+| `mask-width` | `number` | The mask's size. Default: the container's size. |
+| `mask-height` | `number` |  |
+| `mask-mode` | `alpha` `luminance` | alpha (the asset's opacity, default) or luminance (its brightness). |
+| `mask-invert` | `boolean` | Presence = true. Cut the mask's shape out instead of keeping it. |
 
 Also accepts all [shared attributes](#shared-attributes).
 
@@ -440,7 +446,7 @@ w / h absent = hug content; "fill" = fill parent; number = fixed px. p accepts C
 | `border-align` | `center` `inside` `outside` |  |
 | `shadow` | `string` |  |
 | `clip` | `boolean` |  |
-| `clip-path` | `string` |  |
+| `clip-path` | `string` | A shape to clip to: inset(), circle(), ellipse() or polygon(); % of the node's box (RFC-0028). |
 | `overflow-x` | `hidden` `visible` `scroll` `auto` |  |
 | `overflow-y` | `hidden` `visible` `scroll` `auto` |  |
 | `border-image` | `string` |  |
@@ -450,6 +456,13 @@ w / h absent = hug content; "fill" = fill parent; number = fixed px. p accepts C
 | `slot-accept` | `string` | Space-separated component or component-set ids. Present = the slot takes only instances of these, flat. |
 | `slot-min` | `number` | Advisory minimum item count. A quality finding, never an error. |
 | `slot-max` | `number` | Advisory maximum item count. A quality finding, never an error. |
+| `mask-src` | `asset` | The mask: an SVG or raster asset. |
+| `mask-x` | `number` | Where the mask sits, relative to the container. Default 0. |
+| `mask-y` | `number` |  |
+| `mask-width` | `number` | The mask's size. Default: the container's size. |
+| `mask-height` | `number` |  |
+| `mask-mode` | `alpha` `luminance` | alpha (the asset's opacity, default) or luminance (its brightness). |
+| `mask-invert` | `boolean` | Presence = true. Cut the mask's shape out instead of keeping it. |
 
 Also accepts all [shared attributes](#shared-attributes).
 
@@ -508,7 +521,7 @@ w / h absent = hug content; "fill" = fill parent; number = fixed px. gap="auto" 
 | `border-align` | `center` `inside` `outside` |  |
 | `shadow` | `string` |  |
 | `clip` | `boolean` |  |
-| `clip-path` | `string` |  |
+| `clip-path` | `string` | A shape to clip to: inset(), circle(), ellipse() or polygon(); % of the node's box (RFC-0028). |
 | `overflow-x` | `hidden` `visible` `scroll` `auto` |  |
 | `overflow-y` | `hidden` `visible` `scroll` `auto` |  |
 | `border-image` | `string` |  |
@@ -518,6 +531,13 @@ w / h absent = hug content; "fill" = fill parent; number = fixed px. gap="auto" 
 | `slot-accept` | `string` | Space-separated component or component-set ids. Present = the slot takes only instances of these, flat. |
 | `slot-min` | `number` | Advisory minimum item count. A quality finding, never an error. |
 | `slot-max` | `number` | Advisory maximum item count. A quality finding, never an error. |
+| `mask-src` | `asset` | The mask: an SVG or raster asset. |
+| `mask-x` | `number` | Where the mask sits, relative to the container. Default 0. |
+| `mask-y` | `number` |  |
+| `mask-width` | `number` | The mask's size. Default: the container's size. |
+| `mask-height` | `number` |  |
+| `mask-mode` | `alpha` `luminance` | alpha (the asset's opacity, default) or luminance (its brightness). |
+| `mask-invert` | `boolean` | Presence = true. Cut the mask's shape out instead of keeping it. |
 
 Also accepts all [shared attributes](#shared-attributes).
 
@@ -572,7 +592,7 @@ w / h absent = hug content; "fill" = fill parent; number = fixed px. gap="auto" 
 | `border-align` | `center` `inside` `outside` |  |
 | `shadow` | `string` |  |
 | `clip` | `boolean` |  |
-| `clip-path` | `string` |  |
+| `clip-path` | `string` | A shape to clip to: inset(), circle(), ellipse() or polygon(); % of the node's box (RFC-0028). |
 | `overflow-x` | `hidden` `visible` `scroll` `auto` |  |
 | `overflow-y` | `hidden` `visible` `scroll` `auto` |  |
 | `border-image` | `string` |  |
@@ -582,6 +602,13 @@ w / h absent = hug content; "fill" = fill parent; number = fixed px. gap="auto" 
 | `slot-accept` | `string` | Space-separated component or component-set ids. Present = the slot takes only instances of these, flat. |
 | `slot-min` | `number` | Advisory minimum item count. A quality finding, never an error. |
 | `slot-max` | `number` | Advisory maximum item count. A quality finding, never an error. |
+| `mask-src` | `asset` | The mask: an SVG or raster asset. |
+| `mask-x` | `number` | Where the mask sits, relative to the container. Default 0. |
+| `mask-y` | `number` |  |
+| `mask-width` | `number` | The mask's size. Default: the container's size. |
+| `mask-height` | `number` |  |
+| `mask-mode` | `alpha` `luminance` | alpha (the asset's opacity, default) or luminance (its brightness). |
+| `mask-invert` | `boolean` | Presence = true. Cut the mask's shape out instead of keeping it. |
 
 Also accepts all [shared attributes](#shared-attributes).
 
@@ -634,7 +661,7 @@ A grid range fills the spanned tracks (no w/h needed). A single value hugs conte
 | `border-align` | `center` `inside` `outside` |  |
 | `shadow` | `string` |  |
 | `clip` | `boolean` |  |
-| `clip-path` | `string` |  |
+| `clip-path` | `string` | A shape to clip to: inset(), circle(), ellipse() or polygon(); % of the node's box (RFC-0028). |
 | `overflow-x` | `hidden` `visible` `scroll` `auto` |  |
 | `overflow-y` | `hidden` `visible` `scroll` `auto` |  |
 | `border-image` | `string` |  |
@@ -644,6 +671,13 @@ A grid range fills the spanned tracks (no w/h needed). A single value hugs conte
 | `slot-accept` | `string` | Space-separated component or component-set ids. Present = the slot takes only instances of these, flat. |
 | `slot-min` | `number` | Advisory minimum item count. A quality finding, never an error. |
 | `slot-max` | `number` | Advisory maximum item count. A quality finding, never an error. |
+| `mask-src` | `asset` | The mask: an SVG or raster asset. |
+| `mask-x` | `number` | Where the mask sits, relative to the container. Default 0. |
+| `mask-y` | `number` |  |
+| `mask-width` | `number` | The mask's size. Default: the container's size. |
+| `mask-height` | `number` |  |
+| `mask-mode` | `alpha` `luminance` | alpha (the asset's opacity, default) or luminance (its brightness). |
+| `mask-invert` | `boolean` | Presence = true. Cut the mask's shape out instead of keeping it. |
 
 Also accepts all [shared attributes](#shared-attributes).
 
@@ -668,7 +702,7 @@ Also accepts all [shared attributes](#shared-attributes).
 
 No layout behavior. Children are absolutely positioned relative to the group origin. Maps to a Figma group node.
 
-When the first child of a Figma group is a mask node, the mask shape is extracted as an SVG asset and hoisted onto the <group> as mask-src attrs.
+A mask is mask-src on the container — any layout container, not only a group — and masks everything it draws. An exporter turns a design tool's mask layer into an SVG or raster asset and writes it there (RFC-0028).
 
 **Maps to Figma:** Group
 
@@ -680,13 +714,13 @@ When the first child of a Figma group is a mask node, the mask shape is extracte
 | `y` | `number` |  |
 | `w` **(required)** | `number` | Required on group — no content to derive size from |
 | `h` **(required)** | `number` | Required on group — no content to derive size from |
-| `mask-src` | `asset` |  |
-| `mask-x` | `number` |  |
+| `mask-src` | `asset` | The mask: an SVG or raster asset. |
+| `mask-x` | `number` | Where the mask sits, relative to the container. Default 0. |
 | `mask-y` | `number` |  |
-| `mask-width` | `number` |  |
+| `mask-width` | `number` | The mask's size. Default: the container's size. |
 | `mask-height` | `number` |  |
-| `mask-mode` | `alpha` `luminance` |  |
-| `mask-composite` | `add` `subtract` `intersect` `exclude` |  |
+| `mask-mode` | `alpha` `luminance` | alpha (the asset's opacity, default) or luminance (its brightness). |
+| `mask-invert` | `boolean` | Presence = true. Cut the mask's shape out instead of keeping it. |
 
 Also accepts all [shared attributes](#shared-attributes).
 
@@ -1092,7 +1126,9 @@ source-id is the source tool's own handle for a node, read against source on the
 
 detached-from names the component a layout container was detached from, when an exporter could not keep a heavily-overridden instance as an <instance>. It holds a component or variant id declared in the document or its library, and must resolve; it changes nothing on screen. Only <instance> carries component (RFC-0035).
 
-Boolean presence convention: bare attributes without a value are treated as true. <frame clip> = <frame clip="true">. Applies to: clip, mask, wrap, abs, truncate, reverse-z.
+Boolean presence convention: bare attributes without a value are treated as true. <frame clip> = <frame clip="true">. Applies to: clip, mask-invert, wrap, abs, truncate, reverse-z.
+
+Clipping and masks (RFC-0028): clip clips children to the box and its radius; clip-path clips to a shape — inset(), circle(), ellipse() or polygon(), with % of the node's box; mask-src masks everything a container draws through an SVG or raster asset, placed by mask-x, mask-y, mask-width and mask-height, read by mask-mode (alpha or luminance), and cut out instead with mask-invert. The mask attributes mean nothing without mask-src. There is no mask flag on a child and no mask-composite.
 
 | Attribute | Type | Description |
 |---|---|---|
@@ -1100,7 +1136,6 @@ Boolean presence convention: bare attributes without a value are treated as true
 | `source-id` | `string` | The source tool's handle for this node, read against `source` on the root. Opaque, exporters only, written only for round-trip exports (RFC-0046). |
 | `opacity` | `number` | Layer opacity, 0–1. Omitted when 1. |
 | `blend` | `normal` `multiply` `screen` `overlay` `darken` `lighten` `color-dodge` `color-burn` `hard-light` `soft-light` `difference` `exclusion` `hue` `saturation` `color` `luminosity` `linear-burn` `linear-dodge` | Blend mode against layers below. Omitted when normal. |
-| `mask` | `boolean` | Presence = true. Acts as an alpha mask for subsequent siblings. |
 | `rotation` | `number` | Rotation in degrees. Omitted when 0. |
 | `constraint-h` | `left` `right` `center` `scale` `stretch` | Horizontal pin/resize behavior. Default left (omitted). |
 | `constraint-v` | `center` `scale` `stretch` `top` `bottom` | Vertical pin/resize behavior. Default top (omitted). |

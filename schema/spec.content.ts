@@ -59,7 +59,7 @@ export interface ContentEntry {
  * The spec point this content describes: the chapter and the last RFC landed
  * in it (see rfcs/README.md, Format Versions). Written into spec.json.
  */
-export const specFormatVersion = '0.3.10'
+export const specFormatVersion = '0.3.11'
 
 export const specCategoryOrder = ['Format', 'Metadata', 'Layout', 'Content', 'Geometry', 'Appearance']
 
@@ -420,7 +420,7 @@ export const specContent: ContentEntry[] = [
     mapsToFigma: 'Group',
     description: [
       'No layout behavior. Children are absolutely positioned relative to the group origin. Maps to a Figma group node.',
-      'When the first child of a Figma group is a mask node, the mask shape is extracted as an SVG asset and hoisted onto the <group> as mask-src attrs.'
+      'A mask is mask-src on the container — any layout container, not only a group — and masks everything it draws. An exporter turns a design tool\'s mask layer into an SVG or raster asset and writes it there (RFC-0028).'
     ],
     exampleLabel: 'Group with mask',
     example: `<group x="0" y="0" w="390" h="200"
@@ -567,7 +567,8 @@ export const specContent: ContentEntry[] = [
       'id names a node so something can point at it: a prop target, a path segment through an instance (target="tab-1/label"). Lowercase kebab-case, written only where something points, unique within its scope — the screen tree of a document, or one component or variant body. A reference that does not resolve is an error (RFC-0046).',
       'source-id is the source tool\'s own handle for a node, read against source on the <gui> root. It is optional, written by exporters only when the user asks for an export that can go back, and opaque: the format never parses it. A document with any source-id must declare source. What each tool writes is in spec/SOURCES.md (RFC-0046).',
       'detached-from names the component a layout container was detached from, when an exporter could not keep a heavily-overridden instance as an <instance>. It holds a component or variant id declared in the document or its library, and must resolve; it changes nothing on screen. Only <instance> carries component (RFC-0035).',
-      'Boolean presence convention: bare attributes without a value are treated as true. <frame clip> = <frame clip="true">. Applies to: clip, mask, wrap, abs, truncate, reverse-z.'
+      'Boolean presence convention: bare attributes without a value are treated as true. <frame clip> = <frame clip="true">. Applies to: clip, mask-invert, wrap, abs, truncate, reverse-z.',
+      'Clipping and masks (RFC-0028): clip clips children to the box and its radius; clip-path clips to a shape — inset(), circle(), ellipse() or polygon(), with % of the node\'s box; mask-src masks everything a container draws through an SVG or raster asset, placed by mask-x, mask-y, mask-width and mask-height, read by mask-mode (alpha or luminance), and cut out instead with mask-invert. The mask attributes mean nothing without mask-src. There is no mask flag on a child and no mask-composite.'
     ],
     exampleLabel: 'Shared attrs in use',
     example: `<img src="assets/overlay.webp" w="390" h="240" opacity="0.6" blend="multiply" />
