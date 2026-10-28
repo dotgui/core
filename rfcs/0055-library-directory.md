@@ -53,7 +53,7 @@ acme-ds.gui
     └── arrow.svg
 ```
 
-It holds identically for a ZIP package and for a folder-form package ([RFC-0054](0054-folder-packages.md)).
+It holds identically for a ZIP package and for a folder-form package ([RFC-0054](0054-folder-form-packages.md)).
 
 ### The rules
 
