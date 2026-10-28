@@ -1,10 +1,11 @@
 ---
 rfc: 0054
 title: Folder-form packages — a .gui can be a directory
-status: Accepted
+status: Implemented
 targets: 0.4.1
 date: 2026-10-29
 updated: 2026-10-29
+implemented: 2026-10-29
 depends-on: 0004, 0042, 0043
 amends: 0004
 ---
@@ -168,7 +169,12 @@ P12 is the one to watch. Two forms would fail it if a design could be expressed 
 - **CLI:** `gui pack` and `gui unpack` move onto kit's entry step once a kit release carrying it is published.
 - **Spec:** `spec/DOTGUI.md` *The .gui package* describes both forms.
 
+Shipped in 0.4.1: the spec text; kit's `fromEntries` / `toEntries`, which `unpack` and `pack` now go through; and the native renderer's `read_gui_entries` and `read_gui_directory`, with `render_png` reading a directory. Kit reads up to 0.4.1; the renderer moves to 0.4.0 and reads up to 0.4.1. The CLI change waits for a kit release.
+
 ## Test Cases
+
+Tested in kit and the native renderer:
+
 
 - A ZIP and the directory it unzips to read as the same package: the same documents, library, preview and assets, byte for byte.
 - `toEntries` of a package, zipped and read back, is unchanged; two zips of one directory are identical.
