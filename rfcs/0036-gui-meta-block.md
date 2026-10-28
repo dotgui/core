@@ -1,118 +1,132 @@
 ---
 rfc: 0036
-title: gui root attrs and meta block — platform and provenance
-status: Draft
+title: platform and source on the gui root
+status: Proposed
 targets: 0.3.6
 date: 2026-05-31
+updated: 2026-10-28
 ---
 
-# `<gui>` Root Attrs and `<meta>` Block — Platform and Provenance
+# `platform` and `source` on `<gui>`
 
 ## Context
 
-The `<gui>` root element currently carries two attributes: `version` (spec version) and `name` (screen or layer name). That is the full extent of document-level information in a `.gui` file today.
+The `<gui>` root carries `version` and `name`. That is the whole of what a document says about itself, and two gaps have shown up as more tools read and write the format:
 
-As dotgui is used across more tools — Figma exporters, AI agents, code generators, hand-authored files — two gaps have emerged:
+1. **No platform signal.** A code generator cannot tell whether a document targets iOS, Android, the web or a desktop without inferring it from the canvas size or layer names. That is guesswork.
+2. **No provenance.** A file exported from a design tool records nothing about which tool produced it. Round-trip tooling and design-to-code diffing have nothing to read a layer id against.
 
-1. **No platform signal.** A code generator reading a `.gui` file cannot tell whether it targets iOS, Android, web, or desktop without inferring from viewport dimensions or layer naming conventions. This forces guesswork.
+Both are already being written. The Figma exporter emits `platform` when the exported frame is an exact device size, and a `<meta source="figma" source-node="…" exported-at="…" />` block on every export. Kit reads `platform`; the native renderer ignores both. The spec defines neither.
 
-2. **No provenance.** When a `.gui` file is exported from a design tool, there is no record of where it came from — which tool, which file, which node, when. Round-trip tooling and design-to-code diffing have no anchor point.
+### What changed from the first draft
 
-These are distinct concerns. Platform shapes how the file is interpreted. Provenance is purely informational — it has no effect on rendering or code generation and should never be required.
+The first draft put provenance in a `<meta>` block with three attributes: `source`, `source-node`, `exported-at`. A hearing against [PRINCIPLES.md](../PRINCIPLES.md) found the intent sound and the form wrong:
+
+- **A tag where a property would do.** Provenance is one or two scalar facts about the document. [P11](../PRINCIPLES.md) prefers a property over a new tag.
+- **`<meta>` is HTML's word.** The preamble names "meta soup" as the baggage the format drops, and a model with HTML priors will write `<meta name="…" content="…">` into it ([P7](../PRINCIPLES.md), [P8](../PRINCIPLES.md)).
+- **It would be shared by accident.** In a multi-document package, everything above `library.guix`'s layout root is shared with every document ([RFC-0042](0042-multi-document-packages.md)). A library's `<meta>` would become every document's provenance, while each document has its own ([RFC-0046](0046-identity-and-source-ids.md)). Root attributes are not part of the library part, so they stay per-document without an exception.
+- **`exported-at` breaks determinism.** Two exports of the same unchanged design would differ, and every diff of a re-exported file would show a change ([P14](../PRINCIPLES.md)).
+- **`source-node` is already being replaced.** [RFC-0046](0046-identity-and-source-ids.md) writes the exported frame's id as `source-id` on the root, like every other node. Shipping `source-node` in 0.3.6 to supersede it in 0.3.7 is two ways to say one thing ([P12](../PRINCIPLES.md)).
+- The draft also contradicted itself: its rule placed `<meta>` after the declaration blocks, while its own example — and the exporter — put it first.
 
 ## Decision
 
-### 1. Add `platform` to `<gui>` root attrs
-
-`platform` is an optional attribute on the `<gui>` root describing the intended target platform.
+**Two optional attributes on `<gui>`. No new tag.**
 
 ```xml
-<gui version="0.2" name="Checkout" platform="ios">
+<gui version="0.3.6" name="Checkout" platform="ios" source="figma">
 ```
 
-Recommended values (open string, not enforced):
+### `platform` — the intended target
+
+An open string describing the platform the document is designed for. Recommended values:
 
 | Value | Target |
 |---|---|
-| `ios` | Apple iOS / iPadOS |
-| `android` | Android (Material) |
-| `web` | Web browser (responsive or desktop) |
-| `desktop` | Native desktop (macOS, Windows, Linux) |
+| `ios` | iOS / iPadOS |
+| `android` | Android |
+| `web` | Web browser, responsive or desktop |
+| `desktop` | Native desktop — macOS, Windows, Linux |
 | `tv` | TV / 10-foot UI |
-| `watch` | Wearable / Apple Watch |
+| `watch` | Wearables |
 
-The value is open — any tool can emit its own platform string. The spec documents recommended values but does not validate them.
+- Absent means **unspecified**. A consumer must not assume a default.
+- It describes intent. It changes nothing about how the document is drawn; the core vocabulary stays platform-neutral ([P2](../PRINCIPLES.md)).
+- Values outside the recommended list are allowed. Linters warn on them, so a typo is caught without the spec having to enumerate every platform.
+- An exporter writes it only when it knows. The Figma exporter's rule — exact device-frame sizes only, no fuzzy matching — is the model: inference that can be wrong is not written ([P14](../PRINCIPLES.md)).
 
-When absent, platform is unspecified. Consumers must not assume a default.
+### `source` — the tool that produced the file
 
-### 2. Introduce `<meta>` block for provenance
+An open string naming the producer. Recommended values: `figma`, `penpot`, `sketch`, `html`.
 
-`<meta>` is an optional child of `<gui>` that carries export provenance. It must appear before any layout node, after `<tokens>`, `<fonts>`, `<styles>`, and `<components>` blocks.
+- **Exporters only.** A file written by hand or by an AI has no source and omits it. Its presence therefore means the file was exported by a tool; its absence means it was authored directly.
+- It is the anchor other provenance is read against. [RFC-0046](0046-identity-and-source-ids.md) adds `source-id` — the source tool's own id for a node, including the root — and reads it against this `source`.
+- It is the same word, with the same meaning, as `<font source>`: where a thing came from ([P8](../PRINCIPLES.md)).
 
-```xml
-<gui version="0.2" name="Checkout" platform="ios">
-  <meta source="figma" source-node="336:1697" exported-at="2026-05-31T10:00:00Z" />
-  <tokens>...</tokens>
-  <col w="390">
-    ...
-  </col>
-</gui>
-```
+### Per document
 
-**`<meta>` attributes:**
+Both attributes belong to the document that declares them. In a multi-document package each document, `library.guix` included, carries its own; nothing is inherited from the library, because root attributes are not part of a document's library part ([RFC-0042](0042-multi-document-packages.md)).
 
-| Attr | Type | Description |
-|---|---|---|
-| `source` | open string | Tool or origin that produced this file. Recommended: `figma`, `penpot`, `sketch`, `hand`. |
-| `source-node` | string | Node ID of the exported node in the source design tool. Design-tool exports only. |
-| `exported-at` | ISO 8601 | Timestamp of when the export ran. |
+### Not recorded
 
-All attributes are optional. An empty `<meta />` is valid but pointless — omit the block if there is nothing to say.
-
-### 3. `<meta>` is absent on hand-authored and AI-generated files
-
-`<meta>` is an export artifact. When a human or AI writes a `.gui` file from scratch, there is no source tool, no node ID, and no export timestamp. The block should be omitted entirely.
-
-Presence of `<meta>` is therefore a reliable signal: this file came from a design tool export. Absence means it was authored directly.
+- **When it was exported.** A timestamp makes identical exports differ. Version control and file metadata already know.
+- **Which file it came from.** No export format records it, the consumer doing a round trip already knows, and a file key is an access-bearing link that would travel with every copy ([RFC-0046](0046-identity-and-source-ids.md), *Why the source file is not recorded*).
+- **`theme` and screen size.** Theme is token modes ([RFC-0037](0037-token-modes-theming.md)); screen size is [RFC-0050](0050-screen-and-scroll.md).
 
 ## Reasoning
 
-**`platform` on `<gui>` root, not in `<meta>`.** Platform shapes how the entire file is interpreted by a renderer or code generator — it is an input, not history. It belongs alongside `version` and `name` as a document descriptor. Provenance is history and belongs in `<meta>`.
+**Both are facts about the document, so both sit on its root.** `version` and `name` already live there; `platform` and `source` are the same kind of thing. The first draft's argument for a block — keeping renderer-relevant attributes apart from informational ones — does not hold: a renderer reads neither `platform` nor `source`. And stripping provenance from a file for handoff is removing one attribute, as easy as removing one block.
 
-**`source` is open string, not enum.** An enum of design tools (`figma | penpot | sketch`) would need to be updated every time a new tool adopts dotgui. An open string lets any tool self-identify without waiting for a spec update. Recommended values are documented as a convention, not a constraint.
+**Open strings, recommended values.** An enum of tools or platforms would need a spec change every time a new one appears. Recommended values give producers a convention to agree on; linters catch the typos ([P15](../PRINCIPLES.md)).
 
-**`source-node` kept despite being design-tool specific.** It is the most actionable provenance datum — with a node ID, round-trip tooling can re-export the same node, diff against the latest design, or re-attach to the live file. `source-file` (the design file name) was considered but dropped — it overlaps with `name` enough that the signal is weak. `source-url` was considered but dropped — the Figma plugin API does not expose the file URL, and it has no meaning for non-design-tool sources.
+**The lowest rung that works.** Two inline-single values ([P11](../PRINCIPLES.md)). Nothing here needs a tag, a list, or a block.
 
-**`exported-at` in ISO 8601.** Standard, unambiguous, sortable. No timezone assumptions — exporters should emit UTC.
+### Principle pass
 
-**`theme` and `viewport` deferred.** `theme` (`light` / `dark` / `auto`) is useful but requires mode support in the renderer — not yet implemented. `viewport` (`390x844`) is useful but requires scroll and fixed-canvas support to be meaningful — also not yet implemented. Both are natural additions to `<gui>` root attrs in a future RFC when their supporting features land.
+| Principle | Result | Note |
+|---|---|---|
+| P1 — neutral, round-trips | pass | `source` is any tool's name; it is what round-trip ids are read against. |
+| P2 — platform-agnostic | pass | `platform` describes a target and changes no vocabulary. |
+| P3 — faithful, not a save file | pass | Provenance, not editor state; no timestamp, no file key. |
+| P4 — everything means something | pass | Present only when known; absent means unspecified or hand-authored. |
+| P5 — not React / HTML / Figma | pass | No behaviour; no HTML `<meta>`; no tool internals. |
+| P6 — intent vs computation | pass | Neither can be derived by a renderer. |
+| P7 / P8 — readable, one vocabulary | pass | Plain nouns; `source` matches `<font source>`. |
+| P9 / P10 — compact, conventions | pass | Absent by default; one attribute each when present. |
+| P11 — grammar | pass | Properties on an existing tag, inline-single values. |
+| P12 / P13 — one way, few primitives | pass | No new tag; `source-node` left to RFC-0046's `source-id`. |
+| P14 — deterministic | pass | No timestamp; exporters write `platform` only on an exact match. |
+| P15 — honest | pass | Unknown values are allowed and warned on, never guessed into a default. |
 
 ## Alternatives Considered
 
-**All metadata as attrs on `<gui>`** — Rejected. Provenance attrs (`source`, `source-node`, `exported-at`) have zero runtime meaning. Mixing them with structural attrs (`version`, `name`, `platform`) obscures which attrs a renderer actually needs to read. The `<meta>` block makes the boundary explicit and lets the optimizer strip provenance in a single targeted pass.
+**A `<meta>` block with `source`, `source-node` and `exported-at`** — Rejected. This RFC's first draft. A tag where a property does, HTML's word, shared by accident in a package, and non-deterministic; see *What changed from the first draft*.
 
-**`source-file` — the design file name** — Rejected. Overlaps with `name` on `<gui>` (which already captures the screen or layer name). The Figma file name and the exported node name are different things, but the file name adds little actionable value compared to `source-node`.
+**`exported-at` on `<gui>`** — Rejected. Moving the timestamp does not fix it: identical exports still differ.
 
-**`source-url` — link back to the source file** — Rejected. The Figma plugin API does not expose the canonical file URL. For hand-authored or AI-generated files, there is no URL. Not practical to emit reliably.
+**`source-node` on `<gui>`** — Rejected. The root's id is written as `source-id`, the same way as every other node's ([RFC-0046](0046-identity-and-source-ids.md)).
 
-**`author` and `created-at`** — Rejected. Authorship is either implicit in the source tool (the design file's owner) or meaningless for the consumer. `created-at` is file management metadata, not format metadata. Neither affects rendering or code generation.
+**`source-url` / `source-file`** — Rejected. Not exposed by every tool, meaningless for hand-written files, and a file link carries access with every copy.
+
+**`author` / `created-at`** — Rejected. File-management metadata, not format metadata.
+
+**An enum for `platform` or `source`** — Rejected. Every new platform or tool would need a spec change.
 
 ## Drawbacks
 
-- Existing `.gui` files carry no `<meta>` block. Tooling must treat its absence gracefully — this is already required since the block is optional.
-- `platform` being an open string means tooling cannot exhaustively validate it. A typo like `platfrom="ios"` goes undetected. Linters should warn on unknown values against the recommended list.
+- Files exported before this RFC carry `<meta>`. Consumers must keep tolerating it in documents declaring 0.3.5 or earlier; from 0.3.6 it is reported as obsolete, with the attributes to use instead.
+- Open strings cannot be validated exhaustively; a typo is a lint warning, not an error.
+- Between 0.3.6 and 0.3.7 an exporter can name its tool but has no way to write the exported frame's id. The window is one point release, and nothing ships that writes it today except the Figma exporter, whose output is being reworked anyway.
 
 ## Implementation Notes
 
-**Figma exporter (`gui-figma/src/code.ts`):** Emit `<meta>` block after the `<gui>` opening tag with `source="figma"`, `source-node` from the exported node's ID, and `exported-at` as the current UTC timestamp. Add `platform` to the `<gui>` tag — the Figma plugin UI should expose a platform selector (default: unset).
-
-**Renderer (`gui-render/src/index.ts`):** `<meta>` is already a no-op — the renderer does not process unknown child blocks. No change needed for `<meta>`. Read `platform` from `<gui>` if needed for platform-specific rendering decisions (none currently — future use).
-
-**Optimizer:** Add `<meta>` to the Pass 1 strip candidates — it is eligible for removal with zero visual impact. Make stripping opt-in (keep by default, `--strip-meta` to remove) so round-trip and diffing tooling retains provenance.
-
-**Parser/linter:** Warn on unknown `platform` values (not in the recommended list). Warn if `<meta>` appears in a file where `source="hand"` or `source` is absent — this is not an error but is unusual.
+- **Schema:** `platform` and `source` on the `<gui>` root entry in `schema/spec.content.ts`.
+- **Kit:** the validator accepts both, warns on a `platform` outside the recommended list, and warns on `<meta>` in a document declaring 0.3.6 or higher. `info()` reports `source` beside `platform`.
+- **Native renderer:** reads neither. Reports `<meta>` the same way for 0.3.6 documents.
+- **Figma exporter:** writes `source="figma"` and, when known, `platform` on `<gui>`; stops writing `<meta>`. Deferred with the rest of the Figma plugin work.
+- **On acceptance:** [RFC-0046](0046-identity-and-source-ids.md) reads `source-id` against `<gui source>` instead of `<meta source>`, and [P1](../PRINCIPLES.md)'s list of provenance names `source` and `source-id`.
 
 ## Unresolved Questions
 
-- Should the Figma plugin UI expose a `platform` selector, or should platform be inferred from the Figma file's device frame (iPhone frame → `ios`, Android frame → `android`)? Inference is convenient but unreliable — many Figma files use no device frame at all.
-- Should `<meta>` support multiple entries for files that have been re-exported or processed by multiple tools? e.g. exported from Figma, then run through the optimizer. An export chain. Deferred — adds complexity for a niche case.
+- **Should a multi-document package state a platform as a whole?** Current lean, shared with [RFC-0042](0042-multi-document-packages.md): no — read it per document and assume nothing for the package.
+- **Should `platform` take a list** (`platform="ios android"`) for a screen designed for both? Lean: no until a real file needs it; a shared screen is better described by leaving `platform` out.

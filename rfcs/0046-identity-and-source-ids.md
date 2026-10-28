@@ -362,6 +362,8 @@ That cost is paid only by exported files, which are the files that need it, and 
 
 ## Unresolved Questions
 
+- **Follow [RFC-0036](0036-gui-meta-block.md)'s revision.** 0036 now puts provenance on the root — `<gui source="figma">` — and drops the `<meta>` block. Every `<meta source>` in this RFC reads as `<gui source>`: `source-id` is read against the declaring document's root `source`, and the root's own id is `source-id` on `<gui>` beside it. To be rewritten at this RFC's hearing for 0.3.7.
+
 - **Should exporters write `source-id` on every node by default?** Leaning yes: round-trip and behaviour-attaching consumers both need it, and a strip pass removes it for handoff. To be confirmed once the token cost (not only the byte cost) is measured on real exports, including files with components.
 - **Strict kebab-case, or any XML name?** Leaning strict. It is what generation already produces, and it guarantees `/` never appears in an id. Hand-written files that want `saveButton` would have to write `save-button`.
 - **Does `detached-from` fold into this?** `detached-from="comp-x"` ([RFC-0035](0035-detached-from.md)) records which *component* a frame came from — a reference inside the package, where `source-id` points outside it. The overlap is real. Leaning: keep them separate in this RFC and revisit when 0035 moves forward.
