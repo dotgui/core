@@ -2,7 +2,7 @@
 rfc: 0056
 title: Linked libraries — declarations pulled from another package, cached in this one
 status: Draft
-targets: 0.4
+targets: 0.4.4
 date: 2026-10-29
 depends-on: 0036, 0042, 0043, 0046
 related: 0054, 0055, 0057
