@@ -153,7 +153,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0036](0036-gui-meta-block.md) | `platform` and `source` on `<gui>` | Proposed |
+| [0036](0036-gui-meta-block.md) | `platform` and `source` on `<gui>` | Implemented |
 
 ### 0.3.7 — Identity
 

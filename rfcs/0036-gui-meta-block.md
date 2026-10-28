@@ -1,10 +1,11 @@
 ---
 rfc: 0036
 title: platform and source on the gui root
-status: Proposed
+status: Implemented
 targets: 0.3.6
 date: 2026-05-31
 updated: 2026-10-28
+implemented: 2026-10-28
 ---
 
 # `platform` and `source` on `<gui>`
@@ -124,7 +125,18 @@ Both attributes belong to the document that declares them. In a multi-document p
 - **Kit:** the validator accepts both, warns on a `platform` outside the recommended list, and warns on `<meta>` in a document declaring 0.3.6 or higher. `info()` reports `source` beside `platform`.
 - **Native renderer:** reads neither. Reports `<meta>` the same way for 0.3.6 documents.
 - **Figma exporter:** writes `source="figma"` and, when known, `platform` on `<gui>`; stops writing `<meta>`. Deferred with the rest of the Figma plugin work.
-- **On acceptance:** [RFC-0046](0046-identity-and-source-ids.md) reads `source-id` against `<gui source>` instead of `<meta source>`, and [P1](../PRINCIPLES.md)'s list of provenance names `source` and `source-id`.
+- **On acceptance:** [RFC-0046](0046-identity-and-source-ids.md) reads `source-id` against `<gui source>` instead of `<meta source>` (noted there, rewritten at its hearing), and [P1](../PRINCIPLES.md)'s list of provenance names `source` and `source-id` (done).
+
+Shipped in 0.3.6: the schema entry; kit's validator warns `UNKNOWN_PLATFORM` and `OBSOLETE_META` and `info()` reports `source`; the native renderer reports an obsolete `<meta>`. Both read documents up to 0.3.6. The Figma exporter change waits with the rest of the Figma plugin work.
+
+## Test Cases
+
+Tested in kit and the native renderer:
+
+- `<gui version="0.3.6" platform="ios" source="figma">` validates and renders.
+- `platform="iso"` warns as an unknown platform and never fails.
+- `<meta source="figma" source-node="1:2" exported-at="…">` in a `0.3.6` document is reported as obsolete; the same block in a `0.3.5` document is untouched.
+- `info()` reports `platform` and `source`.
 
 ## Unresolved Questions
 
