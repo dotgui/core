@@ -2,7 +2,7 @@
 rfc: 0055
 title: The library directory — one library, split across files
 status: Draft
-targets: 0.4
+targets: 0.4.2
 date: 2026-10-29
 depends-on: 0042, 0054
 amends: 0042
