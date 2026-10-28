@@ -2,7 +2,7 @@
 rfc: 0054
 title: Folder-form packages — a .gui can be a directory
 status: Draft
-targets: 0.4
+targets: 0.4.1
 date: 2026-10-29
 depends-on: 0004, 0042, 0043
 amends: 0004
