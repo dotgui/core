@@ -183,7 +183,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0028](0028-clipping-and-masks.md) | Clipping and masks for visual export | Draft |
+| [0028](0028-clipping-and-masks.md) | Clipping and masks for visual export | Accepted |
 
 ### 0.3 — Decided Against
 

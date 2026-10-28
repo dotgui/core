@@ -1,6 +1,6 @@
 {
   "$generated": "DO NOT EDIT — run `bun run gen:spec` in the kit. Source: core/schema/types.ts + spec.content.ts",
-  "formatVersion": "0.3.10",
+  "formatVersion": "0.3.11",
   "categoryOrder": [
     "Format",
     "Metadata",
@@ -53,12 +53,6 @@
         "linear-burn",
         "linear-dodge"
       ]
-    },
-    {
-      "name": "mask",
-      "type": "boolean",
-      "required": false,
-      "description": "Presence = true. Acts as an alpha mask for subsequent siblings."
     },
     {
       "name": "rotation",
@@ -261,7 +255,7 @@
           "name": "version",
           "type": "string",
           "required": true,
-          "description": "Spec version the document is written for: a chapter (\"0.3\") or a point in it (\"0.3.4\"). Consumers refuse a version newer than they read. Current: 0.3.10."
+          "description": "Spec version the document is written for: a chapter (\"0.3\") or a point in it (\"0.3.4\"). Consumers refuse a version newer than they read. Current: 0.3.11."
         },
         {
           "name": "name",
@@ -849,7 +843,7 @@
           "name": "clip-path",
           "type": "string",
           "required": false,
-          "description": ""
+          "description": "A shape to clip to: inset(), circle(), ellipse() or polygon(); % of the node's box (RFC-0028)."
         },
         {
           "name": "overflow-x",
@@ -916,6 +910,52 @@
           "type": "number",
           "required": false,
           "description": "Advisory maximum item count. A quality finding, never an error."
+        },
+        {
+          "name": "mask-src",
+          "type": "asset",
+          "required": false,
+          "description": "The mask: an SVG or raster asset."
+        },
+        {
+          "name": "mask-x",
+          "type": "number",
+          "required": false,
+          "description": "Where the mask sits, relative to the container. Default 0."
+        },
+        {
+          "name": "mask-y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-width",
+          "type": "number",
+          "required": false,
+          "description": "The mask's size. Default: the container's size."
+        },
+        {
+          "name": "mask-height",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-mode",
+          "type": "MaskMode",
+          "required": false,
+          "description": "alpha (the asset's opacity, default) or luminance (its brightness).",
+          "enum": [
+            "alpha",
+            "luminance"
+          ]
+        },
+        {
+          "name": "mask-invert",
+          "type": "boolean",
+          "required": false,
+          "description": "Presence = true. Cut the mask's shape out instead of keeping it."
         }
       ],
       "sharedAttrs": true,
@@ -1173,7 +1213,7 @@
           "name": "clip-path",
           "type": "string",
           "required": false,
-          "description": ""
+          "description": "A shape to clip to: inset(), circle(), ellipse() or polygon(); % of the node's box (RFC-0028)."
         },
         {
           "name": "overflow-x",
@@ -1240,6 +1280,52 @@
           "type": "number",
           "required": false,
           "description": "Advisory maximum item count. A quality finding, never an error."
+        },
+        {
+          "name": "mask-src",
+          "type": "asset",
+          "required": false,
+          "description": "The mask: an SVG or raster asset."
+        },
+        {
+          "name": "mask-x",
+          "type": "number",
+          "required": false,
+          "description": "Where the mask sits, relative to the container. Default 0."
+        },
+        {
+          "name": "mask-y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-width",
+          "type": "number",
+          "required": false,
+          "description": "The mask's size. Default: the container's size."
+        },
+        {
+          "name": "mask-height",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-mode",
+          "type": "MaskMode",
+          "required": false,
+          "description": "alpha (the asset's opacity, default) or luminance (its brightness).",
+          "enum": [
+            "alpha",
+            "luminance"
+          ]
+        },
+        {
+          "name": "mask-invert",
+          "type": "boolean",
+          "required": false,
+          "description": "Presence = true. Cut the mask's shape out instead of keeping it."
         }
       ],
       "sharedAttrs": true,
@@ -1457,7 +1543,7 @@
           "name": "clip-path",
           "type": "string",
           "required": false,
-          "description": ""
+          "description": "A shape to clip to: inset(), circle(), ellipse() or polygon(); % of the node's box (RFC-0028)."
         },
         {
           "name": "overflow-x",
@@ -1524,6 +1610,52 @@
           "type": "number",
           "required": false,
           "description": "Advisory maximum item count. A quality finding, never an error."
+        },
+        {
+          "name": "mask-src",
+          "type": "asset",
+          "required": false,
+          "description": "The mask: an SVG or raster asset."
+        },
+        {
+          "name": "mask-x",
+          "type": "number",
+          "required": false,
+          "description": "Where the mask sits, relative to the container. Default 0."
+        },
+        {
+          "name": "mask-y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-width",
+          "type": "number",
+          "required": false,
+          "description": "The mask's size. Default: the container's size."
+        },
+        {
+          "name": "mask-height",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-mode",
+          "type": "MaskMode",
+          "required": false,
+          "description": "alpha (the asset's opacity, default) or luminance (its brightness).",
+          "enum": [
+            "alpha",
+            "luminance"
+          ]
+        },
+        {
+          "name": "mask-invert",
+          "type": "boolean",
+          "required": false,
+          "description": "Presence = true. Cut the mask's shape out instead of keeping it."
         }
       ],
       "sharedAttrs": true,
@@ -1741,7 +1873,7 @@
           "name": "clip-path",
           "type": "string",
           "required": false,
-          "description": ""
+          "description": "A shape to clip to: inset(), circle(), ellipse() or polygon(); % of the node's box (RFC-0028)."
         },
         {
           "name": "overflow-x",
@@ -1808,6 +1940,52 @@
           "type": "number",
           "required": false,
           "description": "Advisory maximum item count. A quality finding, never an error."
+        },
+        {
+          "name": "mask-src",
+          "type": "asset",
+          "required": false,
+          "description": "The mask: an SVG or raster asset."
+        },
+        {
+          "name": "mask-x",
+          "type": "number",
+          "required": false,
+          "description": "Where the mask sits, relative to the container. Default 0."
+        },
+        {
+          "name": "mask-y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-width",
+          "type": "number",
+          "required": false,
+          "description": "The mask's size. Default: the container's size."
+        },
+        {
+          "name": "mask-height",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-mode",
+          "type": "MaskMode",
+          "required": false,
+          "description": "alpha (the asset's opacity, default) or luminance (its brightness).",
+          "enum": [
+            "alpha",
+            "luminance"
+          ]
+        },
+        {
+          "name": "mask-invert",
+          "type": "boolean",
+          "required": false,
+          "description": "Presence = true. Cut the mask's shape out instead of keeping it."
         }
       ],
       "sharedAttrs": true,
@@ -2011,7 +2189,7 @@
           "name": "clip-path",
           "type": "string",
           "required": false,
-          "description": ""
+          "description": "A shape to clip to: inset(), circle(), ellipse() or polygon(); % of the node's box (RFC-0028)."
         },
         {
           "name": "overflow-x",
@@ -2078,6 +2256,52 @@
           "type": "number",
           "required": false,
           "description": "Advisory maximum item count. A quality finding, never an error."
+        },
+        {
+          "name": "mask-src",
+          "type": "asset",
+          "required": false,
+          "description": "The mask: an SVG or raster asset."
+        },
+        {
+          "name": "mask-x",
+          "type": "number",
+          "required": false,
+          "description": "Where the mask sits, relative to the container. Default 0."
+        },
+        {
+          "name": "mask-y",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-width",
+          "type": "number",
+          "required": false,
+          "description": "The mask's size. Default: the container's size."
+        },
+        {
+          "name": "mask-height",
+          "type": "number",
+          "required": false,
+          "description": ""
+        },
+        {
+          "name": "mask-mode",
+          "type": "MaskMode",
+          "required": false,
+          "description": "alpha (the asset's opacity, default) or luminance (its brightness).",
+          "enum": [
+            "alpha",
+            "luminance"
+          ]
+        },
+        {
+          "name": "mask-invert",
+          "type": "boolean",
+          "required": false,
+          "description": "Presence = true. Cut the mask's shape out instead of keeping it."
         }
       ],
       "sharedAttrs": true,
@@ -2102,7 +2326,7 @@
       "summary": "logical grouping",
       "description": [
         "No layout behavior. Children are absolutely positioned relative to the group origin. Maps to a Figma group node.",
-        "When the first child of a Figma group is a mask node, the mask shape is extracted as an SVG asset and hoisted onto the <group> as mask-src attrs."
+        "A mask is mask-src on the container — any layout container, not only a group — and masks everything it draws. An exporter turns a design tool's mask layer into an SVG or raster asset and writes it there (RFC-0028)."
       ],
       "mapsToFigma": "Group",
       "attributes": [
@@ -2146,13 +2370,13 @@
           "name": "mask-src",
           "type": "asset",
           "required": false,
-          "description": ""
+          "description": "The mask: an SVG or raster asset."
         },
         {
           "name": "mask-x",
           "type": "number",
           "required": false,
-          "description": ""
+          "description": "Where the mask sits, relative to the container. Default 0."
         },
         {
           "name": "mask-y",
@@ -2164,7 +2388,7 @@
           "name": "mask-width",
           "type": "number",
           "required": false,
-          "description": ""
+          "description": "The mask's size. Default: the container's size."
         },
         {
           "name": "mask-height",
@@ -2176,23 +2400,17 @@
           "name": "mask-mode",
           "type": "MaskMode",
           "required": false,
-          "description": "",
+          "description": "alpha (the asset's opacity, default) or luminance (its brightness).",
           "enum": [
             "alpha",
             "luminance"
           ]
         },
         {
-          "name": "mask-composite",
-          "type": "MaskComposite",
+          "name": "mask-invert",
+          "type": "boolean",
           "required": false,
-          "description": "",
-          "enum": [
-            "add",
-            "subtract",
-            "intersect",
-            "exclude"
-          ]
+          "description": "Presence = true. Cut the mask's shape out instead of keeping it."
         }
       ],
       "sharedAttrs": true,
@@ -3279,7 +3497,8 @@
         "id names a node so something can point at it: a prop target, a path segment through an instance (target=\"tab-1/label\"). Lowercase kebab-case, written only where something points, unique within its scope — the screen tree of a document, or one component or variant body. A reference that does not resolve is an error (RFC-0046).",
         "source-id is the source tool's own handle for a node, read against source on the <gui> root. It is optional, written by exporters only when the user asks for an export that can go back, and opaque: the format never parses it. A document with any source-id must declare source. What each tool writes is in spec/SOURCES.md (RFC-0046).",
         "detached-from names the component a layout container was detached from, when an exporter could not keep a heavily-overridden instance as an <instance>. It holds a component or variant id declared in the document or its library, and must resolve; it changes nothing on screen. Only <instance> carries component (RFC-0035).",
-        "Boolean presence convention: bare attributes without a value are treated as true. <frame clip> = <frame clip=\"true\">. Applies to: clip, mask, wrap, abs, truncate, reverse-z."
+        "Boolean presence convention: bare attributes without a value are treated as true. <frame clip> = <frame clip=\"true\">. Applies to: clip, mask-invert, wrap, abs, truncate, reverse-z.",
+        "Clipping and masks (RFC-0028): clip clips children to the box and its radius; clip-path clips to a shape — inset(), circle(), ellipse() or polygon(), with % of the node's box; mask-src masks everything a container draws through an SVG or raster asset, placed by mask-x, mask-y, mask-width and mask-height, read by mask-mode (alpha or luminance), and cut out instead with mask-invert. The mask attributes mean nothing without mask-src. There is no mask flag on a child and no mask-composite."
       ],
       "attributes": [
         {
@@ -3325,12 +3544,6 @@
             "linear-burn",
             "linear-dodge"
           ]
-        },
-        {
-          "name": "mask",
-          "type": "boolean",
-          "required": false,
-          "description": "Presence = true. Acts as an alpha mask for subsequent siblings."
         },
         {
           "name": "rotation",
