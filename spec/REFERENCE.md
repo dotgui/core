@@ -2,7 +2,7 @@
 
 # .gui Element Reference
 
-Format version `0.3.7`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
+Format version `0.3.8`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
 
 ## Contents
 
@@ -89,7 +89,7 @@ platform and source describe the document itself and belong to it alone: in a mu
 
 | Attribute | Type | Description |
 |---|---|---|
-| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.3.7. |
+| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.3.8. |
 | `name` | `string` | Screen or layer name from the source design. |
 | `platform` | `string` | The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036). |
 | `source` | `string` | The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036). |
@@ -349,6 +349,7 @@ w and h are required. clip (boolean presence) clips content to bounds.
 | Attribute | Type | Description |
 |---|---|---|
 | `name` | `string` |  |
+| `detached-from` | `string` | The component this container was detached from: a component or variant id declared in the document or its library. Exporters only; changes nothing on screen (RFC-0035). |
 | `x` | `number` |  |
 | `y` | `number` |  |
 | `w` **(required)** | `number | 'fill'` | Required on frame |
@@ -408,6 +409,7 @@ w / h absent = hug content; "fill" = fill parent; number = fixed px. p accepts C
 | Attribute | Type | Description |
 |---|---|---|
 | `name` | `string` |  |
+| `detached-from` | `string` | The component this container was detached from: a component or variant id declared in the document or its library. Exporters only; changes nothing on screen (RFC-0035). |
 | `direction` **(required)** | `horizontal` `vertical` `grid` |  |
 | `x` | `number` |  |
 | `y` | `number` |  |
@@ -482,6 +484,7 @@ w / h absent = hug content; "fill" = fill parent; number = fixed px. gap="auto" 
 | `h` | `number | 'fill'` | Absent = hug children |
 | `fill` | `fill` |  |
 | `name` | `string` |  |
+| `detached-from` | `string` | The component this container was detached from: a component or variant id declared in the document or its library. Exporters only; changes nothing on screen (RFC-0035). |
 | `x` | `number` |  |
 | `y` | `number` |  |
 | `w` | `number | 'fill'` | Absent = hug children |
@@ -545,6 +548,7 @@ w / h absent = hug content; "fill" = fill parent; number = fixed px. gap="auto" 
 | `h` | `number | 'fill'` | Absent = hug children |
 | `fill` | `fill` |  |
 | `name` | `string` |  |
+| `detached-from` | `string` | The component this container was detached from: a component or variant id declared in the document or its library. Exporters only; changes nothing on screen (RFC-0035). |
 | `x` | `number` |  |
 | `y` | `number` |  |
 | `w` | `number | 'fill'` | Absent = hug children |
@@ -610,6 +614,7 @@ A grid range fills the spanned tracks (no w/h needed). A single value hugs conte
 | `h` | `number | 'fill'` | Absent = hug children |
 | `fill` | `fill` |  |
 | `name` | `string` |  |
+| `detached-from` | `string` | The component this container was detached from: a component or variant id declared in the document or its library. Exporters only; changes nothing on screen (RFC-0035). |
 | `x` | `number` |  |
 | `y` | `number` |  |
 | `w` | `number | 'fill'` | Absent = hug children |
@@ -670,6 +675,7 @@ When the first child of a Figma group is a mask node, the mask shape is extracte
 | Attribute | Type | Description |
 |---|---|---|
 | `name` | `string` |  |
+| `detached-from` | `string` | The component this container was detached from: a component or variant id declared in the document or its library. Exporters only; changes nothing on screen (RFC-0035). |
 | `x` | `number` |  |
 | `y` | `number` |  |
 | `w` **(required)** | `number` | Required on group — no content to derive size from |
@@ -1075,6 +1081,8 @@ Visual attributes available on all layout, content, and geometry nodes.
 id names a node so something can point at it: a prop target, a path segment through an instance (target="tab-1/label"). Lowercase kebab-case, written only where something points, unique within its scope — the screen tree of a document, or one component or variant body. A reference that does not resolve is an error (RFC-0046).
 
 source-id is the source tool's own handle for a node, read against source on the <gui> root. It is optional, written by exporters only when the user asks for an export that can go back, and opaque: the format never parses it. A document with any source-id must declare source. What each tool writes is in spec/SOURCES.md (RFC-0046).
+
+detached-from names the component a layout container was detached from, when an exporter could not keep a heavily-overridden instance as an <instance>. It holds a component or variant id declared in the document or its library, and must resolve; it changes nothing on screen. Only <instance> carries component (RFC-0035).
 
 Boolean presence convention: bare attributes without a value are treated as true. <frame clip> = <frame clip="true">. Applies to: clip, mask, wrap, abs, truncate, reverse-z.
 

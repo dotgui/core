@@ -526,6 +526,14 @@ Any node may carry `id`, and a node something points at must ([RFC-0046](../rfcs
 
 `source-id` is the source tool's own handle for a node, read against `source` on the `<gui>` root. It is optional and written by exporters only, for exports meant to round-trip; the format never parses it, and a document with any `source-id` must declare `source`. What each tool writes is in [SOURCES.md](SOURCES.md).
 
+`detached-from` on a layout container (`frame`, `stack`, `row`, `col`, `grid`, `group`) names the component it was detached from — an instance an exporter could not keep as one because it was overridden too heavily ([RFC-0035](../rfcs/0035-detached-from.md)). It holds a component or variant id declared in the document or its library and must resolve; it changes nothing on screen. A `slot-accept` that names the component accepts the detached container. `component` is valid only on `<instance>`.
+
+```xml
+<col detached-from="comp-heading-green" name="Heading">
+  <text value="Search engine optimization" />
+</col>
+```
+
 ### Layout Tags
 
 #### `<frame>` — Fixed container
