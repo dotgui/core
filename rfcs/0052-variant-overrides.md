@@ -2,7 +2,7 @@
 rfc: 0052
 title: Variant overrides — a variant as the set's body with different values
 status: Draft
-targets: 0.4
+targets: 0.5
 date: 2026-10-18
 depends-on: 0008, 0034, 0045, 0048
 ---

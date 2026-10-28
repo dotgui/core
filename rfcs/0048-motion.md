@@ -2,7 +2,7 @@
 rfc: 0048
 title: Motion — how a design moves, as a spec
 status: Draft
-targets: 0.4
+targets: 0.5
 date: 2026-10-17
 updated: 2026-10-18
 depends-on: 0045, 0046
