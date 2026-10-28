@@ -260,6 +260,16 @@ appearances side by side in one pass.
 token definitions in `<tokens>`; an inline literal is static across modes — the
 same rule as Figma, where only variable-bound properties change between modes.
 
+### Descriptions and templates
+
+A library item may say what it is for: `description` on a component, component set, variant, token or style — plain text, one or two sentences, never rendered ([RFC-0057](../rfcs/0057-describing-library-items.md)). An exporter copies the source tool's description verbatim and never writes one of its own.
+
+```xml
+<color name="primary" value="#3B5BFD" description="Brand colour for the single main action on a screen. Not for links." />
+```
+
+`template` on a document's `<gui>` marks it as a starting point to copy rather than a screen to ship. It changes nothing on screen, and `library.guix` or a `library/` file cannot be one.
+
 ### Styles
 
 Named text styles from the design system. Each `<text-style>` captures a full typography definition. Text nodes reference a style by name — individual font attrs are omitted when a style is applied.

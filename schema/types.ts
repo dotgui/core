@@ -233,16 +233,22 @@ export interface VisualAttrs {
 // ---------------------------------------------------------------------------
 
 export interface ColorToken {
+  /** What the item is for and when to use it. Plain text, never rendered (RFC-0057). */
+  description?: string
   name: string
   value: ColorValue
 }
 
 export interface NumberToken {
+  /** What the item is for and when to use it. Plain text, never rendered (RFC-0057). */
+  description?: string
   name: string
   value: number
 }
 
 export interface StringToken {
+  /** What the item is for and when to use it. Plain text, never rendered (RFC-0057). */
+  description?: string
   name: string
   value: string
 }
@@ -261,6 +267,8 @@ export interface Tokens {
 
 /** Named text style capturing Figma typography definition */
 export interface TextStyleDeclaration {
+  /** What the item is for and when to use it. Plain text, never rendered (RFC-0057). */
+  description?: string
   name: string                          // Figma style name, e.g. "Heading/H1"
   'font-family'?: string
   'font-postscript'?: string            // PostScript name (best-effort)
@@ -281,12 +289,16 @@ export interface TextStyleDeclaration {
 
 /** Named fill/color style */
 export interface FillStyleDeclaration {
+  /** What the item is for and when to use it. Plain text, never rendered (RFC-0057). */
+  description?: string
   name: string                          // Figma style name, e.g. "Brand/Primary"
   value: ColorValue
 }
 
 /** Named effect style, contains one or more effects */
 export interface EffectStyleDeclaration {
+  /** What the item is for and when to use it. Plain text, never rendered (RFC-0057). */
+  description?: string
   name: string                          // Figma style name, e.g. "Elevation/1"
   effects: AppearanceEffect[]
 }
@@ -948,6 +960,8 @@ export interface ComponentDef {
   tag: 'component'
   /** Referenced by <instance component>. Unique across the whole package (RFC-0046). */
   id: string
+  /** What the component is for and when to use it. Plain text, never rendered (RFC-0057). */
+  description?: string
   /** The source tool's handle for the main component (RFC-0046). */
   'source-id'?: string
   /** Design-tool name, e.g. "Card/Product". */
@@ -966,6 +980,8 @@ export interface VariantDef extends Omit<ComponentDef, 'tag'> {
 export interface ComponentSetDef {
   tag: 'component-set'
   id: string
+  /** What the set is for and when to use it. Plain text, never rendered (RFC-0057). */
+  description?: string
   /** The source tool's handle for the set (RFC-0046). */
   'source-id'?: string
   name?: string
