@@ -159,7 +159,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0046](0046-identity-and-source-ids.md) | Identity and source ids — addressing nodes, tracing them to their source | Draft |
+| [0046](0046-identity-and-source-ids.md) | Identity and source ids — addressing nodes, tracing them to their source | Proposed |
 
 ### 0.3.8 — Detached Instances
 
