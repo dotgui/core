@@ -59,7 +59,7 @@ export interface ContentEntry {
  * The spec point this content describes: the chapter and the last RFC landed
  * in it (see rfcs/README.md, Format Versions). Written into spec.json.
  */
-export const specFormatVersion = '0.3.6'
+export const specFormatVersion = '0.3.7'
 
 export const specCategoryOrder = ['Format', 'Metadata', 'Layout', 'Content', 'Geometry', 'Appearance']
 
@@ -96,7 +96,8 @@ export const specContent: ContentEntry[] = [
       { name: 'version', type: 'string', required: true, description: 'Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: ' + specFormatVersion + '.' },
       { name: 'name', type: 'string', description: 'Screen or layer name from the source design.' },
       { name: 'platform', type: 'string', description: 'The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036).' },
-      { name: 'source', type: 'string', description: 'The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036).' }
+      { name: 'source', type: 'string', description: 'The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036).' },
+      { name: 'source-id', type: 'string', description: 'The exported frame\'s handle in the source tool, read against source. Exporters only, and only for an export meant to round-trip. See spec/SOURCES.md (RFC-0046).' }
     ],
     description: [
       'The root element is a document envelope — never rendered. Direct children are metadata blocks or exactly one root layout node. Metadata always precedes the layout root.',
@@ -269,12 +270,13 @@ export const specContent: ContentEntry[] = [
     attributes: [
       { name: 'name', type: 'string', required: true, description: 'The attribute an instance passes the value as.' },
       { name: 'type', type: 'string | boolean | number | color | image | component | style', required: true, description: 'A data type (RFC-0034).' },
-      { name: 'target', type: 'string', description: 'Layer id(s) the value applies to, space-separated. Optional for a string prop whose name is the id of exactly one <text> in the body.' },
+      { name: 'target', type: 'string', description: 'Layer id(s) the value applies to, space-separated. Each is an id in the body, or a path through instances in it — tab-1/label sets label inside the instance tab-1 (RFC-0046). Optional for a string prop whose name is the id of exactly one <text> in the body.' },
       { name: 'bind', type: 'string', description: 'The attribute overridden on the target. Required for number and style. Defaults: string → value, boolean → visible, color → fill (or stroke), image → src, component → component.' }
     ],
     description: [
       'A <prop> inside a component\'s <props> block declares one value an instance may pass. Prop types are data types — string, boolean, number, color, image, component, style — and bind names which attribute of the target changes.',
-      'number and style always need bind, because each could mean several attributes. A list in target applies one value to several layers at once.'
+      'number and style always need bind, because each could mean several attributes. A list in target applies one value to several layers at once.',
+      'A path reaches a node inside a nested instance, so a component can expose it as an ordinary prop: every segment but the last names an <instance> by id, and the next segment is read in that instance\'s component body.'
     ],
     exampleLabel: 'Typed props',
     example: `<props>
@@ -557,6 +559,8 @@ export const specContent: ContentEntry[] = [
     source: 'interface:VisualAttrs',
     description: [
       'Visual attributes available on all layout, content, and geometry nodes.',
+      'id names a node so something can point at it: a prop target, a path segment through an instance (target="tab-1/label"). Lowercase kebab-case, written only where something points, unique within its scope — the screen tree of a document, or one component or variant body. A reference that does not resolve is an error (RFC-0046).',
+      'source-id is the source tool\'s own handle for a node, read against source on the <gui> root. It is optional, written by exporters only when the user asks for an export that can go back, and opaque: the format never parses it. A document with any source-id must declare source. What each tool writes is in spec/SOURCES.md (RFC-0046).',
       'Boolean presence convention: bare attributes without a value are treated as true. <frame clip> = <frame clip="true">. Applies to: clip, mask, wrap, abs, truncate, reverse-z.'
     ],
     exampleLabel: 'Shared attrs in use',

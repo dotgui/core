@@ -2,7 +2,7 @@
 
 # .gui Element Reference
 
-Format version `0.3.6`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
+Format version `0.3.7`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
 
 ## Contents
 
@@ -19,6 +19,8 @@ Available on all layout, content, and geometry nodes.
 
 | Attribute | Type | Description |
 |---|---|---|
+| `id` | `string` | The node's name in this file, for references: a prop target, a path segment, a link. Lowercase kebab-case, [a-z][a-z0-9-]*. Written only on nodes something points at; unique within its scope (RFC-0046). |
+| `source-id` | `string` | The source tool's handle for this node, read against `source` on the root. Opaque, exporters only, written only for round-trip exports (RFC-0046). |
 | `opacity` | `number` | Layer opacity, 0–1. Omitted when 1. |
 | `blend` | `normal` `multiply` `screen` `overlay` `darken` `lighten` `color-dodge` `color-burn` `hard-light` `soft-light` `difference` `exclusion` `hue` `saturation` `color` `luminosity` `linear-burn` `linear-dodge` | Blend mode against layers below. Omitted when normal. |
 | `mask` | `boolean` | Presence = true. Acts as an alpha mask for subsequent siblings. |
@@ -87,10 +89,11 @@ platform and source describe the document itself and belong to it alone: in a mu
 
 | Attribute | Type | Description |
 |---|---|---|
-| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.3.6. |
+| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.3.7. |
 | `name` | `string` | Screen or layer name from the source design. |
 | `platform` | `string` | The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036). |
 | `source` | `string` | The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036). |
+| `source-id` | `string` | The exported frame's handle in the source tool, read against source. Exporters only, and only for an export meant to round-trip. See spec/SOURCES.md (RFC-0046). |
 
 **Example**
 
@@ -306,11 +309,13 @@ A <prop> inside a component's <props> block declares one value an instance may p
 
 number and style always need bind, because each could mean several attributes. A list in target applies one value to several layers at once.
 
+A path reaches a node inside a nested instance, so a component can expose it as an ordinary prop: every segment but the last names an <instance> by id, and the next segment is read in that instance's component body.
+
 | Attribute | Type | Description |
 |---|---|---|
 | `name` **(required)** | `string` | The attribute an instance passes the value as. |
 | `type` **(required)** | `string | boolean | number | color | image | component | style` | A data type (RFC-0034). |
-| `target` | `string` | Layer id(s) the value applies to, space-separated. Optional for a string prop whose name is the id of exactly one <text> in the body. |
+| `target` | `string` | Layer id(s) the value applies to, space-separated. Each is an id in the body, or a path through instances in it — tab-1/label sets label inside the instance tab-1 (RFC-0046). Optional for a string prop whose name is the id of exactly one <text> in the body. |
 | `bind` | `string` | The attribute overridden on the target. Required for number and style. Defaults: string → value, boolean → visible, color → fill (or stroke), image → src, component → component. |
 
 **Typed props**
@@ -707,6 +712,8 @@ Its only children are <slot> fills. Setting w or h scales the component body to 
 | Attribute | Type | Description |
 |---|---|---|
 | `component` **(required)** | `string` | Component or variant id. |
+| `id` | `string` | Names the instance so a path can pass through it: `tab-1/label` (RFC-0046). |
+| `source-id` | `string` | The source tool's handle for this instance (RFC-0046). |
 | `x` | `number` |  |
 | `y` | `number` |  |
 | `w` | `number | 'fill'` | Absent = the component's own width; scales the body when set. |
@@ -1065,10 +1072,16 @@ Gradient syntax mirrors CSS — linear-gradient(), radial-gradient(), conic-grad
 
 Visual attributes available on all layout, content, and geometry nodes.
 
+id names a node so something can point at it: a prop target, a path segment through an instance (target="tab-1/label"). Lowercase kebab-case, written only where something points, unique within its scope — the screen tree of a document, or one component or variant body. A reference that does not resolve is an error (RFC-0046).
+
+source-id is the source tool's own handle for a node, read against source on the <gui> root. It is optional, written by exporters only when the user asks for an export that can go back, and opaque: the format never parses it. A document with any source-id must declare source. What each tool writes is in spec/SOURCES.md (RFC-0046).
+
 Boolean presence convention: bare attributes without a value are treated as true. <frame clip> = <frame clip="true">. Applies to: clip, mask, wrap, abs, truncate, reverse-z.
 
 | Attribute | Type | Description |
 |---|---|---|
+| `id` | `string` | The node's name in this file, for references: a prop target, a path segment, a link. Lowercase kebab-case, [a-z][a-z0-9-]*. Written only on nodes something points at; unique within its scope (RFC-0046). |
+| `source-id` | `string` | The source tool's handle for this node, read against `source` on the root. Opaque, exporters only, written only for round-trip exports (RFC-0046). |
 | `opacity` | `number` | Layer opacity, 0–1. Omitted when 1. |
 | `blend` | `normal` `multiply` `screen` `overlay` `darken` `lighten` `color-dodge` `color-burn` `hard-light` `soft-light` `difference` `exclusion` `hue` `saturation` `color` `luminosity` `linear-burn` `linear-dodge` | Blend mode against layers below. Omitted when normal. |
 | `mask` | `boolean` | Presence = true. Acts as an alpha mask for subsequent siblings. |

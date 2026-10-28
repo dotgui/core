@@ -391,7 +391,7 @@ Tested in both implementations:
 
 ## Unresolved Questions
 
-- **Must component ids be unique package-wide?** Inherited from [RFC-0042](0042-multi-document-packages.md) and sharper here: slot content in one document may hold instances of library components and document-local components in the same subtree, and `slot-accept` names ids that must resolve unambiguously across that boundary.
+- **Must component ids be unique package-wide?** *Settled by [RFC-0046](0046-identity-and-source-ids.md): yes.* Inherited from [RFC-0042](0042-multi-document-packages.md) and sharper here: slot content in one document may hold instances of library components and document-local components in the same subtree, and `slot-accept` names ids that must resolve unambiguously across that boundary.
 - **What does the extractor do with the settings the format drops?** A Figma slot with unenforced preferred instances or hard min/max has intent that will not survive. Refusing the import is more honest; degrading quietly is friendlier. The export path needs a stated rule rather than whatever falls out.
 - **Does the quality model score slots?** [RFC-0040](0040-quality-scoring-model.md) counts dead weight and redundant wrappers. An unfilled slot, a slot holding a single text node, and a component that is only slots are shapes it has no opinion on — and `slot-min`/`slot-max` findings need a home in its buckets.
 - **How does `slot-accept` interact with a detached instance?** If an accepted instance diverges enough to be emitted as an inline tree ([RFC-0035](0035-detached-from.md)), it is no longer an `<instance>` and rule 7 would reject it — but it still carries a `detached-from` origin naming an accepted component.

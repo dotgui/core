@@ -158,6 +158,17 @@ export type GapValue = string | number
 // ---------------------------------------------------------------------------
 
 export interface VisualAttrs {
+  /**
+   * The node's name in this file, for references: a prop target, a path
+   * segment, a link. Lowercase kebab-case, [a-z][a-z0-9-]*. Written only on
+   * nodes something points at; unique within its scope (RFC-0046).
+   */
+  id?: string
+  /**
+   * The source tool's handle for this node, read against `source` on the
+   * root. Opaque, exporters only, written only for round-trip exports (RFC-0046).
+   */
+  'source-id'?: string
   /** Layer opacity, 0–1. Omitted when 1. */
   opacity?: number
   /** Blend mode against layers below. Omitted when normal. */
@@ -908,8 +919,10 @@ export interface PropDef {
 /** A reusable component: an optional <props> block and one layout body. */
 export interface ComponentDef {
   tag: 'component'
-  /** Referenced by <instance component>. */
+  /** Referenced by <instance component>. Unique across the whole package (RFC-0046). */
   id: string
+  /** The source tool's handle for the main component (RFC-0046). */
+  'source-id'?: string
   /** Design-tool name, e.g. "Card/Product". */
   name?: string
   props?: PropDef[]
@@ -926,6 +939,8 @@ export interface VariantDef extends Omit<ComponentDef, 'tag'> {
 export interface ComponentSetDef {
   tag: 'component-set'
   id: string
+  /** The source tool's handle for the set (RFC-0046). */
+  'source-id'?: string
   name?: string
   variants: VariantDef[]
 }
@@ -938,6 +953,10 @@ export interface InstanceNode {
   tag: 'instance'
   /** Component or variant id. */
   component: string
+  /** Names the instance so a path can pass through it: `tab-1/label` (RFC-0046). */
+  id?: string
+  /** The source tool's handle for this instance (RFC-0046). */
+  'source-id'?: string
   x?: number
   y?: number
   /** Absent = the component's own width; scales the body when set. */
