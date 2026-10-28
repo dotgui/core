@@ -1,6 +1,6 @@
 {
   "$generated": "DO NOT EDIT — run `bun run gen:spec` in the kit. Source: core/schema/types.ts + spec.content.ts",
-  "formatVersion": "0.3.8",
+  "formatVersion": "0.3.9",
   "categoryOrder": [
     "Format",
     "Metadata",
@@ -261,7 +261,7 @@
           "name": "version",
           "type": "string",
           "required": true,
-          "description": "Spec version the document is written for: a chapter (\"0.3\") or a point in it (\"0.3.4\"). Consumers refuse a version newer than they read. Current: 0.3.8."
+          "description": "Spec version the document is written for: a chapter (\"0.3\") or a point in it (\"0.3.4\"). Consumers refuse a version newer than they read. Current: 0.3.9."
         },
         {
           "name": "name",
@@ -354,7 +354,7 @@
           "name": "<color>",
           "type": "token",
           "required": false,
-          "description": "Hex color, e.g. #007AFF."
+          "description": "A color: hex, rgba() or oklch(), e.g. #007AFF."
         },
         {
           "name": "<number>",
@@ -2823,13 +2823,13 @@
           "name": "w",
           "type": "number | 'fill'",
           "required": true,
-          "description": "Unified width. Replaces width + sizing-h.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nString forms: '50%' (of parent), '1.5rem', '100vw', 'calc(100% - 16px)'\nNot valid on frame/img/svg — those require explicit values."
+          "description": "Unified width. Replaces width + sizing-h.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nOr a share of the parent: '50%'.\nNot valid on frame/img/svg — those require explicit values."
         },
         {
           "name": "h",
           "type": "number | 'fill'",
           "required": true,
-          "description": "Unified height. Replaces height + sizing-v.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nString forms: '50%' (of parent), '1.5rem', '100vh', 'calc(100% - 16px)'\nNot valid on frame/img/svg — those require explicit values."
+          "description": "Unified height. Replaces height + sizing-v.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nOr a share of the parent: '50%'.\nNot valid on frame/img/svg — those require explicit values."
         },
         {
           "name": "fill",
@@ -2966,13 +2966,13 @@
           "name": "w",
           "type": "number | 'fill'",
           "required": true,
-          "description": "Unified width. Replaces width + sizing-h.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nString forms: '50%' (of parent), '1.5rem', '100vw', 'calc(100% - 16px)'\nNot valid on frame/img/svg — those require explicit values."
+          "description": "Unified width. Replaces width + sizing-h.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nOr a share of the parent: '50%'.\nNot valid on frame/img/svg — those require explicit values."
         },
         {
           "name": "h",
           "type": "number | 'fill'",
           "required": true,
-          "description": "Unified height. Replaces height + sizing-v.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nString forms: '50%' (of parent), '1.5rem', '100vh', 'calc(100% - 16px)'\nNot valid on frame/img/svg — those require explicit values."
+          "description": "Unified height. Replaces height + sizing-v.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nOr a share of the parent: '50%'.\nNot valid on frame/img/svg — those require explicit values."
         },
         {
           "name": "fill",
@@ -3096,7 +3096,7 @@
           "name": "w",
           "type": "number | 'fill'",
           "required": false,
-          "description": "Unified width. Replaces width + sizing-h.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nString forms: '50%' (of parent), '1.5rem', '100vw', 'calc(100% - 16px)'\nNot valid on frame/img/svg — those require explicit values."
+          "description": "Unified width. Replaces width + sizing-h.\nAbsent = hug (valid on row/col/stack/text/instance only).\n\"fill\" = grow to fill parent.\nnumber = fixed px.\nOr a share of the parent: '50%'.\nNot valid on frame/img/svg — those require explicit values."
         },
         {
           "name": "direction",
@@ -3198,7 +3198,8 @@
       "category": "Appearance",
       "summary": "fill attribute formats",
       "description": [
-        "The fill attribute accepts hex colors, gradient functions, and token references. Alpha is encoded as the last byte of an 8-digit hex: #1C1C1ECC.",
+        "The fill attribute accepts a color — hex, rgba() or oklch() — a gradient function, or a token reference. The same three color notations work everywhere a color goes: strokes, borders, shadows, gradient stops, tokens and fill styles. rgb() is tolerated for existing exports but is not part of the format; write hex.",
+        "Dimensions are bare numbers in pixels. Sizes (w, h, min-width, max-width, min-height, max-height) may also be a share of the parent: w=\"50%\". There is no px suffix, rem, vw/vh or calc() (RFC-0033).",
         "Gradient syntax mirrors CSS — linear-gradient(), radial-gradient(), conic-gradient(). Token references use $name syntax."
       ],
       "attributes": [
@@ -3215,6 +3216,18 @@
           "description": "#1C1C1ECC (last byte = alpha)."
         },
         {
+          "name": "rgba",
+          "type": "format",
+          "required": false,
+          "description": "rgba(28, 28, 30, 0.8) — integers 0–255, alpha 0–1. The readable form for any color with opacity (RFC-0033)."
+        },
+        {
+          "name": "oklch",
+          "type": "format",
+          "required": false,
+          "description": "oklch(0.627 0.258 29.23) or oklch(0.6 0.2 250 / 0.5) — wide-gamut, stored as written (RFC-0033)."
+        },
+        {
           "name": "Linear gradient",
           "type": "format",
           "required": false,
@@ -3224,13 +3237,13 @@
           "name": "Radial gradient",
           "type": "format",
           "required": false,
-          "description": "radial-gradient(circle at 50% 30%, #FFF 0%, #000 100%)."
+          "description": "radial-gradient(circle at 50% 30%, #FFFFFF 0%, #000000 100%)."
         },
         {
           "name": "Angular gradient",
           "type": "format",
           "required": false,
-          "description": "conic-gradient(from 0deg at 50% 50%, #F00 0deg, #00F 360deg)."
+          "description": "conic-gradient(from 0deg at 50% 50%, #FF0000 0deg, #0000FF 360deg)."
         },
         {
           "name": "Token",

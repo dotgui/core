@@ -137,6 +137,20 @@ The first layout tag under `<gui>` defines the canvas. Two patterns:
 
 `<frame>` children are absolutely positioned. `<col>` children flow vertically. Default to `<col>` — it cannot clip content.
 
+### Colors and dimensions
+
+A color is written in one of three notations, everywhere a color goes — fills, strokes, borders, shadows, gradient stops, tokens and fill styles ([RFC-0033](../rfcs/0033-color-and-dimension-units.md)):
+
+| Notation | Example | For |
+|---|---|---|
+| Hex | `#FF0000` / `#FF000080` | Opaque colors; the default |
+| `rgba()` | `rgba(255, 0, 0, 0.5)` | A color with opacity |
+| `oklch()` | `oklch(0.6 0.2 250 / 0.5)` | Wide-gamut color, stored as written |
+
+`rgb()` is drawn for existing exports but is not part of the format; write hex. Named colors, `hsl()` and 3-digit hex are not accepted.
+
+A dimension is a bare number in pixels. Sizes — `w`, `h`, `min-width`, `max-width`, `min-height`, `max-height` — may also be a share of the parent: `w="50%"`. There is no `px` suffix, `rem`, `vw`/`vh` or `calc()`. Grid track lists (`cols`, `rows`) keep their own syntax.
+
 ### Tokens
 
 Design system primitives. Referenced anywhere in the tree with `$name`.
