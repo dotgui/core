@@ -1,10 +1,11 @@
 ---
 rfc: 0022
 title: fill and border — one way to color and outline a node
-status: Accepted
+status: Implemented
 targets: 0.3.10
 date: 2026-05-21
 updated: 2026-10-28
+implemented: 2026-10-28
 ---
 
 # `fill` and `border` — One Way to Color and Outline a Node
@@ -92,7 +93,12 @@ Rules 1 and 3 are 0.3.10 rules: errors in a document declaring 0.3.10 or higher,
 - **Figma exporter:** already writes `fill` on text and `border` for outlines. No change.
 - **Migration:** rename `color=` → `fill=` on `<text>` and `<segment>`; merge `stroke`, `stroke-width`, `stroke-position` into `border`.
 
+Shipped in 0.3.10: the schema and reference; kit's validator and HTML renderer, which also gained the border longhands RFC-0025 specified and a border color with spaces kept in one piece; and the native renderer, which now draws a legacy `stroke` as a border. Both read documents up to 0.3.10.
+
 ## Test Cases
+
+Tested in kit and the native renderer:
+
 
 - `<text fill="$ink">` and `<segment fill="$ink">` validate; `<text color="$ink">` is an error in 0.3.10 and a warning in 0.3.9, where it still draws.
 - `<col stroke="#000000" stroke-width="2">` is an error in 0.3.10; in 0.3.9 it warns and the native renderer draws a 2px border.
