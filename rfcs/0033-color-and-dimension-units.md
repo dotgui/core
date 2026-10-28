@@ -1,184 +1,155 @@
 ---
 rfc: 0033
 title: Color formats and dimension units
-status: Draft
+status: Implemented
 targets: 0.3.9
 date: 2026-05-25
+updated: 2026-10-28
+implemented: 2026-10-28
 ---
 
 # Color Formats and Dimension Units
 
 ## Context
 
-In 0.1–0.2, the format accepts exactly one color notation (6- or 8-digit hex) and one dimension unit (px, stored as a bare number). Both constraints made early implementation easier but have become friction points:
+In 0.1–0.2 the format accepted one color notation (6- or 8-digit hex) and one dimension unit (px, written as a bare number). Two of those limits cause real friction:
 
-- **Hex alpha is unusable in practice.** Editing opacity means hex math — `#FF000080` is 50% transparent red. No designer does this by hand. `rgba(255, 0, 0, 0.5)` is immediately readable and editable.
-- **oklch is becoming the default in design systems.** It is perceptually uniform, supports wide-gamut displays, and cannot be losslessly round-tripped through sRGB hex. Requiring conversion at write time discards color intent.
-- **Bare pixel numbers block responsive intent.** A node that should be 50% of its parent has no way to express that today — it must be given a fixed value. With the format increasingly used for multi-screen and component-level design, `%` and `rem` are table stakes.
+- **Hex alpha is unreadable.** `#FF000080` is 50% transparent red. Nobody computes `80` → 128 → 50% by hand; `rgba(255, 0, 0, 0.5)` is read and edited at a glance.
+- **Wide-gamut color has no home.** `oklch()` is perceptually uniform and reaches colors outside sRGB. Converting it to hex at write time throws away the designer's color.
+
+A third — sizing relative to the parent — matters too: a column that is half its parent's width has no way to say so except a fixed number.
+
+What tools do today:
+
+| | Kit validator | Kit HTML renderer | Native renderer |
+|---|---|---|---|
+| hex | ✓ | ✓ | ✓ |
+| `rgba()` | ✓ | ✓ (CSS) | **draws nothing** |
+| `oklch()` | anything starting `oklch(` | ✓ (CSS) | **draws nothing** |
+| `rgb()` | rejected | ✓ (CSS) | **draws nothing** |
+| `%` on sizes | ✓ | ✓ | ✓ on `w`, `h`, min/max |
+| `px`, `rem`, `vw`, `vh`, `calc()` | ✓ | ✓ (CSS) | ignored |
+
+Two consequences. The Figma exporter writes every gradient stop as `rgb()` or `rgba()`, so every exported gradient draws nothing in the native renderer. And kit accepts units that one renderer silently ignores — a file that validates and renders differently depending on who reads it ([P15](../PRINCIPLES.md)). Across 442 `.guix` files in the workspace, only `%` appears; no file uses `rem`, `vw`, `vh`, `calc()` or a `px` suffix.
+
+The first draft of this RFC accepted all six unit forms and pushed the optimizer's color rules into the format. A hearing against [PRINCIPLES.md](../PRINCIPLES.md) kept the colors and `%`, and dropped the rest.
 
 ## Decision
 
-### 1. Three canonical color notations
+### 1. Three color notations
 
-The format accepts three color notations as equally valid. No normalization between them.
-
-| Notation | Example | Notes |
+| Notation | Example | For |
 |---|---|---|
-| Hex | `#FF0000` / `#FF000080` | 6-digit (opaque) or 8-digit (with alpha) |
-| rgba | `rgba(255, 0, 0, 0.5)` | Alpha as 0–1 float. **Preferred for any color with opacity.** |
-| oklch | `oklch(0.6 0.2 250)` / `oklch(0.6 0.2 250 / 0.5)` | Slash-alpha syntax for oklch |
+| Hex | `#FF0000` / `#FF000080` | Opaque colors; the default |
+| `rgba()` | `rgba(255, 0, 0, 0.5)` | Any color with opacity — the alpha stays readable |
+| `oklch()` | `oklch(0.627 0.258 29.23)` / `oklch(0.6 0.2 250 / 0.5)` | Wide-gamut color |
 
-All three are valid in any attribute that accepts a color: `fill`, `color`, `border`, `shadow`, gradient stops, and token `value` declarations.
+- **Exact forms.** `rgba(r, g, b, a)`: three integers 0–255 and an alpha 0–1, comma-separated. `oklch(L C H)` or `oklch(L C H / a)`: lightness 0–1 or `0%`–`100%`, chroma ≥ 0, hue in degrees, alpha 0–1 or a percentage, space-separated.
+- **Everywhere a color goes:** `fill`, stroke and border colors, shadows, gradient stops, token values, fill styles.
+- **Stored as written.** No tool converts one notation into another. An `oklch()` color is kept, because it may lie outside sRGB.
+- **Drawing is the renderer's job.** A renderer that paints in sRGB maps `oklch()` into sRGB, clipping colors outside its gamut ([P6](../PRINCIPLES.md)). The file still holds the original color, so a wide-gamut renderer draws it in full.
+- **`rgb(r, g, b)` is tolerated, not part of the format.** Hex already says it ([P12](../PRINCIPLES.md)). Renderers draw it, because every Figma gradient stop has used it, and validators warn with the hex to write instead.
+- **Not accepted:** named colors (`red`; the token system names colors), `hsl()`, 3-digit hex, `lab()` / `lch()`.
+
+### 2. Dimensions: bare numbers, and `%` for sizes
+
+- **A bare number is pixels**, as it always has been: `w="320"`.
+- **`%` is a share of the parent**, on the size attributes only: `w`, `h`, `min-width`, `max-width`, `min-height`, `max-height`. `w="50%"` is half the parent's width.
+- `fill` and `hug` are unchanged. `fill` takes the space left over; `100%` is the parent's full size whatever its siblings take.
+- **Everywhere else a dimension is a bare number**: padding, gap, radius, position, font sizes, stroke widths, shadow offsets.
+- **Not accepted:** a `px` suffix, `rem`, `em`, `vw`, `vh`, `fr`, `calc()`. Grid track lists (`cols`, `rows`, [RFC-0032](0032-grid-system.md)) keep their own syntax, `fr` and `%` included.
+
+Both are 0.3.9 rules: a document declaring 0.3.9 or higher that uses a dropped form is an error; one declaring an earlier point gets a warning, and renders as it did.
 
 ```xml
-<!-- All of these are valid -->
-<rect fill="#FF0000" w="40" h="40" />
-<rect fill="rgba(255, 0, 0, 0.5)" w="40" h="40" />
-<rect fill="oklch(0.6 0.2 250 / 0.5)" w="40" h="40" />
 <tokens>
   <color name="primary" value="oklch(0.627 0.258 29.23)" />
-  <color name="overlay" value="rgba(0, 0, 0, 0.4)" />
+  <color name="scrim" value="rgba(0, 0, 0, 0.4)" />
 </tokens>
+<row w="390" gap="16" p="24">
+  <col w="50%" fill="$primary" radius="12" />
+  <col w="fill" fill="linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 100%)" />
+</row>
 ```
-
-**rgba is the preferred notation for any color with opacity.** Changing opacity is editing one number at the end of the value. This is the primary reason rgba is promoted to first-class rather than treated as a normalization target.
-
-### 2. Color normalizer scope
-
-The optimizer's color normalizer (`rule-11-normalize-colors`) currently converts `rgb()` and lowercase hex to uppercase hex. Updated scope:
-
-- `rgb(r, g, b)` (no alpha) → `#RRGGBB` hex (no change from current behavior)
-- `rgba(r, g, b, a)` → **left as-is** (rgba is now a canonical format)
-- `oklch(...)` → **left as-is** (cannot be converted to sRGB hex without gamut clipping)
-- `#rrggbb` / `#rrggbbaa` → normalized to uppercase (no change)
-
-The normalizer does not add or remove alpha. It does not change format unless the input is a bare `rgb()` call.
-
-### 3. Five dimension units
-
-Dimension values — `w`, `h`, `min-w`, `max-w`, `min-h`, `max-h`, padding (`p`, `pt`, `pr`, `pb`, `pl`), gap, radius, `x`, `y`, font sizes, and shadow offsets — now accept five forms:
-
-| Form | Example | CSS output | Notes |
-|---|---|---|---|
-| Bare number | `320` | `320px` | Backward-compatible. All existing files unchanged. |
-| px string | `"320px"` | `320px` | Explicit form. Same result as bare number. |
-| Percent | `"50%"` | `50%` | Always relative to the **parent container**. |
-| rem | `"1.5rem"` | `1.5rem` | Relative to root font size. |
-| vw / vh | `"100vw"` / `"50vh"` | `100vw` / `50vh` | Percent of viewport width/height. |
-| calc | `"calc(100% - 16px)"` | `calc(100% - 16px)` | Passed through verbatim. |
-
-Keyword values `fill`, `hug`, and `auto` are unaffected.
-
-```xml
-<!-- Existing files: no change needed -->
-<rect w="320" h="80" fill="$surface" />
-
-<!-- New: percentage, rem, viewport, calc -->
-<col w="50%" h="100vh" fill="$background" />
-<text font-size="1rem" value="Hello" />
-<col w="calc(100% - 32px)" gap="16" p="24" />
-```
-
-**`%` always means percent of the parent container.** For viewport-relative sizing, `vw` and `vh` are the correct units. There is no ambiguity between the two.
-
-### 4. Space-separated multi-value attributes
-
-Attributes that accept space-separated lists — `radius`, `p` (padding shorthand), `shadow` offsets — accept the same unit forms per token:
-
-```xml
-<!-- radius: each corner independently -->
-<rect radius="8px 8px 0 0" w="320" h="64" fill="$surface" />
-<rect radius="50% 50% 0 0" w="80" h="80" fill="$primary" />
-
-<!-- padding shorthand -->
-<col p="16px 24px" gap="12">
-  <text value="Label" font-size="14" />
-</col>
-<col p="1rem 1.5rem" gap="12">
-  <text value="Label" font-size="14" />
-</col>
-```
-
-Each whitespace-separated token is parsed individually. A token that is a bare number gets `px` appended. A token that is already a unit string passes through.
 
 ## Reasoning
 
-### Why rgba over hex-alpha for opacity
+**rgba is how people write opacity.** It is not added because it is new; it is the syntax every designer already reaches for. Hex alpha stays valid — it is what existing files and exporters write — but `rgba()` is the readable form.
 
-`#FF000080` and `rgba(255, 0, 0, 0.5)` represent the same color. The hex form requires mental conversion — `80` in hex is 128 in decimal, which is 50% of 255. No one computes this. Every designer who wants 40% opacity writes `rgba(r, g, b, 0.4)`. Making the format accept only hex means every opacity-carrying color must be converted before being written, which defeats the purpose of a human-readable format.
+**oklch keeps the designer's color.** Normalising to hex would silently change it on wide-gamut displays. The format stores intent; gamut mapping is computation, and computation belongs to the renderer ([P6](../PRINCIPLES.md)).
 
-rgba is not added because it is new — it is added because it is already the de facto authoring syntax for transparent colors.
+**`%` is intent every platform has.** "Half the parent" means the same thing in SwiftUI, Compose and CSS ([P2](../PRINCIPLES.md)), and real files already use it. It stays on sizes because that is where it means one thing; percentage padding or radius is a CSS habit with no consistent meaning elsewhere.
 
-### Why oklch is not normalized to hex
+**Why the other units were dropped:**
 
-oklch operates in a wider color space than sRGB. A color expressed as `oklch(0.627 0.258 29.23)` may be outside the sRGB gamut and has no lossless hex equivalent. Normalizing it would silently change the color — potentially significantly on wide-gamut displays. The format stores design intent, not a rendering approximation. oklch values must be preserved as authored.
+- **`px` suffix** — a second way to write `320` ([P12](../PRINCIPLES.md)).
+- **`rem`** — relative to the browser's root font size, which only exists on the web ([P2](../PRINCIPLES.md)). The intent behind it — text that scales with the user's settings — is real, and is its own RFC, stated as intent rather than borrowed as a CSS unit.
+- **`vw` / `vh`** — a share of the screen. That depends on what a screen is, which [RFC-0050](0050-screen-and-scroll.md) defines. Deferred there.
+- **`calc()`** — arithmetic in the file ([P6](../PRINCIPLES.md)), a CSS dialect ([P8](../PRINCIPLES.md)), and a primitive existing ones already cover ([P13](../PRINCIPLES.md)): "the parent's width minus 16" is `fill` with padding or gap.
 
-### Why `%` does not mean "of viewport"
+**One reading for every renderer.** Kit and the native renderer now accept and draw the same set. A file that validates draws the same everywhere ([P15](../PRINCIPLES.md)).
 
-Viewport-relative percent is a CSS-specific convention (`vw`/`vh` exist precisely because `%` was overloaded). In dotgui, `%` means "of parent" at every level — the same semantics as `fill` but with a specific fraction. `vw`/`vh` are available when viewport-relative sizing is genuinely needed.
+### Principle pass
 
-### Why bare numbers still mean px
-
-All existing `.gui` files use bare numbers. Making them mean anything else is a breaking change with no benefit. The explicit `px` suffix is accepted for authoring clarity but is not required.
-
-### Why no em, fr, dvh, or clamp()
-
-- `em` — relative to the element's own font size. Useful in CSS but uncommon in design tools where context-sensitive sizing complicates layout math. Deferred.
-- `fr` — grid fractions. Meaningful only inside `grid` containers. Grid layout is a separate concern (RFC-0032). Deferred until grid implementation is mature.
-- `dvh` / `svh` — dynamic/small viewport height. Useful for mobile browser chrome but adds complexity. The designs dotgui targets are single-screen, not scroll-driven. Deferred.
-- `clamp()` — useful for responsive typography. The designs dotgui targets are not responsive at the font level. Deferred.
-
-## Implications for Figma Plugin
-
-Figma operates in sRGB. The Figma plugin (`gui-figma`) must handle the two non-hex formats:
-
-- **rgba → Figma RGB**: Divide each channel by 255, pass alpha directly. Straightforward.
-- **oklch → Figma RGB**: Requires oklch-to-sRGB conversion with gamut mapping. Colors outside sRGB are clipped to the sRGB boundary. This is a lossy operation and is documented as such — the plugin will emit a warning when oklch values are gamut-mapped.
-
-Figma export does not change the stored `.gui` format. The conversion happens at export time only.
+| Principle | Result | Note |
+|---|---|---|
+| P1 — neutral | pass | Every tool can write hex, rgba and oklch; Figma's gradients already write rgba. |
+| P2 — platform-agnostic | pass | Colors and `%` mean the same on every platform. `rem` and `vw`/`vh` are out. |
+| P6 — intent vs computation | pass | Gamut mapping is the renderer's. `calc()` is out. |
+| P7 — readable | pass | Opacity is one readable number. |
+| P8 — one vocabulary | pass | CSS color syntax that every model knows; no CSS-only units. |
+| P11 — grammar | pass | Value forms: inline-single and functions reusing existing value vocabulary. |
+| P12 — one way | watch | Hex alpha and `rgba()` both carry alpha; hex is kept for existing files and exporters. `rgb()` and `px` are not part of the format. |
+| P13 — fewer primitives | pass | No new primitive; `calc()` refused because existing ones cover it. |
+| P14 — deterministic | pass | Stored as written; no conversion on the way in. |
+| P15 — honest | pass | Every accepted form is drawn by every renderer; dropped forms fail loudly. |
 
 ## Alternatives Considered
 
-**Accept any CSS string as a dimension (no validation)** — Rejected. Passing `"banana"` as a width would silently produce invalid CSS. The format should validate against a known-good set of units.
+**Accept every CSS unit, as the first draft did** — Rejected. `rem`, `vw`/`vh` and `calc()` are CSS ideas the native renderer cannot honor, and no file in the workspace uses them.
 
-**Adopt full CSS color syntax (lab, lch, display-p3, named colors)** — Considered. CSS lab/lch are similar to oklch but oklch is strictly better and is the direction the CSS spec is moving; lab/lch are not planned.
+**`rem` for scalable text** — Rejected here. The intent is real; it gets its own RFC stated as intent, not as a CSS unit.
 
-Named colors specifically (`red`, `coral`, `rebeccapurple`) are rejected. CSS named colors were introduced long before CSS custom properties — they were the only way to give a color a human-readable name at the time. That problem is now solved by the token system. `$red` in dotgui is the team's red: the exact value the designer chose, not the browser's arbitrary `#FF0000`. Named colors are also ambiguous (`grey` vs `gray` are both valid CSS, `green` is `#008000` not `#00FF00`). Tokens are unambiguous, designer-controlled, and already part of the format — they make named colors unnecessary.
+**`%` everywhere** — Rejected. Percentage padding, gap and radius each mean something different in CSS and nothing consistent elsewhere.
 
-**Normalize rgba to hex, store hex only** — Rejected. This is the current behavior for `rgb()` and it is the source of the friction being addressed. Once a color is normalized to hex, the alpha is buried in two hex digits that no one can read or edit.
+**`rgb()` as a fourth notation** — Rejected. Hex already writes an opaque color. It stays drawable so existing exports keep working.
 
-**Store a structured `{r, g, b, a}` color object instead of a string** — Rejected. dotgui attributes are strings. A structured color object would require a new value type and complicates every attribute parser. String formats are sufficient.
+**Normalise rgba and oklch to hex** — Rejected. Hex buries alpha in two digits and cannot hold wide-gamut color.
+
+**Named colors** (`red`, `coral`) — Rejected. Tokens name colors, with the value the designer chose; CSS names are arbitrary (`green` is `#008000`) and spelled two ways (`grey`, `gray`).
+
+**hsl, lab, lch, display-p3** — Not planned. oklch covers wide gamut and perceptual editing.
+
+**A structured color object** — Rejected. Attributes are strings, and the string forms are sufficient.
 
 ## Drawbacks
 
-- Three color notations means three branches in every color parser and validator. Not complex, but it is more surface area.
-- calc() is accepted but not validated. Malformed calc expressions will pass the format validator and fail at render time. This is acceptable — calc() is a power-user escape hatch, not a common case.
-- oklch gamut-mapping in the Figma plugin introduces a dependency on a color conversion library (e.g. `culori`). Adds ~15KB to the plugin bundle.
+- Three color notations mean three branches in every color parser.
+- Files that use `rem`, `vw`, `vh`, `calc()` or a `px` suffix fail once they declare 0.3.9. None were found; any written by a tool must be re-exported.
+- The Figma exporter should write opaque gradient stops as hex. Until it does, every exported gradient carries `rgb()` warnings.
+- Wide-gamut colors are clipped by an sRGB renderer. That is a limit of the output, and the file keeps the full color.
+
+## Implementation Notes
+
+- **Schema:** `ColorValue` documents the exact `rgba()` and `oklch()` forms; `DimensionValue` is a number, or a `%` string on size attributes. The *Fill Values* reference lists all three notations.
+- **Kit validator:** a strict `oklch()` check; `RGB_COLOR` warns on `rgb()` and names the hex; `INVALID_DIMENSION` for a `px` suffix, `rem`, `vw`, `vh` or `calc()`, and for `%` outside the size attributes. Errors from 0.3.9, warnings before.
+- **Native renderer:** draws `rgba()`, `rgb()` and `oklch()` everywhere a color goes, gradient stops included, mapping oklch into sRGB with gamut clipping; refuses the dropped unit forms from 0.3.9.
+- **Kit HTML renderer:** unchanged — CSS draws all three notations.
+- **Figma exporter:** write opaque gradient stops as hex. Deferred with the rest of the Figma plugin work.
+- **Optimizer:** its color rules are its own; it must not convert `rgba()` or `oklch()`.
+
+Shipped in 0.3.9: the schema and reference, kit's validator, and the native renderer — which now draws `rgba()`, `rgb()` and `oklch()` everywhere, including exported gradients, and keeps a border color with spaces in one piece. Both read documents up to 0.3.9. The Figma exporter change waits with the rest of the Figma plugin work.
 
 ## Test Cases
 
-**Colors:**
-- `fill="#FF0000"` — valid hex, opaque red
-- `fill="#FF000080"` — valid hex with alpha, 50% red
-- `fill="rgba(255, 0, 0, 0.5)"` — valid rgba, 50% red
-- `fill="rgba(255, 0, 0, 1)"` — valid rgba, opaque red (not required to be hex)
-- `fill="oklch(0.6 0.2 250)"` — valid oklch, opaque
-- `fill="oklch(0.6 0.2 250 / 0.5)"` — valid oklch with alpha
-- `fill="rgb(255, 0, 0)"` — valid input, optimizer normalizes to `#FF0000`
-- `fill="red"` — invalid (named colors not yet supported)
-- `fill="hsl(0, 100%, 50%)"` — invalid (hsl not in scope)
+Tested in kit and the native renderer:
 
-**Dimensions:**
-- `w="320"` — valid, 320px (existing behavior)
-- `w="320px"` — valid, 320px (explicit form)
-- `w="50%"` — valid, 50% of parent width
-- `w="1.5rem"` — valid, 1.5rem
-- `w="100vw"` — valid, full viewport width
-- `w="calc(100% - 16px)"` — valid, passed through
-- `w="fill"` — valid keyword (existing behavior)
-- `w="50em"` — invalid (em not in scope)
-- `w="1fr"` — invalid (fr not in scope)
-- `p="16 24"` — valid, 16px top/bottom 24px left/right (existing behavior)
-- `p="1rem 1.5rem"` — valid, rem values per side
-- `radius="8 8 0 0"` — valid, per-corner px (existing behavior)
-- `radius="50% 50% 0 0"` — valid, percent corners
+**Colors**
+- `#FF0000`, `#FF000080`, `rgba(255, 0, 0, 0.5)`, `oklch(0.6 0.2 250)`, `oklch(0.6 0.2 250 / 0.5)`, `oklch(60% 0.2 250)` — valid, and drawn by the native renderer.
+- `linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 100%)` — drawn natively.
+- `rgb(255, 0, 0)` — drawn; a warning names `#FF0000`.
+- `oklch(banana)`, `rgba(255, 0, 0)`, `red`, `hsl(0, 100%, 50%)` — invalid.
+
+**Dimensions**
+- `w="320"`, `w="50%"`, `max-width="80%"`, `w="fill"`, `p="16 24"` — valid.
+- `w="320px"`, `w="1.5rem"`, `w="100vw"`, `w="calc(100% - 16px)"`, `p="10%"`, `radius="50%"` — errors in 0.3.9, warnings in 0.3.8.

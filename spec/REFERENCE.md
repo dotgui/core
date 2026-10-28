@@ -2,7 +2,7 @@
 
 # .gui Element Reference
 
-Format version `0.3.8`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
+Format version `0.3.9`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
 
 ## Contents
 
@@ -89,7 +89,7 @@ platform and source describe the document itself and belong to it alone: in a mu
 
 | Attribute | Type | Description |
 |---|---|---|
-| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.3.8. |
+| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.3.9. |
 | `name` | `string` | Screen or layer name from the source design. |
 | `platform` | `string` | The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036). |
 | `source` | `string` | The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036). |
@@ -162,7 +162,7 @@ Design system primitives. Referenced anywhere in the tree with $name. Figma Vari
 
 | Attribute | Type | Description |
 |---|---|---|
-| `<color>` | `token` | Hex color, e.g. #007AFF. |
+| `<color>` | `token` | A color: hex, rgba() or oklch(), e.g. #007AFF. |
 | `<number>` | `token` | Numeric value, e.g. 12. |
 | `<string>` | `token` | String value, e.g. Inter. |
 
@@ -911,8 +911,8 @@ Border shorthand: "[width] [color] [style] [align]". Defaults: 1px solid center.
 | `name` | `string` |  |
 | `x` | `number` |  |
 | `y` | `number` |  |
-| `w` **(required)** | `number | 'fill'` | Unified width. Replaces width + sizing-h. Absent = hug (valid on row/col/stack/text/instance only). "fill" = grow to fill parent. number = fixed px. String forms: '50%' (of parent), '1.5rem', '100vw', 'calc(100% - 16px)' Not valid on frame/img/svg — those require explicit values. |
-| `h` **(required)** | `number | 'fill'` | Unified height. Replaces height + sizing-v. Absent = hug (valid on row/col/stack/text/instance only). "fill" = grow to fill parent. number = fixed px. String forms: '50%' (of parent), '1.5rem', '100vh', 'calc(100% - 16px)' Not valid on frame/img/svg — those require explicit values. |
+| `w` **(required)** | `number | 'fill'` | Unified width. Replaces width + sizing-h. Absent = hug (valid on row/col/stack/text/instance only). "fill" = grow to fill parent. number = fixed px. Or a share of the parent: '50%'. Not valid on frame/img/svg — those require explicit values. |
+| `h` **(required)** | `number | 'fill'` | Unified height. Replaces height + sizing-v. Absent = hug (valid on row/col/stack/text/instance only). "fill" = grow to fill parent. number = fixed px. Or a share of the parent: '50%'. Not valid on frame/img/svg — those require explicit values. |
 | `fill` | `fill` |  |
 | `fill-style` | `string` |  |
 | `effect-style` | `string` |  |
@@ -954,8 +954,8 @@ Arc and donut shapes (progress rings, pie segments) are SVG assets referenced vi
 | `name` | `string` |  |
 | `x` | `number` |  |
 | `y` | `number` |  |
-| `w` **(required)** | `number | 'fill'` | Unified width. Replaces width + sizing-h. Absent = hug (valid on row/col/stack/text/instance only). "fill" = grow to fill parent. number = fixed px. String forms: '50%' (of parent), '1.5rem', '100vw', 'calc(100% - 16px)' Not valid on frame/img/svg — those require explicit values. |
-| `h` **(required)** | `number | 'fill'` | Unified height. Replaces height + sizing-v. Absent = hug (valid on row/col/stack/text/instance only). "fill" = grow to fill parent. number = fixed px. String forms: '50%' (of parent), '1.5rem', '100vh', 'calc(100% - 16px)' Not valid on frame/img/svg — those require explicit values. |
+| `w` **(required)** | `number | 'fill'` | Unified width. Replaces width + sizing-h. Absent = hug (valid on row/col/stack/text/instance only). "fill" = grow to fill parent. number = fixed px. Or a share of the parent: '50%'. Not valid on frame/img/svg — those require explicit values. |
+| `h` **(required)** | `number | 'fill'` | Unified height. Replaces height + sizing-v. Absent = hug (valid on row/col/stack/text/instance only). "fill" = grow to fill parent. number = fixed px. Or a share of the parent: '50%'. Not valid on frame/img/svg — those require explicit values. |
 | `fill` | `fill` |  |
 | `fill-style` | `string` |  |
 | `effect-style` | `string` |  |
@@ -993,7 +993,7 @@ Sugar for a thin frame used as a visual divider. Default: horizontal, thickness=
 | `name` | `string` |  |
 | `x` | `number` |  |
 | `y` | `number` |  |
-| `w` | `number | 'fill'` | Unified width. Replaces width + sizing-h. Absent = hug (valid on row/col/stack/text/instance only). "fill" = grow to fill parent. number = fixed px. String forms: '50%' (of parent), '1.5rem', '100vw', 'calc(100% - 16px)' Not valid on frame/img/svg — those require explicit values. |
+| `w` | `number | 'fill'` | Unified width. Replaces width + sizing-h. Absent = hug (valid on row/col/stack/text/instance only). "fill" = grow to fill parent. number = fixed px. Or a share of the parent: '50%'. Not valid on frame/img/svg — those require explicit values. |
 | `direction` | `horizontal` `vertical` |  |
 | `thickness` | `number` | Line thickness in px. Default: 1 |
 | `fill` | `color | token` |  |
@@ -1048,7 +1048,9 @@ All three stacks — fills, borders, effects — are ordered in document order. 
 
 *fill attribute formats*
 
-The fill attribute accepts hex colors, gradient functions, and token references. Alpha is encoded as the last byte of an 8-digit hex: #1C1C1ECC.
+The fill attribute accepts a color — hex, rgba() or oklch() — a gradient function, or a token reference. The same three color notations work everywhere a color goes: strokes, borders, shadows, gradient stops, tokens and fill styles. rgb() is tolerated for existing exports but is not part of the format; write hex.
+
+Dimensions are bare numbers in pixels. Sizes (w, h, min-width, max-width, min-height, max-height) may also be a share of the parent: w="50%". There is no px suffix, rem, vw/vh or calc() (RFC-0033).
 
 Gradient syntax mirrors CSS — linear-gradient(), radial-gradient(), conic-gradient(). Token references use $name syntax.
 
@@ -1056,9 +1058,11 @@ Gradient syntax mirrors CSS — linear-gradient(), radial-gradient(), conic-grad
 |---|---|---|
 | `Hex opaque` | `format` | #1C1C1E. |
 | `Hex + alpha` | `format` | #1C1C1ECC (last byte = alpha). |
+| `rgba` | `format` | rgba(28, 28, 30, 0.8) — integers 0–255, alpha 0–1. The readable form for any color with opacity (RFC-0033). |
+| `oklch` | `format` | oklch(0.627 0.258 29.23) or oklch(0.6 0.2 250 / 0.5) — wide-gamut, stored as written (RFC-0033). |
 | `Linear gradient` | `format` | linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%). |
-| `Radial gradient` | `format` | radial-gradient(circle at 50% 30%, #FFF 0%, #000 100%). |
-| `Angular gradient` | `format` | conic-gradient(from 0deg at 50% 50%, #F00 0deg, #00F 360deg). |
+| `Radial gradient` | `format` | radial-gradient(circle at 50% 30%, #FFFFFF 0%, #000000 100%). |
+| `Angular gradient` | `format` | conic-gradient(from 0deg at 50% 50%, #FF0000 0deg, #0000FF 360deg). |
 | `Token` | `format` | $primary. |
 
 **Fill values in use**

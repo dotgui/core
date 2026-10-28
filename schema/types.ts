@@ -14,13 +14,13 @@
 /** A hex color: #RRGGBB or #RRGGBBAA */
 export type HexColor = string
 
-/** An rgba color: rgba(r, g, b, a) — preferred for any color with opacity */
+/** An rgba color: rgba(r, g, b, a) — integers 0–255, alpha 0–1. Preferred for any color with opacity (RFC-0033). */
 export type RgbaColor = string
 
 /**
- * An oklch color: oklch(l c h) or oklch(l c h / a)
- * Wide-gamut — cannot be losslessly converted to sRGB hex.
- * Always stored and rendered as-is.
+ * An oklch color: oklch(L C H) or oklch(L C H / a) — lightness 0–1 or a
+ * percentage, chroma ≥ 0, hue in degrees. Wide-gamut: stored as written; an
+ * sRGB renderer maps it into gamut when drawing (RFC-0033).
  */
 export type OklchColor = string
 
@@ -37,14 +37,12 @@ export type TokenRef = string
 export type FillValue = ColorValue | GradientValue | TokenRef
 
 /**
- * A dimension value.
- * - Bare number → treated as px (e.g. 320 → "320px")
- * - 'fill' → 100% of parent
- * - 'hug' → fit-content
- * - '50%' → 50% of parent container
- * - '1.5rem' → relative to root font size
- * - '100vw' / '50vh' → viewport-relative
- * - 'calc(100% - 16px)' → CSS math, passed through verbatim
+ * A dimension value (RFC-0033).
+ * - Bare number → pixels
+ * - 'fill' → the space left in the parent
+ * - 'hug' → fit the content
+ * - '50%' → a share of the parent; only on w, h, min-*, max-*
+ * No px suffix, rem, vw/vh or calc().
  */
 export type DimensionValue = number | string
 
@@ -186,7 +184,7 @@ export interface VisualAttrs {
    * Absent = hug (valid on row/col/stack/text/instance only).
    * "fill" = grow to fill parent.
    * number = fixed px.
-   * String forms: '50%' (of parent), '1.5rem', '100vw', 'calc(100% - 16px)'
+   * Or a share of the parent: '50%'.
    * Not valid on frame/img/svg — those require explicit values.
    */
   w?: DimensionValue
@@ -195,7 +193,7 @@ export interface VisualAttrs {
    * Absent = hug (valid on row/col/stack/text/instance only).
    * "fill" = grow to fill parent.
    * number = fixed px.
-   * String forms: '50%' (of parent), '1.5rem', '100vh', 'calc(100% - 16px)'
+   * Or a share of the parent: '50%'.
    * Not valid on frame/img/svg — those require explicit values.
    */
   h?: DimensionValue

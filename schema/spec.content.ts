@@ -59,7 +59,7 @@ export interface ContentEntry {
  * The spec point this content describes: the chapter and the last RFC landed
  * in it (see rfcs/README.md, Format Versions). Written into spec.json.
  */
-export const specFormatVersion = '0.3.8'
+export const specFormatVersion = '0.3.9'
 
 export const specCategoryOrder = ['Format', 'Metadata', 'Layout', 'Content', 'Geometry', 'Appearance']
 
@@ -154,7 +154,7 @@ export const specContent: ContentEntry[] = [
     slug: 'tokens', tag: 'tokens', name: '<tokens>', kind: 'tag', category: 'Metadata', summary: 'design primitives',
     source: 'content',
     attributes: [
-      { name: '<color>', type: 'token', description: 'Hex color, e.g. #007AFF.' },
+      { name: '<color>', type: 'token', description: 'A color: hex, rgba() or oklch(), e.g. #007AFF.' },
       { name: '<number>', type: 'token', description: 'Numeric value, e.g. 12.' },
       { name: '<string>', type: 'token', description: 'String value, e.g. Inter.' }
     ],
@@ -539,13 +539,16 @@ export const specContent: ContentEntry[] = [
     attributes: [
       { name: 'Hex opaque', type: 'format', description: '#1C1C1E.' },
       { name: 'Hex + alpha', type: 'format', description: '#1C1C1ECC (last byte = alpha).' },
+      { name: 'rgba', type: 'format', description: 'rgba(28, 28, 30, 0.8) — integers 0–255, alpha 0–1. The readable form for any color with opacity (RFC-0033).' },
+      { name: 'oklch', type: 'format', description: 'oklch(0.627 0.258 29.23) or oklch(0.6 0.2 250 / 0.5) — wide-gamut, stored as written (RFC-0033).' },
       { name: 'Linear gradient', type: 'format', description: 'linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%).' },
-      { name: 'Radial gradient', type: 'format', description: 'radial-gradient(circle at 50% 30%, #FFF 0%, #000 100%).' },
-      { name: 'Angular gradient', type: 'format', description: 'conic-gradient(from 0deg at 50% 50%, #F00 0deg, #00F 360deg).' },
+      { name: 'Radial gradient', type: 'format', description: 'radial-gradient(circle at 50% 30%, #FFFFFF 0%, #000000 100%).' },
+      { name: 'Angular gradient', type: 'format', description: 'conic-gradient(from 0deg at 50% 50%, #FF0000 0deg, #0000FF 360deg).' },
       { name: 'Token', type: 'format', description: '$primary.' }
     ],
     description: [
-      'The fill attribute accepts hex colors, gradient functions, and token references. Alpha is encoded as the last byte of an 8-digit hex: #1C1C1ECC.',
+      'The fill attribute accepts a color — hex, rgba() or oklch() — a gradient function, or a token reference. The same three color notations work everywhere a color goes: strokes, borders, shadows, gradient stops, tokens and fill styles. rgb() is tolerated for existing exports but is not part of the format; write hex.',
+      'Dimensions are bare numbers in pixels. Sizes (w, h, min-width, max-width, min-height, max-height) may also be a share of the parent: w="50%". There is no px suffix, rem, vw/vh or calc() (RFC-0033).',
       'Gradient syntax mirrors CSS — linear-gradient(), radial-gradient(), conic-gradient(). Token references use $name syntax.'
     ],
     exampleLabel: 'Fill values in use',
