@@ -217,7 +217,7 @@ For a multi-document package it is a contact sheet of the documents in order. Pe
 
 ### Non-goals — pre-rejected, explicitly
 
-> **Amended (Draft).** [RFC-0055](0055-library-directory.md) proposes relaxing *no page or folder hierarchy* for one directory, `library/`, whose files together form the library. [RFC-0056](0056-linked-libraries.md) proposes relaxing *no external references* and *no second library*: a `<library>` block may record where its declarations came from, for tools only, while resolution stays closed inside the package. Embedding another file's screens stays rejected.
+> **Amended.** [RFC-0055](0055-library-directory.md) relaxed *no page or folder hierarchy* for one directory, `library/`, whose files together form the library. [RFC-0056](0056-linked-libraries.md) (Draft) proposes relaxing *no external references* and *no second library*: a `<library>` block may record where its declarations came from, for tools only, while resolution stays closed inside the package. Embedding another file's screens stays rejected.
 
 These are the next things someone will ask for. They are refused now so the slope is not walked down one accepted RFC at a time:
 
