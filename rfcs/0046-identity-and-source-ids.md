@@ -2,6 +2,7 @@
 rfc: 0046
 title: Identity and source ids — addressing nodes in a file, and tracing them to their source
 status: Implemented
+amended-by: 0056
 targets: 0.3.7
 date: 2026-10-16
 updated: 2026-10-28
@@ -171,6 +172,8 @@ A plain id reaches any node in its own scope. To reach a node inside an instance
 13. **On the root, `source-id` is the exported frame's id.** The root is a node like any other, so the exported frame is traced the same way every other node is ([P12](../PRINCIPLES.md)). It is what the first draft of [RFC-0036](0036-gui-meta-block.md) called `<meta source-node>`.
 14. **A source with no layer ids writes `source` and nothing else.** A code generator, or a capture with nothing stable to point at, states the tool and writes no `source-id`. The file came from that tool; no node can be traced further.
 15. **Inside component bodies, nodes carry the main component's ids.** An instance carries its own `source-id`. Nodes *inside* an instance are never written out — the instance is a reference — so the tool-specific ids of instance sublayers (Figma's `I336:1697;12:4`) never appear. If a consumer needs one, it composes it from the instance's `source-id` and the component node's `source-id`, using the same path that addresses it in Part 2. That composition is the tool's job, not the format's.
+
+> **Amended (Draft).** [RFC-0056](0056-linked-libraries.md) proposes that each `<library>` block may declare its own `source`, so rule 6 (one source per document) becomes one source per document *or library block*; `source-id`s inside a block read against the block's source. It also amends rule 10: a `<library>` block records where its declarations can be found (`src`) and which library and release they belong to (`uid`, `release`). Figma file keys stay out of the format.
 
 ### Source guidelines
 

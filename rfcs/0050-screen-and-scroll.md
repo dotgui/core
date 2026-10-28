@@ -2,7 +2,7 @@
 rfc: 0050
 title: Screen and scroll — screen size, scrolling regions, pinned edges
 status: Draft
-targets: 0.4
+targets: 0.5
 date: 2026-10-18
 depends-on: 0021, 0045, 0048
 ---
@@ -42,7 +42,7 @@ Every platform and design tool has the same three concepts, under different name
 ### 1. `screen` on `<gui>`: how big the screen is
 
 ```xml
-<gui version="0.4" name="Goals" platform="android" screen="360 800">
+<gui version="0.5" name="Goals" platform="android" screen="360 800">
   <col w="360"> … content of any height … </col>
 </gui>
 ```
