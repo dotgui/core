@@ -205,7 +205,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0055](0055-library-directory.md) | The library directory — a library split across `library/` (amends 0042) | Accepted |
+| [0055](0055-library-directory.md) | The library directory — a library split across `library/` (amends 0042) | Implemented |
 
 ### 0.4.3 — Describing Library Items
 

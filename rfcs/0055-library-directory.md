@@ -1,10 +1,11 @@
 ---
 rfc: 0055
 title: The library directory — one library, split across files
-status: Accepted
+status: Implemented
 targets: 0.4.2
 date: 2026-10-29
 updated: 2026-10-29
+implemented: 2026-10-29
 depends-on: 0042, 0054
 amends: 0042
 ---
@@ -189,7 +190,12 @@ The library is small — 37 KB, one component set per file — so the shares are
 - **Native renderer:** the package keeps library files beside `library.guix`, refuses both together, and parses the union, naming both files in a collision.
 - **Spec:** `spec/DOTGUI.md` describes the directory form and the recommended layout.
 
+Shipped in 0.4.2: the spec text; kit's library files, joined library, `LIBRARY_COLLISION`, `VERSION_BELOW_LIBRARY_DIRECTORY` and `setLibraryFile`; and the native renderer's `parse_library_files`, with each library file's own page. Both read documents up to 0.4.2.
+
 ## Test Cases
+
+Tested in kit and the native renderer:
+
 
 - A package with `library/tokens.guix` and `library/components/button.guix` renders a document using `$primary` and `comp-button`, exactly as the same declarations in one `library.guix`.
 - `library.guix` beside `library/x.guix` is refused; an empty `library/` beside `library.guix` is not a library and is fine.
