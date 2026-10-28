@@ -1,9 +1,10 @@
 ---
 rfc: 0057
 title: description and template — what a library item is for
-status: Draft
+status: Accepted
 targets: 0.4.3
 date: 2026-10-29
+updated: 2026-10-29
 depends-on: 0005, 0008, 0042
 ---
 
@@ -39,7 +40,7 @@ The format already accepts that some meaning has no pixels.
 
 ## Decision
 
-### `description` — one property, five places
+### `description` — one property, on every library item
 
 An optional `description` property holds plain text that says what the item is for and when to use it.
 
@@ -65,7 +66,7 @@ An optional `description` property holds plain text that says what the item is f
 </components>
 ```
 
-It is valid on exactly these elements: `<component>`, `<component-set>`, `<variant>`, the token elements (`<color>`, `<number>`, `<string>`) and `<text-style>`. These are the library items a reader picks from, and they are the items Figma and the Tokens format describe.
+It is valid on exactly these elements: `<component>`, `<component-set>`, `<variant>`, the token elements (`<color>`, `<number>`, `<string>`), and every style — `<text-style>`, `<fill-style>`, `<effect-style>`. These are the library items a reader picks from, and they are the items Figma and the Tokens format describe; Figma describes every style, not text styles alone.
 
 Rules:
 
@@ -74,7 +75,7 @@ Rules:
 3. **Belongs to the definition.** It lives where the item is declared. An `<instance>` does not carry or override it.
 4. **Exporters copy, they don't write.** An exporter writes `description` verbatim when the source item has one, and omits it when the source has none. It never generates one ([RFC-0010](0010-no-ai-in-pipeline.md)). Hand-written and AI-written files may add descriptions freely; that is authoring, not export.
 5. **Preserved by every transform.** An optimizer must not strip it as "no visual impact". `flatten` and any library copy carry it with the item.
-6. **Validation.** `description=""` is a warning, because an empty description says nothing (P4). `description` on any other element is an error in a `0.4` document.
+6. **Validation.** `description=""` is a warning, because an empty description says nothing (P4). `description` on any other element is an error in a document declaring 0.4.3 or higher, and a warning before.
 
 **Length guidance, not a rule:** one or two sentences, about 200 characters at most. Say what the item is for, when to use it, and when not to. Anything longer is documentation, and documentation belongs beside the package, not inside the markup a model reads on every request.
 
@@ -91,7 +92,7 @@ Rules:
 - **It changes nothing about rendering.** A template renders exactly as it would without the flag.
 - **Using a template means copying it.** A tool that "starts from a template" copies the document into the target package as a new document without `template`. Templates are never referenced or instanced. That keeps them inside the closed-resolution rule of RFC-0042: copying crosses no boundary.
 - **A template's purpose is carried by its `name`.** `<gui>` does not take `description` in this RFC (see *Unresolved Questions*).
-- `library.guix`, and any library-part file, cannot be a template. It is declarations, and its screen part is a style guide, not a starting point. `template` on it is an error.
+- `library.guix`, and any library file under `library/` ([RFC-0055](0055-library-directory.md)), cannot be a template. It is declarations, and its screen part is a style guide, not a starting point. `template` on it is an error.
 
 **Why this belongs here, not in a later RFC:** both properties answer the same question for the same reader ("what is this for?") on the same artifact, a library. Splitting them would make two hearings argue the same P3 question twice. `template` is also the smallest change that gives the planner something to start from, and it costs one bare word on the roots that need it.
 
@@ -137,6 +138,18 @@ This RFC takes the same position, so **no principle is amended.** The tension is
 
 They are what a reader *chooses from*. Layers inside a component body are implementation; describing them is documentation of the drawing, not guidance for the user of the library. Props are a possible sixth (see *Unresolved Questions*), but Figma has no description on component properties, so there is nothing to round-trip yet.
 
+### What it costs — measured
+
+On the 45-component shadcn library used for [RFC-0055](0055-library-directory.md), with a typical 20-token description (`cl100k`, a proxy for the model's tokenizer):
+
+| Described | Library tokens | Added |
+|---|---|---|
+| Nothing | 12,047 | — |
+| Each component set | 12,947 | +7.5% |
+| Every set and every variant | 14,327 | +18.9% |
+
+The cost is opt-in, sits only in library files, and is read once per library. With the library split, an agent editing the button reads 682 tokens instead of 542.
+
 ## Alternatives Considered
 
 **XML comments** (`<!-- Primary action. One per screen. -->`). Rejected. Parsers drop comments, so they aren't attached to an element and can't be copied with it when a component is pulled into another package. An optimizer may strip them. They look like data and aren't.
@@ -153,11 +166,30 @@ They are what a reader *chooses from*. Layers inside a component body are implem
 
 **Defer `template` to its own RFC.** Considered. Rejected because it raises the same P3 question for the same reader, and a separate hearing would only repeat this one.
 
+## Drawbacks
+
+- **Tokens.** A fully described library is about a fifth larger (*What it costs*). Authors choose how much to describe; exporters copy only what the source has.
+- **A second kind of meaning with no pixels.** Validators and optimizers must know `description` and `template` are kept, never stripped as dead weight.
+- **P3's wording lags its application.** This is the fifth property admitted as authored meaning that is never seen (see *Unresolved Questions*).
+
+## Implementation Notes
+
+- **Schema:** `description` on component, component set, variant, the three token types and the three style types; `template` on `<gui>`.
+- **Kit validator:** `DESCRIPTION_EMPTY` (warning) and `DESCRIPTION_MISPLACED` (error from 0.4.3, warning before); `TEMPLATE_IN_LIBRARY` for `template` on `library.guix` or a `library/` file. `info()` lists the documents that are templates.
+- **Native renderer:** the same rules; both attributes are ignored when drawing.
+- **Figma exporter:** copies component, set, variant, variable and style descriptions verbatim. Deferred with the rest of the Figma plugin work.
+
+## Test Cases
+
+- `description` on each of the nine elements validates and changes nothing on screen.
+- `description` on a `<col>` or an `<instance>` is an error in 0.4.3 and a warning in 0.4.2.
+- `description=""` warns.
+- `<gui template>` on a document validates and renders as without it; on `library.guix` or `library/x.guix` it is an error.
+
 ## Unresolved Questions
 
 - **Should P3's wording change?** It has now been read as "no editor state" rather than "nothing unseen" for `role`, `name`, `detached-from`, `source-id` and this RFC. Saying so in P3 would stop each of these from being argued again. If the answer is yes, that is a principle amendment, and it belongs in its own change, possibly together with RFC-0045.
 - **`description` on `<gui>`.** A document, a template especially, might want one. It's left out to keep this RFC to library items. Is a document's `name` enough?
 - **`description` on `<prop>`.** Useful to an agent filling in an instance ("label: verb first, two words"), but nothing exports it today.
 - **Mode axes and mode values.** "Compact is for dense admin tables" is real guidance. Should `<mode>` take a description too?
-- **Token cost.** Descriptions are opt-in, but a fully described design system adds real tokens to its library part. The cost should be measured on a real exported library before this moves to Proposed (P7, *Process notes*).
 - **Templates across packages.** If a library package holds templates, they're documents, and RFC-0042 never shares documents. The copy-to-use rule above works without linking. Does the linked-library RFC need to say anything about listing a source's templates?

@@ -211,7 +211,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0057](0057-describing-library-items.md) | Describing library items — `description` on components, tokens and styles | Draft |
+| [0057](0057-describing-library-items.md) | Describing library items — `description` on components, tokens and styles | Accepted |
 
 ### 0.4.4 — Linked Libraries
 

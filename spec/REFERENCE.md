@@ -2,7 +2,7 @@
 
 # .gui Element Reference
 
-Format version `0.4.2`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
+Format version `0.4.3`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
 
 ## Contents
 
@@ -92,10 +92,11 @@ platform and source describe the document itself and belong to it alone: in a mu
 
 | Attribute | Type | Description |
 |---|---|---|
-| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.4.2. |
+| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.4.3. |
 | `name` | `string` | Screen or layer name from the source design. |
 | `platform` | `string` | The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036). |
 | `source` | `string` | The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036). |
+| `template` | `boolean` | Presence: this document is a starting point to copy, not a screen to ship. Renders exactly as without it; never on library.guix or a library/ file (RFC-0057). |
 | `source-id` | `string` | The exported frame's handle in the source tool, read against source. Exporters only, and only for an export meant to round-trip. See spec/SOURCES.md (RFC-0046). |
 
 **Example**
@@ -1123,6 +1124,8 @@ Gradient syntax mirrors CSS — linear-gradient(), radial-gradient(), conic-grad
 *all nodes*
 
 Visual attributes available on all layout, content, and geometry nodes.
+
+description says what a library item is for and when to use it — on components, component sets, variants, tokens and styles only. Plain text, one or two sentences, never rendered; exporters copy it from the source, never write one (RFC-0057).
 
 id names a node so something can point at it: a prop target, a path segment through an instance (target="tab-1/label"). Lowercase kebab-case, written only where something points, unique within its scope — the screen tree of a document, or one component or variant body. A reference that does not resolve is an error (RFC-0046).
 
