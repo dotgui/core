@@ -1,6 +1,6 @@
 {
   "$generated": "DO NOT EDIT — run `bun run gen:spec` in the kit. Source: core/schema/types.ts + spec.content.ts",
-  "formatVersion": "0.3.5",
+  "formatVersion": "0.3.6",
   "categoryOrder": [
     "Format",
     "Metadata",
@@ -241,24 +241,37 @@
       "category": "Format",
       "summary": "document root",
       "description": [
-        "The root element is a document envelope — never rendered. Direct children are metadata blocks or exactly one root layout node. Metadata always precedes the layout root."
+        "The root element is a document envelope — never rendered. Direct children are metadata blocks or exactly one root layout node. Metadata always precedes the layout root.",
+        "platform and source describe the document itself and belong to it alone: in a multi-document package each document, library.guix included, carries its own. There is no <meta> block; files written before 0.3.6 that carry one keep working."
       ],
       "attributes": [
         {
           "name": "version",
           "type": "string",
           "required": true,
-          "description": "Spec version the document is written for: a chapter (\"0.3\") or a point in it (\"0.3.4\"). Consumers refuse a version newer than they read. Current: 0.3.5."
+          "description": "Spec version the document is written for: a chapter (\"0.3\") or a point in it (\"0.3.4\"). Consumers refuse a version newer than they read. Current: 0.3.6."
         },
         {
           "name": "name",
           "type": "string",
           "required": false,
           "description": "Screen or layer name from the source design."
+        },
+        {
+          "name": "platform",
+          "type": "string",
+          "required": false,
+          "description": "The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036)."
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "required": false,
+          "description": "The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036)."
         }
       ],
       "sharedAttrs": false,
-      "example": "<gui version=\"0.2\" name=\"Checkout\">\n  <tokens>\n    <color name=\"primary\" value=\"#007AFF\" />\n  </tokens>\n  <fonts>\n    <font family=\"Inter\" source=\"google\" weights=\"400 700\" />\n  </fonts>\n  <col w=\"390\" fill=\"#F2F2F7\" gap=\"16\" p=\"24\">\n    <text value=\"Checkout\"\n          font-family=\"Inter\" font-size=\"28\"\n          font-weight=\"700\" fill=\"#1C1C1E\" />\n  </col>\n</gui>",
+      "example": "<gui version=\"0.3\" name=\"Checkout\" platform=\"ios\">\n  <tokens>\n    <color name=\"primary\" value=\"#007AFF\" />\n  </tokens>\n  <fonts>\n    <font family=\"Inter\" source=\"google\" weights=\"400 700\" />\n  </fonts>\n  <col w=\"390\" fill=\"#F2F2F7\" gap=\"16\" p=\"24\">\n    <text value=\"Checkout\"\n          font-family=\"Inter\" font-size=\"28\"\n          font-weight=\"700\" fill=\"#1C1C1E\" />\n  </col>\n</gui>",
       "exampleLabel": "Example",
       "exampleMode": "hl",
       "related": [

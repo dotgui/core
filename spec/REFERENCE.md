@@ -2,7 +2,7 @@
 
 # .gui Element Reference
 
-Format version `0.3.5`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
+Format version `0.3.6`. This reference is generated from the canonical spec — every element, attribute, type, and constraint is extracted from `kit/src/schema/types.ts`. For rationale and design philosophy, see [DOTGUI.md](DOTGUI.md).
 
 ## Contents
 
@@ -83,15 +83,19 @@ No — a .gui file is a ZIP package whose markup (design.guix) is XML, alongside
 
 The root element is a document envelope — never rendered. Direct children are metadata blocks or exactly one root layout node. Metadata always precedes the layout root.
 
+platform and source describe the document itself and belong to it alone: in a multi-document package each document, library.guix included, carries its own. There is no <meta> block; files written before 0.3.6 that carry one keep working.
+
 | Attribute | Type | Description |
 |---|---|---|
-| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.3.5. |
+| `version` **(required)** | `string` | Spec version the document is written for: a chapter ("0.3") or a point in it ("0.3.4"). Consumers refuse a version newer than they read. Current: 0.3.6. |
 | `name` | `string` | Screen or layer name from the source design. |
+| `platform` | `string` | The platform the document is designed for. Open string; recommended: ios, android, web, desktop, tv, watch. Absent = unspecified — assume no default. Describes intent; changes nothing about how the document is drawn (RFC-0036). |
+| `source` | `string` | The tool that exported the file. Open string; recommended: figma, penpot, sketch, html. Exporters only — a file written by hand or by an AI omits it (RFC-0036). |
 
 **Example**
 
 ```xml
-<gui version="0.2" name="Checkout">
+<gui version="0.3" name="Checkout" platform="ios">
   <tokens>
     <color name="primary" value="#007AFF" />
   </tokens>
