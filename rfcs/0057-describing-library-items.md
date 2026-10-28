@@ -2,7 +2,7 @@
 rfc: 0057
 title: description and template — what a library item is for
 status: Draft
-targets: 0.4
+targets: 0.4.3
 date: 2026-10-29
 depends-on: 0005, 0008, 0042
 ---
