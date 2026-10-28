@@ -2,6 +2,7 @@
 rfc: 0004
 title: Package format — .gui is always a ZIP package
 status: Implemented
+amended-by: 0042, 0043, 0054
 introduced-in: 0.1
 date: 2026-05-20
 updated: 2026-05-23
@@ -14,6 +15,8 @@ updated: 2026-05-23
 A UI file references external assets — images, vector artwork, fonts. These need to travel with the markup. The format needed a way to bundle everything into one portable unit.
 
 ## Decision
+
+> **Amended.** [RFC-0042](0042-multi-document-packages.md) replaced the single `design.guix` with any number of root documents plus an optional `library.guix`. [RFC-0043](0043-standalone-guix.md) made bare `.guix` markup a served form. [RFC-0054](0054-folder-form-packages.md) (Draft) proposes that a folder named `*.gui` is a package too. The ZIP described below remains the transfer form.
 
 `.gui` is always a ZIP package. There is no standalone markup format. The markup lives inside the package as `design.guix`. Binary assets live in `assets/`. A preview thumbnail lives at `preview.webp`.
 

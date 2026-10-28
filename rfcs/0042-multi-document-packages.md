@@ -2,6 +2,7 @@
 rfc: 0042
 title: Multi-document packages — many .guix in one .gui
 status: Implemented
+amended-by: 0055, 0056
 targets: 0.3.2
 date: 2026-08-22
 implemented: 2026-10-27
@@ -215,6 +216,8 @@ The third row is a legitimate shape — it is what hosting a screen at a URL req
 For a multi-document package it is a contact sheet of the documents in order. Per-document previews are deferred (see *Unresolved Questions*).
 
 ### Non-goals — pre-rejected, explicitly
+
+> **Amended (Draft).** [RFC-0055](0055-library-directory.md) proposes relaxing *no page or folder hierarchy* for one directory, `library/`, whose files together form the library. [RFC-0056](0056-linked-libraries.md) proposes relaxing *no external references* and *no second library*: a `<library>` block may record where its declarations came from, for tools only, while resolution stays closed inside the package. Embedding another file's screens stays rejected.
 
 These are the next things someone will ask for. They are refused now so the slope is not walked down one accepted RFC at a time:
 

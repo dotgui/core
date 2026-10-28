@@ -44,6 +44,8 @@ Rejected     →  considered and deliberately not done
 Superseded   →  replaced by a newer RFC
 ```
 
+An RFC that changes part of an earlier one does not supersede it. The earlier RFC keeps its status, gains an `amended-by:` line in its frontmatter, and gets a short note at each section that changed, linking the amending RFC. The amending RFC states exactly what it changes under `amends:`.
+
 ---
 
 ## RFC Structure
@@ -203,6 +205,15 @@ Each RFC has frontmatter followed by these sections:
 | [0051](0051-images-with-a-source.md) | Images with a source — carrying what .gui cannot describe | Draft |
 | [0052](0052-variant-overrides.md) | Variant overrides — a variant as the set's body with different values | Draft |
 | [0053](0053-literal-dollar.md) | Literal $ — prices in text, token references that fail loudly | Draft |
+
+### 0.4 — Libraries: Folders, Split Libraries, Linking
+
+| RFC | Title | Status |
+|---|---|---|
+| [0054](0054-folder-form-packages.md) | Folder-form packages — a folder named `*.gui` is a package (amends 0004) | Draft |
+| [0055](0055-library-directory.md) | The library directory — a library split across `library/` (amends 0042) | Draft |
+| [0056](0056-linked-libraries.md) | Linked libraries — `<library>` with a cached copy; tools follow `src`, renderers never do (amends 0042, 0043, 0046) | Draft |
+| [0057](0057-describing-library-items.md) | Describing library items — `description` on components, tokens and styles | Draft |
 
 ### 1.0 — Token System Completion (visual-layer freeze)
 
