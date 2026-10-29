@@ -142,7 +142,7 @@ Eleven repositories under [github.com/dotgui](https://github.com/dotgui), plus l
 | **core** | RFCs, principles, spec | — | The source |
 | **parser** | Reads `.gui` into a structured model — TypeScript and Rust | core | Implements the spec; both languages pass the same tests |
 | **render** | Draws `.gui` — native and wasm | parser | Depends on the Rust parser |
-| **kit** | Lint, score, autofix, packaging; today also the HTML renderer and TS parser | core, parser, render | Reads core's schema; generates `spec.json` back into core |
+| **kit** | Lint, score, autofix, packaging; today also the TS parser, and the HTML renderer while it is retired (see *One renderer*) | core, parser, render | Reads core's schema; generates `spec.json` back into core |
 | **embed** | Renders `.gui` in any web page | kit | npm |
 | **cli** | `gui` toolchain; installs the agent skill | kit | npm |
 | **farm** | gui.farm example library | kit, embed | npm |
@@ -154,6 +154,17 @@ Eleven repositories under [github.com/dotgui](https://github.com/dotgui), plus l
 **Two ways downstream gets a change.** npm consumers (embed, cli, farm, website, web-app) only see a feature after kit is published and their version is bumped. Local-link consumers (app, figma-plugin) see whatever is in the `kit` folder *right now* — handy for testing, risky if built while kit is on an RFC branch. Build them from `main` only.
 
 **Release order for a feature:** core + parser + render + kit merge → parser and kit publish → embed publishes → farm, website, cli and web-app bump → app and figma-plugin rebuild → gui-skills learns to write it.
+
+---
+
+## One renderer
+
+`.gui` has one renderer: **render**, in Rust, native and wasm. Kit's HTML renderer was the behavioural reference while render was built, and it is being retired.
+
+- **Frozen.** From the 0.5 chapter, a feature is built in render only. The HTML renderer gets bug fixes and nothing new.
+- **Kit draws through render.** `kit/rasterize` renders previews with render's wasm build instead of a headless browser, and `kit/render` draws onto a canvas through it, behind the same API.
+- **Consumers move one at a time** — previews (cli, farm) first, then embed, the website and web-app, the Figma plugin's UI, and the app.
+- **Deleted when nothing imports it.** The HTML renderer's tests move into render first; then it goes, in a kit chapter release.
 
 ---
 
