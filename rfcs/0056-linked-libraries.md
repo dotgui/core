@@ -1,10 +1,11 @@
 ---
 rfc: 0056
 title: Linked libraries — declarations pulled from another package, cached in this one
-status: Accepted
+status: Implemented
 targets: 0.4.4
 date: 2026-10-29
 updated: 2026-10-29
+implemented: 2026-10-29
 depends-on: 0036, 0042, 0043, 0046
 related: 0054, 0055, 0057
 amends: 0042, 0043, 0046, 0055
@@ -253,6 +254,8 @@ The alternative shape — a reference with no cache, resolved by the renderer �
 - **Kit and the native renderer:** before anything else reads a document, each `<library>` block is unwrapped — its declaration blocks join the document's own, so resolution, redeclaration and flattening are unchanged. The block-level checks under *Validation* run on the markup as written. `source-id`s inside a block read against the block's `source`. Identical mode axes are one axis.
 - **Kit:** `info()` lists the linked libraries — `name`, `uid`, `release`, `src` — so a tool can browse, update or relink.
 - **Figma exporter:** writes a `<library>` block for each published library a screen uses, with component keys as `source-id`. Deferred with the rest of the Figma plugin work.
+
+Shipped in 0.4.4: the schema and spec text; kit's validator (block rules, unwrapping, identical axes, `LIBRARY_UID_TWICE`) and `info().linkedLibraries`; and the native renderer. Both read documents up to 0.4.4. The Figma exporter's blocks wait with the rest of the Figma plugin work.
 
 ## Test Cases
 

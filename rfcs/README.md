@@ -15,8 +15,8 @@ Every RFC is judged against the format's constitution: [**../PRINCIPLES.md**](..
 0.2   →  layout API overhaul                                in progress
 0.3   →  vocabulary, visual fidelity, grid, components,
          package model                                      shipped (0.3.11)
-0.4   →  libraries: folders, split libraries, linking      in progress
-0.5   →  describe, don't run: motion and connections       planned
+0.4   →  libraries: folders, split libraries, linking      shipped (0.4.4)
+0.5   →  describe, don't run: motion and connections       next
 0.6   →  ...                                                as many as it takes
 1.0   →  first public stable release                        when the format is solid
 ```
@@ -217,7 +217,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0056](0056-linked-libraries.md) | Linked libraries — `<library>` with a cached copy; tools follow `src`, renderers never do (amends 0042, 0043, 0046, 0055) | Accepted |
+| [0056](0056-linked-libraries.md) | Linked libraries — `<library>` with a cached copy; tools follow `src`, renderers never do (amends 0042, 0043, 0046, 0055) | Implemented |
 
 ### 0.5 — Describe, Don't Run: Motion and Connections
 
