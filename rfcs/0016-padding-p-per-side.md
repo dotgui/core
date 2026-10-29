@@ -1,8 +1,9 @@
 ---
 rfc: 0016
 title: p and per-side padding pt/pr/pb/pl
-status: Draft
-targets: 0.2
+status: Implemented
+introduced-in: 0.2
+implemented: 2026-10-29
 date: 2026-05-20
 ---
 
