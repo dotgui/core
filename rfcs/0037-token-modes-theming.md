@@ -1,10 +1,11 @@
 ---
 rfc: 0037
 title: Token modes — multi-value tokens
-status: Proposed
-targets: 1.0
+status: Implemented
+introduced-in: 0.3.0
 date: 2026-06-06
-updated: 2026-06-06
+updated: 2026-10-29
+implemented: 2026-10-29
 ---
 
 # Token Modes — Multi-Value Tokens
@@ -47,7 +48,7 @@ falling back to the default mode when a token does not define the active one.
 ### Mode declaration — named axes
 
 A mode axis is declared once as document-level metadata, sibling to
-`<tokens>` / `<fonts>` / `<meta>`, never rendered. The axis is **named** — `name`
+`<tokens>` / `<fonts>`, never rendered. The axis is **named** — `name`
 gives the axis its identity, `values` enumerates its modes, `default` picks one.
 Naming the axis is what makes `theme` self-documenting and what lets multi-axis
 extend without a breaking retrofit.
@@ -65,7 +66,7 @@ prescribe which ones exist:
 
 - `name` — the axis identity, chosen by the author.
 - `values` — space-separated list of the axis's mode values.
-- `default` — the value used when no active mode is supplied; must be one of `values`.
+- `default` — the value used when no active mode is supplied; must be one of `values`. When it is absent, or names no declared value, the first listed value is the default.
 
 **One axis — singular, self-closing `<mode>`:**
 
@@ -187,7 +188,7 @@ the renderer resolves the values, and everything between is plain `$` references
 ## Reasoning
 
 - **Modes belong to the visual layer.** A mode changes how the UI *looks*, with
-  no behavioral component. Squarely 1.0 under "1.0 locks the visual layer."
+  no behavioral component.
 - **It must precede the freeze.** Multi-value tokens change the token data model;
   doing this after stamping 1.0 would break the stability promise.
 - **Generic, not theme-only (P2).** Figma modes, iOS appearances, and Android
@@ -275,47 +276,15 @@ as RFC-0005: platform-specific, implies a CSS runtime, not platform-agnostic.
 
 ## Implementation Notes
 
-- **Parser (`gui-parser`):** read `<mode>` / `<modes>` into an axis table
-  (`name → { values, default }`); validate `default ∈ values`. On a token,
-  collect attributes matching `{axis}-{value}`; a token with any such attribute is
-  moded, otherwise `value` is its constant. Warn on a `{axis}-{value}` attribute
-  whose axis or value is undeclared.
-- **Renderer (`gui-render`):** track the active mode per axis down the tree
-  (nearest ancestor-or-self `mode-{axis}`), optionally seeded by a render-input
-  active-mode map; resolve `$name` per the cascade. Resolve values at render time
-  — never store resolved values in the tree.
-- **Figma exporter (`gui-figma`):** map a variable collection's modes onto an
-  axis and emit `{axis}-{value}` attributes; a single-mode variable emits a plain
-  `value`.
-- **Optimizer (`gui-optimizer`):** mode-aware emission — keep only modes
-  referenced by retained screens; apply color normalization (RFC-0033) per
-  resolved value.
-- **Linter:** error on a `mode-{axis}` or `{axis}-{value}` whose axis or value is
-  undeclared; warn on a token that defines some but not all of an axis's values.
+Built in both renderers before the RFC was accepted, and accepted to match: it is part of the 0.3.0 baseline, like the other RFCs whose behaviour shipped first.
 
-## Test Cases
+- **Native renderer** (`modes.rs`): reads `<mode>` / `<modes>` into axes, falling back to the first value when `default` is absent or undeclared; resolves every moded `$token` once, right after components are expanded, along the cascade above. A consumer seeds the active mode through `ParseOptions::mode`; in-file `mode-{axis}` pins win over it.
+- **Kit**: the validator reads axes and accepts `{axis}-{value}` token attributes; the HTML renderer takes `render(…, { mode: { theme: 'dark' } })`, with the same precedence.
+- **Identical axes** declared twice — by a library and a document, or by two linked libraries — are one axis ([RFC-0056](0056-linked-libraries.md)).
+- **Not built yet:** the linter rules (an error on an undeclared axis or value in `mode-{axis}` or `{axis}-{value}`, a warning on a token missing one of an axis's values); the Figma exporter's mapping of variable collections onto axes, deferred with the rest of the Figma plugin work; the optimizer's dropping of unused modes.
 
-1. A modeless token (`value="12"`) resolves identically under every active mode.
-2. `theme-light="#FFF" theme-dark="#000"` resolves to `#000` under an ancestor
-   `mode-theme="dark"`, `#FFF` under `mode-theme="light"`, and to `default` when
-   no `mode-theme` is in effect and none is supplied at render time.
-3. A `string` token whose value contains spaces
-   (`theme-light="Get started"`) round-trips intact.
-4. A token defining only `theme-light` resolves to its `light` value when the
-   active mode is `dark` and `default="light"`.
-5. A nested `mode-theme` overrides its ancestor: a `light` card inside a `dark`
-   column renders light while its siblings render dark — both appearances in one
-   render.
-6. The optimizer drops a mode referenced by no retained screen.
+## Settled at Acceptance
 
-## Unresolved Questions
-
-1. **No-default behavior** — when `<mode>` omits `default`, define the exact
-   fallback. Leaning: the first listed value is the implicit default.
-2. **Render-API surface and override precedence** — the exact shape by which a
-   consumer seeds the active mode per axis at render time, and whether a forced
-   render-time mode should be able to override explicit in-file `mode-{axis}`
-   pins (the cascade above currently lets in-file pins win).
-3. **Reconciliation with `<gui>` root attrs (RFC-0036)** — confirm the axis
-   declaration is a separate `<mode>` / `<modes>` block rather than attributes on
-   `<gui>` root, with no overlap.
+1. **No default.** The first listed value is the default.
+2. **Render-time mode.** A consumer passes an axis-to-value map (`ParseOptions::mode` in the native renderer, `mode` in kit's render options). In-file `mode-{axis}` pins win over it: a pin is a deliberate design choice.
+3. **`<gui>` root attributes.** Axes are their own `<mode>` / `<modes>` blocks. `<gui>` carries `platform`, `source` and the rest ([RFC-0036](0036-gui-meta-block.md)); there is no overlap.

@@ -12,7 +12,7 @@ Every RFC is judged against the format's constitution: [**../PRINCIPLES.md**](..
 
 ```
 0.1   →  initial format design                              shipped
-0.2   →  layout API overhaul                                in progress
+0.2   →  layout API overhaul                                shipped
 0.3   →  vocabulary, visual fidelity, grid, components,
          package model                                      shipped (0.3.11)
 0.4   →  libraries: folders, split libraries, linking      shipped (0.4.4)
@@ -89,13 +89,13 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0011](0011-w-h-unified-sizing.md) | w / h unified sizing | Draft |
-| [0012](0012-align-9point.md) | 9-point align replaces justify + align | Draft |
-| [0013](0013-gap-auto-convention.md) | gap / gap="auto" replaces space-between | Draft |
-| [0014](0014-absent-means-hug.md) | Absent w/h = hug, layout containers only | Draft |
-| [0015](0015-boolean-presence-convention.md) | Boolean presence convention | Draft |
-| [0016](0016-padding-p-per-side.md) | p and per-side padding pt/pr/pb/pl | Draft |
-| [0017](0017-gap-two-value-wrap.md) | Two-value gap for wrap rows | Draft |
+| [0011](0011-w-h-unified-sizing.md) | w / h unified sizing | Implemented |
+| [0012](0012-align-9point.md) | 9-point align replaces justify + align | Implemented |
+| [0013](0013-gap-auto-convention.md) | gap / gap="auto" replaces space-between | Implemented |
+| [0014](0014-absent-means-hug.md) | Absent w/h = hug, layout containers only | Implemented |
+| [0015](0015-boolean-presence-convention.md) | Boolean presence convention | Implemented |
+| [0016](0016-padding-p-per-side.md) | p and per-side padding pt/pr/pb/pl | Implemented |
+| [0017](0017-gap-two-value-wrap.md) | Two-value gap for wrap rows | Implemented |
 | [0018](0018-rejected-sz-shorthand.md) | REJECTED: sz combined sizing shorthand | Rejected |
 | [0019](0019-rejected-strokes-in-layout.md) | REJECTED: strokes-in-layout | Rejected |
 
@@ -109,7 +109,7 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0021](0021-root-canvas-model.md) | Root canvas model — drop `viewport`, `<col>` over `<frame>` | Draft |
+| [0021](0021-root-canvas-model.md) | Root canvas model — drop `viewport`, `<col>` over `<frame>` | Implemented |
 
 ### 0.3.0 — Baseline — already implemented
 
@@ -121,6 +121,7 @@ Each RFC has frontmatter followed by these sections:
 | [0027](0027-effects-stack.md) | Ordered effects stack | Implemented |
 | [0031](0031-images-and-assets.md) | Images and assets as self-contained visual dependencies | Implemented |
 | [0032](0032-grid-system.md) | Grid system — track grid and unit grid | Implemented |
+| [0037](0037-token-modes-theming.md) | Token modes — multi-value tokens | Implemented |
 
 ### 0.3.1 — Paint Model
 
@@ -235,7 +236,6 @@ Each RFC has frontmatter followed by these sections:
 
 | RFC | Title | Status |
 |---|---|---|
-| [0037](0037-token-modes-theming.md) | Token modes — multi-value tokens | Proposed |
 | [0038](0038-composite-token-types.md) | Composite token types — shadow, typography, border, aliases | Draft |
 | [0039](0039-rejected-render-wrapper-tag.md) | REJECTED: `<render>` wrapper tag | Rejected |
 

@@ -1,8 +1,9 @@
 ---
 rfc: 0021
 title: Root canvas model — drop viewport, col over frame
-status: Draft
-targets: 0.2
+status: Implemented
+introduced-in: 0.2
+implemented: 2026-10-29
 date: 2026-05-21
 ---
 

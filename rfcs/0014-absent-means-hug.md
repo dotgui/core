@@ -1,8 +1,9 @@
 ---
 rfc: 0014
 title: Absent w/h = hug, layout containers only
-status: Draft
-targets: 0.2
+status: Implemented
+introduced-in: 0.2
+implemented: 2026-10-29
 date: 2026-05-20
 ---
 
