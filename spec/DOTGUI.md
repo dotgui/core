@@ -260,6 +260,16 @@ appearances side by side in one pass.
 token definitions in `<tokens>`; an inline literal is static across modes — the
 same rule as Figma, where only variable-bound properties change between modes.
 
+### Linked libraries
+
+A `<library>` block holds declarations copied from another `.gui` package and records where they came from: `name`, the library's `uid`, the `release` they were taken from, an optional `src` to find it again, and the `source` tool its `source-id`s read against ([RFC-0056](../rfcs/0056-linked-libraries.md)). Its children are ordinary declaration blocks and resolve as if written directly; a renderer never fetches `src`, so the package renders offline exactly as before. Names stay unique across the package, an identical mode axis may repeat, blocks do not nest, and a document with one declares 0.4.4 or higher. A package used as a library declares `uid` and `release` on the root of the file that holds its library part.
+
+```xml
+<library name="acme-ds" uid="7f3e9a1c-…" release="1.4.0" src="../libraries/acme-ds.gui" source="figma">
+  <tokens><color name="primary" value="#3B5BFD" /></tokens>
+</library>
+```
+
 ### Descriptions and templates
 
 A library item may say what it is for: `description` on a component, component set, variant, token or style — plain text, one or two sentences, never rendered ([RFC-0057](../rfcs/0057-describing-library-items.md)). An exporter copies the source tool's description verbatim and never writes one of its own.
